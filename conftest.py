@@ -253,7 +253,7 @@ def pytest_configure(config):
     # Get the test suite name
     suite_name = "pytestpackage"
     
-    if not os.path.isdir(os.path.join(config.rootdir, suit_name)):
+    if not os.path.isdir(os.path.join(config.rootdir, suite_name)):
         suite_name = os.path.basename(config, rootdir)
         
     # Get current date and time
