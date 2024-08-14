@@ -1,8 +1,10 @@
 # element_locator.py
 
 import os
+from .config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
 from .utils import logger
-from typing import Otional, List
+from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
+from datetime import datetime
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
@@ -10,41 +12,19 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from datetime import datetime
+from typing import Optional, List
+
 
 class ElementLocator:
     """A class for locating elements
     """
     
-    def __init__(self, driver):
+    def __init__(self, driver: WebDriver, timeout: int = DEFAULT_TIMEOUT):
         self.driver = driver
-        
-    @staticmethod
-    def get_by_type(locator_type: str ="xpath"):
-        """_summary_
-
-        Args:
-            locator_type (str, optional): _description_. Defaults to "xpath".
-
-        Returns:
-            _type_: _description_
-        """
-        locator_type = locator_type.lower()
-        locator_map = {
-            "id": By.ID,
-            "xpath": By.XPATH,
-            "css": By.CSS_SELECTOR,
-            "classname": By.CLASS_NAME,
-            "linktext": By.LINK_TEXT,
-            "name": By.NAME
-        }
-        if locator_type not in locator_map:
-            logger.error(f"Locator type: {locator_type} is not supported.")
-            return None
-        return locator_map[locator_type]
+        self.timeout = timeout
     
-    @staticmethod
-    def get_element(driver: WebDriver, locator: str, locator_type: str = "xpath"):
+
+    def get_element(self, locator: str, locator_type: str = "xpath", condition: str = "presence") -> Optional[WebElement]:
         """_summary_
 
         Args:
@@ -55,19 +35,11 @@ class ElementLocator:
         Returns:
             _type_: _description_
         """
-        try:
-            by_type = ElementLocator.get_by_type(locator_type)
-            if by_type is None:
-                return None
-            element = driver.find_element(by_type, locator)
-            logger.info(f"Element found with locator: {locator}")
-            return element
-        except NoSuchElementException:
-            logger.error(f"No such element found with locator: {locator}")
-            return None
+        logger.info(f"Attempting to get element: {locator} with condition: {condition}")
+        return wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
         
-    @staticmethod
-    def is_element_present(driver: WebDriver, locator: str, locator_type: str = 'xpath') -> bool:
+    
+    def is_element_present(self, locator: str, locator_type: str = 'xpath', condition: str = 'presence') -> bool:
         """_summary_
 
         Args:
@@ -79,19 +51,27 @@ class ElementLocator:
             bool: _description_
         """
         try:
-            driver.find_element(locator_type, locator)
-            logger.info(f"Element found with locator: {locator}")
-            return True
+            element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
+            if element is not None:
+                return True
         except NoSuchElementException:
             logger.error(f"No such element found with locator: {locator}")
             return False
+        except Exception as e:
+            logger.error(f"Unexpected error with is_element_present: {str(e)}")
         
-    @staticmethod
-    def check_elements_present(driver: WebDriver, locator: str, locator_type: str = "xpath") -> bool:
-        elements = driver.find_elements(locator_type, locator)
-        if elements:
-            logger.info(f"{len(elements)} element(s) found with locator: {locator}")
-            return True
-        else:
-            logger.error(f"No elements found with locator: {locator}")
-            return False
+
+    def check_elements_present(self, locator: str, locator_type: str = "xpath") -> bool:
+        """_summary_
+
+        Args:
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+
+        Returns:
+            bool: _description_
+        """
+        logger.info(f"Attempting to find element(s): {locator}")
+        return wait_for_elements(self.driver, locator, locator_type, self.timeout)
+    
+    
