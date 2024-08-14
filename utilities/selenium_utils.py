@@ -89,7 +89,7 @@ def wait_for_elements(driver: WebDriver, locator: str, locator_type: str = "xpat
     
     wait = WebDriverWait(driver, timeout)
     try:
-        elements: wait.until(EC.presence_of_all_elements_located((by_type, locator)))
+        elements = wait.until(EC.presence_of_all_elements_located((by_type, locator)))
         logger.info(f"{len(elements)} element(s) found with locator: {locator}")
         return elements
     except TimeoutException:
