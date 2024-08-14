@@ -2,7 +2,7 @@
 from .config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
 from .utils import logger
 from typing import Optional, Tuple, Any
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -55,6 +55,7 @@ def wait_for_element(driver: WebDriver, locator: str, locator_type: str = "xpath
         return None
     wait = WebDriverWait(driver, timeout)
     try:
+        logger.info(f"Attempting to get locator: {locator} with condition: {condition}")
         if condition == "presence":
             return wait.until(EC.presence_of_element_located((by_type, locator)))
         elif condition == "clickable":
@@ -65,6 +66,9 @@ def wait_for_element(driver: WebDriver, locator: str, locator_type: str = "xpath
             logger.error(f"Unsupported wait conition: {condition}")
     except TimeoutException:
         logger.error(f"Element not found with locator: {locator}, condition: {condition}")
+        return None
+    except NoSuchElementException:
+        logger.error(f"Not such element found with locator: {locator}, and condition: {condition}")
         return None
     except Exception as e:
         logger.error(f"Unexpected error in wait_for_element: {str(e)}")
