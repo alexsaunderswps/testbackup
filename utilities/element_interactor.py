@@ -5,9 +5,9 @@ from .config import FILE_UPLOAD_DIR
 from .utils import logger
 from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
 from typing import Optional
-from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
+from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT, MAX_RETRIES
 from utilities.element_locator import ElementLocator
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -45,6 +45,7 @@ class ElementInteractor:
         except NoSuchElementException:
             logger.error(f"Element could not be found with {element}")
         
+        
     @staticmethod
     def upload_file(file_input: WebElement, file_name: str) -> bool:
         """Uploads a file using a pre-located file input element
@@ -67,8 +68,39 @@ class ElementInteractor:
             logger.error(f"Could not upload {file_name} from {file_path}")
             logger.error(f"Error with file uploadL: {str(e)}")
             return False
-            
-    def element_click(self, locator: str, locator_type: str = "XPATH") -> bool:
+    
+    
+    def clear_element_input(self, locator: str, locator_type: str = "xpath", condition: str = "presence", max_retries: int = MAX_RETRIES) -> bool:
+        """_summary_
+
+        Args:
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+            condition (str, optional): _description_. Defaults to "presence".
+            max_retries (int, optional): _description_. Defaults to MAX_RETRIES.
+
+        Returns:
+            bool: _description_
+        """
+        for attempt in range(max_retries):
+            try:
+                element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
+                if element:
+                    element.clear()
+                    logger.info(f"Element with locator: {locator}, cleared.")
+                    return True
+                else:
+                    logger.warning(f"Element not found with locator: {locator}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")     
+            except StaleElementReferenceException:
+                logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
+            except Exception as e:
+                logger.error(f"Unexpected exception: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
+                    
+        logger.error(f"Failed to clear {locator} in {MAX_RETRIES} attempts.")
+        return False
+        
+    
+    def element_click(self, locator: str, locator_type: str = "xpath") -> bool:
         """_summary_
 
         Args:
@@ -85,12 +117,52 @@ class ElementInteractor:
             return True
         return False
             
-    def element_send_input(self, data: str, locator: str, locator_type: str ="XPATH") -> None:
+            
+    def element_send_input(self, data: str, locator: str, locator_type: str ="xpath", clear_first: bool = True) -> None:
+        """_summary_
 
-        try:
-            element = self.locator.get_element(self.driver, locator, locator_type)
-            element.send_keys(data)
-            logger.info(f"Successfully sent {data} to {locator}")
-        except Exception as e:
-            logger.error(f"Failed to send {data} to {locator}")
-            logger.error(f"Error sending data: {str(e)}")
+        Args:
+            data (str): _description_
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+            clear_first (bool, optional): _description_. Defaults to True.
+        """
+        element = wait_for_element(self.driver, locator, locator_type, self.timeout)
+        if element:
+            try:
+                if clear_first:
+                    self.clear_element_input(locator, locator_type)
+                    element.send_keys(data)
+                    logger.info(f"Successfully sent {data} to {locator}")
+                else: 
+                    logger.error(f"Failed to send {data} to {locator}")
+            except Exception as e:
+                logger.error(f"Unexpected error sending input: {str(e)}")
+                
+    def element_get_text(self, locator: str, locator_type: str = "xpath", max_retries: int = MAX_RETRIES) -> Optional[str]:
+        """_summary_
+
+        Args:
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+            max_retries (int, optional): _description_. Defaults to MAX_RETRIES.
+
+        Returns:
+            Optional[str]: _description_
+        """
+        for attempt in range(max_retries):
+            try:
+                element = wait_for_element(self.driver, locator, locator_type, "visible")
+                if element:
+                        text = element.text
+                        logger.info(f"Got text: {text} from element with locator: {locator}")
+                        return text
+                else:
+                    logger.warning(f"Element not found with locator {locator}: Retry attempt {attempt + 1} of {MAX_RETRIES}")
+            except StaleElementReferenceException:
+                logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}")
+            except Exception as e:
+                
+                logger.error(f"Unexpected error: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}")
+        logger.error(f"No text found with locator: {locator}")
+        return None
