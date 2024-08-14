@@ -250,7 +250,7 @@ def pytest_configure(config):
     suite_name = "pytestpackage"
     
     if not os.path.isdir(os.path.join(config.rootdir, suite_name)):
-        suite_name = os.path.basename(config, rootdir)
+        suite_name = os.path.basename(config.rootdir)
         
     # Get current date and time
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -258,7 +258,7 @@ def pytest_configure(config):
     # Contruct the report name
     report_name = f"{suite_name}_{timestamp}_report.html"
     
-    report_dir = os.path.join(config.rootdir, "reports")
+    reports_dir = os.path.join(config.rootdir, "reports")
     os.makedirs(reports_dir, exist_ok=True)
     
     report_path = os.path.join(reports_dir, report_name)
