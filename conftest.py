@@ -2,7 +2,6 @@
 
 import os
 import pytest
-from dotenv import load_dotenv
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,6 +11,7 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+from utilities.config import LOGIN_BUTTON, LOGOUT_BUTTON
 from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_tests
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.element_locator import ElementLocator
@@ -19,10 +19,6 @@ from utilities.element_locator import ElementLocator
 # Initialize ElementLocator
 locator = ElementLocator()
 
-# Load Environmental Variables
-load_dotenv()
-logout_button = os.getenv("LOGOUT_BUTTON")
-login_button = os.getenv("LOGIN_BUTTON")
 
 # Define pytest addoption for Command Line running of Pytest with options
 def pytest_addoption(parser):
@@ -224,10 +220,10 @@ def perform_teardown(driver, wait):
         logger.info(f"Attempting teardown with perform_teardown.")
         try:
             logger.info(f"Attempting to log out of website")
-            logout_button = locator.get_element(logout_button)
+            logout_button = locator.get_element(LOGOUT_BUTTON)
             logout_button.click()
             try:
-                login_present = wait.until(EC.presence_of_element_located((By.XPATH, login_button)))
+                login_present = wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
                 logger.info(f"Successfully logged out, loing button is present.")
             except TimeoutException:
                 logger.error("Timeout while waiting for login button to appear after logout.")
