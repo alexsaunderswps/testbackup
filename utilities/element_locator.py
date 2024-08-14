@@ -35,7 +35,6 @@ class ElementLocator:
         Returns:
             _type_: _description_
         """
-        logger.info(f"Attempting to get element: {locator} with condition: {condition}")
         return wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
         
     
@@ -50,15 +49,10 @@ class ElementLocator:
         Returns:
             bool: _description_
         """
-        try:
-            element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
-            if element is not None:
-                return True
-        except NoSuchElementException:
-            logger.error(f"No such element found with locator: {locator}")
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected error with is_element_present: {str(e)}")
+        element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
+        if element is not None:
+            return True
+        return False
         
 
     def check_elements_present(self, locator: str, locator_type: str = "xpath") -> bool:
@@ -74,4 +68,14 @@ class ElementLocator:
         logger.info(f"Attempting to find element(s): {locator}")
         return wait_for_elements(self.driver, locator, locator_type, self.timeout)
     
-    
+    def check_element_has_disappeared(self, locator: str, locator_type: str = "xpath") -> bool:
+        """_summary_
+
+        Args:
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+
+        Returns:
+            bool: _description_
+        """
+        return wait_for_element_to_disapear(self.driver, locator, locator_type, self.timeout)
