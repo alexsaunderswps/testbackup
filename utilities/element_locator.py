@@ -54,7 +54,7 @@ class ElementLocator:
             return True
         return False
         
-
+        
     def check_elements_present(self, locator: str, locator_type: str = "xpath") -> bool:
         """_summary_
 
@@ -67,6 +67,7 @@ class ElementLocator:
         """
         logger.info(f"Attempting to find element(s): {locator}")
         return wait_for_elements(self.driver, locator, locator_type, self.timeout)
+    
     
     def check_element_has_disappeared(self, locator: str, locator_type: str = "xpath") -> bool:
         """_summary_
