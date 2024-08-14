@@ -3,6 +3,7 @@
 import os
 from .config import FILE_UPLOAD_DIR
 from .utils import logger
+from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
 from typing import Optional
 from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
 from utilities.element_locator import ElementLocator
@@ -15,9 +16,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 class ElementInteractor:
     
-    def __init__(self, driver):
+    def __init__(self, driver: WebDriver, timeout: int = DEFAULT_TIMEOUT):
         self.driver = driver
         self.locator = ElementLocator()
+        self.timeout = timeout
         
     @staticmethod
     def scroll_to_element(driver: WebDriver, element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> Optional[WebElement]:
@@ -66,29 +68,25 @@ class ElementInteractor:
             logger.error(f"Error with file uploadL: {str(e)}")
             return False
             
-    def element_click(self, locator: str, locator_type: str = "XPATH") -> None:
+    def element_click(self, locator: str, locator_type: str = "XPATH") -> bool:
         """_summary_
 
         Args:
             locator (str): _description_
             locator_type (str, optional): _description_. Defaults to "XPATH".
+
+        Returns:
+            bool: _description_
         """
-        try:
-            element = self.locator.get_element(self.driver, locator, locator_type)
+        element = wait_for_element(self.driver, locator, locator_type, "clickable", self.timeout)
+        if element:
             element.click()
             logger.info(f"Element clicked successfully: {element.text}")
-        except Exception as e:
-            logger.error(f"Could not click {locator} with {locator_type}")
-            logger.error(f"Error clicking element: {str(e)}")
+            return True
+        return False
             
     def element_send_input(self, data: str, locator: str, locator_type: str ="XPATH") -> None:
-        """_summary_
 
-        Args:
-            data (str): _description_
-            locator (str): _description_
-            locator_type (str, optional): _description_. Defaults to "XPATH".
-        """
         try:
             element = self.locator.get_element(self.driver, locator, locator_type)
             element.send_keys(data)
