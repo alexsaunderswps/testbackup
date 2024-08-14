@@ -1,14 +1,12 @@
 # element_interactor.py
 
 import os
+from .config import FILE_UPLOAD_DIR
 from .utils import logger
-from datetime import datetime
-from traceback import print_stack
-from typing import Optional, List
+from typing import Optional
 from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
 from utilities.element_locator import ElementLocator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -42,23 +40,31 @@ class ElementInteractor:
         except TimeoutException:
             logger.error(f"Element not visible after scrolling within {timeout} seconds")
             return None
+        except NoSuchElementException:
+            logger.error(f"Element could not be found with {element}")
         
     @staticmethod
-    def upload_file(file_input: WebElement, file_path: str) -> None:
-        """_summary_
+    def upload_file(file_input: WebElement, file_name: str) -> bool:
+        """Uploads a file using a pre-located file input element
 
         Args:
-            file_input (WebElement): _description_
-            file_path (str): _description_
+            file_input (WebElement): the file input element
+            file_name (str): the name of the file to be uploaded
+
+        Returns:
+            bool: _description_
         """
         try:
-            logger.info(f"Attempting to upload {file_input} from {file_path}")
+            file_path = os.path.join(FILE_UPLOAD_DIR, file_name)
             abs_file_path = os.path.abspath(file_path)
+            logger.info(f"Attempting to upload {file_name} from {file_path}")
             file_input.send_keys(abs_file_path)
-            logger.info(f"Successfully uploaded {file_input} found at {file_path}")
+            logger.info(f"Successfully uploaded {file_name} found at {file_path}")
+            return True
         except Exception as e:
-            logger.error(f"Could not upload {file_input} from {file_path}")
+            logger.error(f"Could not upload {file_name} from {file_path}")
             logger.error(f"Error with file uploadL: {str(e)}")
+            return False
             
     def element_click(self, locator: str, locator_type: str = "XPATH") -> None:
         """_summary_
