@@ -2,10 +2,11 @@
 import os
 import time
 from .config import SCREENSHOT_DIR
-from .utils import logger
+from utilities import CustomLogger
 from datetime import datetime
 from selenium.webdriver.remote.webdriver import WebDriver
 
+logger = CustomLogger()
 
 class ScreenshotManager:
     """A class for managing screenshots."""
