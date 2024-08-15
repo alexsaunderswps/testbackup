@@ -2,11 +2,11 @@
 
 import os
 from .config import FILE_UPLOAD_DIR
-from .utils import logger
+from utilities import CustomLogger
 from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
 from typing import Optional
 from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT, MAX_RETRIES
-from utilities.element_locator import ElementLocator
+from utilities import ElementLocator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -18,11 +18,13 @@ class ElementInteractor:
     
     def __init__(self, driver: WebDriver, timeout: int = DEFAULT_TIMEOUT):
         self.driver = driver
-        self.locator = ElementLocator()
         self.timeout = timeout
+        self.locator = ElementLocator()
+        self.logger = CustomLogger()
+    
         
-    @staticmethod
-    def scroll_to_element(driver: WebDriver, element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> Optional[WebElement]:
+
+    def scroll_to_element(self, driver: WebDriver, element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> Optional[WebElement]:
         """_summary_
 
         Args:
@@ -37,21 +39,21 @@ class ElementInteractor:
             actions = ActionChains(driver)
             actions.move_to_element(element).perform()
             WebDriverWait(driver, timeout).until(EC.visibility_of(element))
-            logger.info(f"Scrolled to {element}")
+            self.logger.info(f"Scrolled to {element}")
             return element
         except TimeoutException:
-            logger.error(f"Element not visible after scrolling within {timeout} seconds")
+            self.logger.error(f"Element not visible after scrolling within {timeout} seconds")
             return None
         except NoSuchElementException:
-            logger.error(f"Element could not be found with {element}")
+            self.logger.error(f"Element could not be found with {element}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error with scroll_to_element: {str(e)}")
+            self.logger.error(f"Unexpected error with scroll_to_element: {str(e)}")
             return None
         
         
-    @staticmethod
-    def upload_file(file_input: WebElement, file_name: str) -> bool:
+
+    def upload_file(self, file_input: WebElement, file_name: str) -> bool:
         """Uploads a file using a pre-located file input element
 
         Args:
@@ -64,13 +66,13 @@ class ElementInteractor:
         try:
             file_path = os.path.join(FILE_UPLOAD_DIR, file_name)
             abs_file_path = os.path.abspath(file_path)
-            logger.info(f"Attempting to upload {file_name} from {file_path}")
+            self.logger.info(f"Attempting to upload {file_name} from {file_path}")
             file_input.send_keys(abs_file_path)
-            logger.info(f"Successfully uploaded {file_name} found at {file_path}")
+            self.logger.info(f"Successfully uploaded {file_name} found at {file_path}")
             return True
         except Exception as e:
-            logger.error(f"Could not upload {file_name} from {file_path}")
-            logger.error(f"Error with file uploadL: {str(e)}")
+            self.logger.error(f"Could not upload {file_name} from {file_path}")
+            self.logger.error(f"Error with file uploadL: {str(e)}")
             return False
     
     
@@ -91,16 +93,16 @@ class ElementInteractor:
                 element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
                 if element:
                     element.clear()
-                    logger.info(f"Element with locator: {locator}, cleared.")
+                    self.logger.info(f"Element with locator: {locator}, cleared.")
                     return True
                 else:
-                    logger.warning(f"Element not found with locator: {locator}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")     
+                    self.logger.warning(f"Element not found with locator: {locator}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")     
             except StaleElementReferenceException:
-                logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
+                self.logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
             except Exception as e:
-                logger.error(f"Unexpected exception: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
+                self.logger.error(f"Unexpected exception: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}.")
                     
-        logger.error(f"Failed to clear {locator} in {MAX_RETRIES} attempts.")
+        self.logger.error(f"Failed to clear {locator} in {MAX_RETRIES} attempts.")
         return False
         
     
@@ -117,7 +119,7 @@ class ElementInteractor:
         element = wait_for_element(self.driver, locator, locator_type, "clickable", self.timeout)
         if element:
             element.click()
-            logger.info(f"Element clicked successfully: {element.text}")
+            self.logger.info(f"Element clicked successfully: {element.text}")
             return True
         return False
             
@@ -137,11 +139,11 @@ class ElementInteractor:
                 if clear_first:
                     self.clear_element_input(locator, locator_type)
                     element.send_keys(data)
-                    logger.info(f"Successfully sent {data} to {locator}")
+                    self.logger.info(f"Successfully sent {data} to {locator}")
                 else: 
-                    logger.error(f"Failed to send {data} to {locator}")
+                    self.logger.error(f"Failed to send {data} to {locator}")
             except Exception as e:
-                logger.error(f"Unexpected error sending input: {str(e)}")
+                self.logger.error(f"Unexpected error sending input: {str(e)}")
                 
                 
     def element_get_text(self, locator: str, locator_type: str = "xpath", max_retries: int = MAX_RETRIES) -> Optional[str]:
@@ -160,14 +162,14 @@ class ElementInteractor:
                 element = wait_for_element(self.driver, locator, locator_type, "visible")
                 if element:
                         text = element.text
-                        logger.info(f"Got text: {text} from element with locator: {locator}")
+                        self.logger.info(f"Got text: {text} from element with locator: {locator}")
                         return text
                 else:
-                    logger.warning(f"Element not found with locator {locator}: Retry attempt {attempt + 1} of {MAX_RETRIES}")
+                    self.logger.warning(f"Element not found with locator {locator}: Retry attempt {attempt + 1} of {MAX_RETRIES}")
             except StaleElementReferenceException:
-                logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}")
+                self.logger.warning(f"StaleElementReferenceException occured. Retry attempt {attempt + 1} of {MAX_RETRIES}")
             except Exception as e:
                 
-                logger.error(f"Unexpected error: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}")
-        logger.error(f"No text found with locator: {locator}")
+                self.logger.error(f"Unexpected error: {str(e)}. Retry attempt {attempt + 1} of {MAX_RETRIES}")
+        self.logger.error(f"No text found with locator: {locator}")
         return None
