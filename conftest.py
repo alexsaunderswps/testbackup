@@ -14,7 +14,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 from utilities.config import LOGIN_BUTTON, LOGOUT_BUTTON
 from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_tests
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
-from utilities.element_locator import ElementLocator
+from utilities import ElementLocator
 
 # Initialize ElementLocator
 locator = ElementLocator()
