@@ -44,6 +44,10 @@ class ElementInteractor:
             return None
         except NoSuchElementException:
             logger.error(f"Element could not be found with {element}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error with scroll_to_element: {str(e)}")
+            return None
         
         
     @staticmethod
@@ -138,6 +142,7 @@ class ElementInteractor:
                     logger.error(f"Failed to send {data} to {locator}")
             except Exception as e:
                 logger.error(f"Unexpected error sending input: {str(e)}")
+                
                 
     def element_get_text(self, locator: str, locator_type: str = "xpath", max_retries: int = MAX_RETRIES) -> Optional[str]:
         """_summary_
