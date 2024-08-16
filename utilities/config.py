@@ -18,7 +18,7 @@ LOGIN_BUTTON = "//section//button[text()='LOG IN']"
 
 # Timeouts
 DEFAULT_TIMEOUT = 10
-EXTENED_TIMEOUT = 30
+EXTENDED_TIMEOUT = 30
 
 # Other constants
 MAX_RETRIES = 3
