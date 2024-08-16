@@ -2,11 +2,11 @@
 
 import os
 from .config import FILE_UPLOAD_DIR
-from utilities import CustomLogger
-from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
+from utilities.utils import logger
+from .selenium_utils import wait_for_element
 from typing import Optional
-from utilities.config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT, MAX_RETRIES
-from utilities import ElementLocator
+from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT, MAX_RETRIES
+from utilities.element_locator import ElementLocator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -19,8 +19,8 @@ class ElementInteractor:
     def __init__(self, driver: WebDriver, timeout: int = DEFAULT_TIMEOUT):
         self.driver = driver
         self.timeout = timeout
-        self.locator = ElementLocator()
-        self.logger = CustomLogger()
+        self.locator = ElementLocator(driver)
+        self.logger = logger
     
         
 
@@ -124,7 +124,7 @@ class ElementInteractor:
         return False
             
             
-    def element_send_input(self, data: str, locator: str, locator_type: str ="xpath", clear_first: bool = True) -> None:
+    def element_send_input(self, data: str, locator: str, locator_type: str ="xpath", clear_first: bool = False) -> None:
         """_summary_
 
         Args:
@@ -133,7 +133,7 @@ class ElementInteractor:
             locator_type (str, optional): _description_. Defaults to "xpath".
             clear_first (bool, optional): _description_. Defaults to True.
         """
-        element = wait_for_element(self.driver, locator, locator_type, self.timeout)
+        element = wait_for_element(self.driver, locator, locator_type, "presence", self.timeout)
         if element:
             try:
                 if clear_first:
@@ -141,7 +141,8 @@ class ElementInteractor:
                     element.send_keys(data)
                     self.logger.info(f"Successfully sent {data} to {locator}")
                 else: 
-                    self.logger.error(f"Failed to send {data} to {locator}")
+                    element.send_keys(data)
+                    self.logger.info(f"Successfully sent {data} to {locator}")
             except Exception as e:
                 self.logger.error(f"Unexpected error sending input: {str(e)}")
                 
@@ -159,7 +160,7 @@ class ElementInteractor:
         """
         for attempt in range(max_retries):
             try:
-                element = wait_for_element(self.driver, locator, locator_type, "visible")
+                element = wait_for_element(self.driver, locator, locator_type, "visible", self.timeout)
                 if element:
                         text = element.text
                         self.logger.info(f"Got text: {text} from element with locator: {locator}")
