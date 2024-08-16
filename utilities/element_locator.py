@@ -1,8 +1,7 @@
 # element_locator.py
-
 import os
-from .config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
-from utilities import CustomLogger
+from .config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
+from utilities.utils import logger
 from .selenium_utils import wait_for_element, wait_for_elements, wait_for_element_to_disapear
 from datetime import datetime
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -19,10 +18,13 @@ class ElementLocator:
     """A class for locating elements
     """
     
-    def __init__(self, driver: WebDriver, timeout: int = DEFAULT_TIMEOUT):
+    def __init__(self, driver: WebDriver = None, timeout: int = DEFAULT_TIMEOUT):
         self.driver = driver
         self.timeout = timeout
-        self.logger = CustomLogger()
+        self.logger = logger
+        
+    def set_driver(self, driver: WebDriver):
+        self.driver = driver
     
 
     def get_element(self, locator: str, locator_type: str = "xpath", condition: str = "presence") -> Optional[WebElement]:
