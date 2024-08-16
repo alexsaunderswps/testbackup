@@ -1,8 +1,8 @@
 #base_page.py
 from utilities.config import DEFAULT_TIMEOUT, SCREENSHOT_DIR
-from utilities import ElementInteractor
-from utilities import ElementLocator
-from utilities import ScreenshotManager
+from utilities.element_interactor import ElementInteractor
+from utilities.element_locator import ElementLocator
+from utilities.screenshot_manager import ScreenshotManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,28 +18,28 @@ class BasePage:
         """
         self.driver = driver
         self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator()
-        self.interactor = ElementInteractor()
+        self.locator = ElementLocator(driver)
+        self.interactor = ElementInteractor(driver)
         self.screenshot = ScreenshotManager()
         
     class CommonLocators:
         
-        HEADER_LOGO = ("//section//img[@alt='logo']", "xpath")
+        HEADER_LOGO = "//section//img[@alt='logo']"
         # FOOTER =
-        LOGIN_LINK = ("//section//button[text()='LOG IN']", "xpath")
-        LOGOUT_BUTTON = ("//section//button[text()='LOG OUT']", "xpath")
+        LOGIN_LINK = "//section//button[text()='LOG IN']"
+        LOGOUT_BUTTON = "//section//button[text()='LOG OUT']"
         
     def find_logo(self):
-        return self.locator.is_element_present(*self.CommonLocators.HEADER_LOGO)
+        return self.locator.is_element_present(self.CommonLocators.HEADER_LOGO)
     
     def find_login_link(self):
-        return self.locator.is_element_present(*self.CommonLocators.LOGIN_LINK)
+        return self.locator.is_element_present(self.CommonLocators.LOGIN_LINK)
     
     def find_logout(self):
-        return self.locator.is_element_present(*self.CommonLocators.LOGOUT_BUTTON)
+        return self.locator.is_element_present(self.CommonLocators.LOGOUT_BUTTON)
     
     def logout_site(self):
-        self.interactor.element_click(*self.CommonLocators.LOGOUT_BUTTON)
+        self.interactor.element_click(self.CommonLocators.LOGOUT_BUTTON)
         
     def get_page_title(self):
         return self.driver.title
