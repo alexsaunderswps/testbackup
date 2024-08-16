@@ -12,9 +12,9 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from utilities.config import LOGIN_BUTTON, LOGOUT_BUTTON
-from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_tests
+from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_test
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
-from utilities import ElementLocator
+from utilities.element_locator import ElementLocator
 
 # Initialize ElementLocator
 locator = ElementLocator()
@@ -122,10 +122,16 @@ def perform_setup(browser_name, headless, private):
     driver.maximize_window()
     wait = WebDriverWait(driver, DEFAULT_TIMEOUT)
     
+    # Navigate to a blank website before clearing data
+    driver.get("about:blank")
+    
     # Clear cookies and cache just in case
-    driver.delete_all_cookies()
-    driver.execute_script("localStorage.clear();")
-    driver.execute_script("sessionStorage.clear();")
+    # try:
+    #     driver.delete_all_cookies()
+    #     driver.execute_script("localStorage.clear();")
+    #     driver.execute_script("sessionStorage.clear();")
+    # except Exception as e:
+    #     logger.error(f"Error clearing browser data: {str(e)}")
     
     start_test_capture(driver.session_id)
     
@@ -165,23 +171,24 @@ def setup_isolated(request):
     browser = request.config.getoption("--browser")
     headless = request.config.getoption("--headless")
     private = request.config.getoption("--private")
-    
     drivers = []
+    
     for browser_name in (browser if isinstance(browser,list) else [browser]):
         driver, wait = perform_setup(browser_name, headless, private)
         drivers.append((driver,wait))
     
     logger.info("Setting up an isolated test.")
+    
     if len(drivers) == 1:
-        driver, wait = driver[0]
+        driver, wait = drivers[0]
     else:
         driver, wait = drivers
         request.node.driver = driver # Attach driver to the test node for teardown
         
     yield driver, wait
     
-    logger.info(f"Performing teardown of isolated test")
-    perform_teardown(driver)
+    # logger.info(f"Performing teardown of isolated test")
+    # perform_teardown(driver, wait)
     
 @pytest.fixture(scope="class")
 def setup_continuous(request):
@@ -216,6 +223,7 @@ def perform_teardown(driver, wait):
         driver (_type_): _description_
         wait (_type_): _description_
     """
+    locator.set_driver(driver)
     try:
         logger.info(f"Attempting teardown with perform_teardown.")
         try:
@@ -289,7 +297,7 @@ def pytest_runtest_makereport(item, call):
     
     if report.when == call:
         # Captures logs for the test
-        logs = get_logs_for_tests(item.name)
+        logs = get_logs_for_test(item.name)
         
         # Adds logs to the report
         extra = getattr(report, "extra", [])
@@ -316,3 +324,8 @@ def pytest_runtest_teardown(item):
     """
     end_test_capture(item.name)
     yield
+    
+# @pytest.fixture(scope="fucntion")
+# def element_locator(setup):
+#     driver, wait = setup
+#     return ElementLocator(driver)
