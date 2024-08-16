@@ -1,6 +1,6 @@
 # selenium_utils.py
-from .config import DEFAULT_TIMEOUT, EXTENED_TIMEOUT
-from utilities import CustomLogger
+from .config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
+from utilities.utils import logger
 from typing import Optional, Tuple, Any
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -8,7 +8,6 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-logger = CustomLogger()
 
 def get_by_type(locator_type: str ="xpath"):
     """Convert string locator type to Selenium's By class attribute
