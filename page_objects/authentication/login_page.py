@@ -40,12 +40,12 @@ class LoginPage(BasePage):
     
     class ErrorMessages:
         BASE_XPATH = "//div[contains(@class, 'alert-danger) and"
-        ERROR_BLANK_INPUT = "//div[contains(@class, 'alert-danger') and contains(., 'UserName field is required') and contains(., 'Password field is required')]"
-        ERROR_NO_PASS = "//div[contains(@class, 'alert-danger) and contains(., 'Password field is required')]"
-        ERROR_NO_USER =  "//div[contains(@class, 'alert-danger) and contains(., 'UserName field is required')]"
-        ERROR_INVALID = "//div[contains(@class, 'alert-danger) and contains(.,'Failed')]"
-        ERROR_PASS_TOO_SHORT = "//div[contains(@class, 'alert-danger) and contains(.(), 'Password must be a string or array type with a minimum length of '4')]"
-        ERROR_USER_TOO_SHORT = "//div[contains(@class, 'alert-danger) and contains(.(), 'UserName must be a string or array type with a minimum length of '4')]"
+        ERROR_BLANK_INPUT = "//div[contains(@class, 'alert-danger') and contains(text(),'UserName') and contains(text(),'Password')]"
+        ERROR_NO_PASS = "//div[contains(@class, 'alert-danger') and contains(text(),'Password')]"
+        ERROR_NO_USER =  "//div[contains(@class, 'alert-danger') and contains(text(),'UserName')]"
+        ERROR_INVALID = "//div[contains(@class, 'alert-danger') and contains(text(),'Failed')]"
+        ERROR_PASS_TOO_SHORT = "//div[contains(@class,'alert-danger') and contains(text(),'Password') and contains(text(),'4')]"
+        ERROR_USER_TOO_SHORT = "//div[contains(@class, 'alert-danger') and contains(text(),'UserName') and contains(text(),'4')]"
 
     
     def click_login_link(self):
@@ -103,6 +103,7 @@ class LoginPage(BasePage):
         except Exception as e:
             self.logger.error(f"Unexpected error while finding elements: {str(e)}")
             return False
+        
 
     def verify_both_missing(self) -> bool:
         
