@@ -39,7 +39,7 @@ class LoginPage(BasePage):
         LOGOUT_BUTTON = "//section//button[text()='LOG OUT']"
     
     class ErrorMessages:
-        BASE_XPATH = "//div[contains(@class, 'alert-danger) and"
+        BASE_XPATH = "//div[contains(@class, 'alert-danger') and"
         ERROR_BLANK_INPUT = "//div[contains(@class, 'alert-danger') and contains(text(),'UserName') and contains(text(),'Password')]"
         ERROR_NO_PASS = "//div[contains(@class, 'alert-danger') and contains(text(),'Password')]"
         ERROR_NO_USER =  "//div[contains(@class, 'alert-danger') and contains(text(),'UserName')]"
