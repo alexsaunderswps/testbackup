@@ -33,21 +33,12 @@ class VideosPage(BasePage):
         self.screenshot = ScreenshotManager()
         self.logger = logger
         
-    class ElementLocators:
-        LOGOUT_BUTTON = "//section//button[text()='LOG OUT']"
-        COLLECTIONS_BUTTON = "//li//a[@href='/videoCollections']"
-        PORTALS_BUTTON = "//li//a[@href='/portals']"
-        # Needs update once development has started
-        USERS_BUTTON = "//li//a[text()='Users']"
-        DEFINITIONS_BUTTON = "//li//button[text()='Definitions']"
-        ORGS_BUTTON = "//li//a[@href='/organizations']"
-        # Needs update once development has started
-        INSTA_BUTTON = "//li//a[text()='Installations']"
+    class VideoElements:
         FILTER_NAME_FIELD = "//div//input[@placeholder='Filter by name']"
         SEARCH_BUTTON = "//button[text()='Search']"
         CANCEL_BUTTON = "//div//button[2]"
         ADD_BUTTON = "//a[@href='/video/add']"
-        SHOWING_COUNT = "//span[contains(text(),'Showing')]"
+        
         
     class PaginationElements:
         PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
@@ -55,6 +46,7 @@ class VideosPage(BasePage):
         CURRENT_PAGE = "//ul//a[@aria-current='page']"
         FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
         BW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump backward']"
+        SHOWING_COUNT = "//span[contains(text(),'Showing')]"
         
         def get_page_locator(page_number):
             return f"//ul//a[@aria-label='Page 1']"
