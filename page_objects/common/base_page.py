@@ -28,7 +28,21 @@ class BasePage:
         # FOOTER =
         LOGIN_LINK = "//section//button[text()='LOG IN']"
         LOGOUT_BUTTON = "//section//button[text()='LOG OUT']"
+    
+    class NavigationLocators:
+        VIDEOS_LINK = "//li//a[contains(@href,'/') and contains(text(), 'Videos')]"
+        COLLECTIONS_LINK = "//li//a[@href='/videoCollections']"
+        PORTALS_LINK = "//li//a[@href='/portals']"
+        # Needs update once development has started
+        USERS_LINK = "//li//a[text()='Users']"
+        # Definitiions is a button not a link
+        DEFINITIONS_BUTTON = "//li//button[text()='Definitions']"
+        ORGS_LINK = "//li//a[@href='/organizations']"
+        # Needs update once development has started
+        INSTA_LINK = "//li//a[text()='Installations']"
+
         
+    # Basic methods
     def find_logo(self):
         return self.locator.is_element_present(self.CommonLocators.HEADER_LOGO)
     
@@ -73,3 +87,46 @@ class BasePage:
     
     def get_alert_text(self) -> str:
         return self.driver.switch_to.alert.text
+    
+    # Navigation methods
+    
+    def find_videos_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.VIDEOS_LINK)
+    
+    def go_videos_page(self):
+        self.interactor.element_click(self.NavigationLocators.VIDEOS_LINK)
+        
+    def find_collections_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.COLLECTIONS_LINK)
+    
+    def go_collections_page(self):
+        self.interactor.element_click(self.NavigationLocators.COLLECTIONS_LINK)
+        
+    def find_portals_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.PORTALS_LINK)
+    
+    def go_portals_page(self):
+        self.interactor.element_click(self.NavigationLocators.PORTALS_LINK)
+    
+    def find_users_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.USERS_LINK)
+    
+    def go_users_page(self):
+        self.interactor.element_click(self.NavigationLocators.USERS_LINK)
+
+    def find_organizations_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.ORGS_LINK)
+    
+    def go_organizations_page(self):
+        self.interactor.element_click(self.NavigationLocators.ORGS_LINK)
+        
+    def find_installations_button(self):
+        return self.locator.is_element_present(self.NavigationLocators.INSTA_LINK)
+    
+    def go_installations_page(self):
+        self.interactor.element_click(self.NavigationLocators.INSTA_LINK)
+        
+    # Handle Definitions as it is a dropdown list
+    
+    def find_definitions_buttons(self):
+        self.locator.is_element_present(self.NavigationLocators.DEFINITIONS_BUTTON)
