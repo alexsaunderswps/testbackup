@@ -116,6 +116,18 @@ class LoginPage(BasePage):
             self.screenshot.take_screenshot(self.driver, "Error_No_Creds")
             self.logger.error(f"There was an Error with No Creds check: {str(e)}")
             return False
+        
+    def verify_invalid_creds(self) -> bool:
+        
+        try:
+            self.locator.is_element_present(self.ErrorMessages.ERROR_INVALID)
+            self.screenshot.take_screenshot(self.driver, "Invalid_Creds")
+            self.logger.info(f"Login was not successful, Invalid credentials")
+            return True
+        except Exception as e:
+            self.screenshot.take_screenshot(self.driver, "Error_Invalid_Creds")
+            self.logger.error(f"There was an Error with Invalid Creds check: {str(e)}")
+            return False
 
     def verify_user_missing(self) -> bool:
         """_summary_
@@ -193,7 +205,7 @@ class LoginPage(BasePage):
         try:
             self.logger.info(f"Attempting to login with username: {user}")
             self.enter_username(user)
-            self.logger.info("Attempting to enter password")
+            self.logger.info(f"Attempting to enter password: {password}")
             self.enter_password(password)
             self.logger.info("Attempting to click LogIn Button")
             self.click_login_button()

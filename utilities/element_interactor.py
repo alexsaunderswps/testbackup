@@ -8,6 +8,7 @@ from typing import Optional
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT, MAX_RETRIES
 from utilities.element_locator import ElementLocator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -92,7 +93,8 @@ class ElementInteractor:
             try:
                 element = wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
                 if element:
-                    element.clear()
+                    element.send_keys(Keys.CONTROL + "a")
+                    element.send_keys(Keys.DELETE)
                     self.logger.info(f"Element with locator: {locator}, cleared.")
                     return True
                 else:

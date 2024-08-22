@@ -78,18 +78,22 @@ class TestLogin:
     @pytest.mark.fails 
     def test_login_failure(self, login_page):
         lp = login_page
-        lp.login("","")
         
+        lp.login("","")
         login_fails = lp.verify_both_missing()
         check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty user and password.")
         
-        lp.login("", fake.password())
-        login_fails = lp.verify_user_missing()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty user name")
+        lp.login(fake.email(),fake.password())
+        login_fails = lp.verify_invalid_creds()
+        check.is_true(login_fails, f"Logging in succeeded unexpectedly with invalid user and password.")
         
         lp.login(fake.email(), "")
         login_fails = lp.verify_password_missing()
         check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty password")
+        
+        lp.login("", fake.password())
+        login_fails = lp.verify_user_missing()
+        check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty user name")
         
         lp.login(fake.email()[:3], fake.password())
         login_fails = lp.verify_user_short()
