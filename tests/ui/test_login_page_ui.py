@@ -1,7 +1,6 @@
 #test_login_page_ui.py
 import os
 import pytest
-import time
 from faker import Faker
 from dotenv import load_dotenv
 from pytest_check import check
