@@ -39,7 +39,21 @@ class ElementLocator:
             _type_: _description_
         """
         return wait_for_element(self.driver, locator, locator_type, condition, self.timeout)
-        
+    
+    def get_elements(self, locator: str, locator_type: str = "xpath", condition: str = "presence") -> List[WebElement]: 
+        """_summary_
+
+        Args:
+            locator (str): _description_
+            locator_type (str, optional): _description_. Defaults to "xpath".
+            condition (str, optional): _description_. Defaults to "presence".
+
+        Returns:
+            List[WebElement]: _description_
+        """
+        self.logger.info(f"Attempting to find element(s): {locator}")
+        return wait_for_elements(self.driver, locator, locator_type, self.timeout)
+    
     
     def is_element_present(self, locator: str, locator_type: str = 'xpath', condition: str = 'presence') -> bool:
         """_summary_
