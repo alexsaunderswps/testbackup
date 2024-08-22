@@ -1,4 +1,4 @@
-#test_login_page.py
+#test_login_page_ui.py
 import os
 import pytest
 import time
@@ -30,80 +30,21 @@ def login_page(setup_isolated):
     driver.get(BASE_URL)
     return LoginPage(driver)
 
-class TestLogin:
+class TestLoginPageUI:
     
-    @pytest.mark.run(order=1)
-    @pytest.mark.succeeds
-    def test_valid_admin_login(self, login_page):
-        lp = login_page
-        lp.login(ADMIN_USER, ADMIN_PASS)
-        
-        login_succeeds = lp.verify_login_success()
-        check.is_true(login_succeeds, "Admin Login Failed")
-        logger.info("Verifiction Successful :: Admin Login Succeeded" if login_succeeds else "Verification Failed :: Admin Login Failed")
+    @pytest.mark.UI 
+    def test_login_page_elements(self, login_page):
+        """_summary_
 
-        find_login_link = lp.find_login_link()
-        check.is_false(find_login_link, "Login Link found after Admin login")
-        logger.info("Verification Successful :: Login Link was not found after logging in as Admin." if not find_login_link else "Verification Failed :: Login link found after logging in as Admin")
-        
-        find_logout_link = lp.find_logout()
-        check.is_true(find_logout_link, "Log Out Link not found after logging in as Admin")
-        logger.info("Verification Successful :: Logout Link found after logging in as Admin." if find_logout_link else "Verification Failed :: Logout link was not found after logging in as Admin")
-
-        lp.logout_site()
-
-
-    @pytest.mark.run(order=2)
-    @pytest.mark.succeeds
-    def test_valid_user_login(self, login_page):        
-        lp = login_page
-        lp.login(VALID_USER,VALID_PASS)
-        
-        login_succeeds = lp.verify_login_success()
-        check.is_true(login_succeeds, "User Login Failed")
-        logger.info("Verifiction Successful :: User Login Succeeded" if login_succeeds else "Verification Failed :: User Login Failed")
-
-        find_login_link = lp.find_login_link()
-        check.is_false(find_login_link, "Login Link found after User login")
-        logger.info("Verification Successful :: Login Link was not found after logging in as User." if not find_login_link else "Verification Failed :: Login link found after logging in as User")
-        
-        find_logout_link = lp.find_logout()
-        check.is_true(find_logout_link, "Log Out Link not found after logging in as User")
-        logger.info("Verification Successful :: Logout Link found after logging in as User." if find_logout_link else "Verification Failed :: Logout link was not found after logging in as User")
-
-        lp.logout_site()
-        
-        
-    @pytest.mark.run(order=3)   
-    @pytest.mark.fails 
-    def test_login_failure(self, login_page):
+        Args:
+            login_page (_type_): _description_
+        """
         lp = login_page
         
-        lp.login("","")
-        login_fails = lp.verify_both_missing()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty user and password.")
-        
-        lp.login(fake.email(),fake.password())
-        login_fails = lp.verify_invalid_creds()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with invalid user and password.")
-        
-        lp.login(fake.email(), "")
-        login_fails = lp.verify_password_missing()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty password")
-        
-        lp.login("", fake.password())
-        login_fails = lp.verify_user_missing()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with empty user name")
-        
-        lp.login(fake.email()[:3], fake.password())
-        login_fails = lp.verify_user_short()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with a short username")
-        
-        lp.login(fake.email(), fake.password()[:3])
-        login_fails = lp.verify_pass_short()
-        check.is_true(login_fails, f"Logging in succeeded unexpectedly with a short password")
-        
+        all_elements = lp.verify_all_elements_present()
+        check.is_true(all_elements, "Elements missing from Login Page")
+        logger.info("Verification Successful :: All Elements found on Login Page")
         
 if __name__ == "__main__":
-    TL = TestLogin()
+    TL = TestLoginPageUI()
     TL.test_valid_login()
