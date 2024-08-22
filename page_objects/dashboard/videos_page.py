@@ -49,5 +49,8 @@ class VideosPage(BasePage):
         SHOWING_COUNT = "//span[contains(text(),'Showing')]"
         
         def get_page_locator(page_number):
-            return f"//ul//a[@aria-label='Page 1']"
+            return f"//ul//a[@aria-label='Page {page_number}']"
+        
+        def check_current_page(page_number):
+            return f"//ul//a[@aria-label='Page {page_number} is your current page']"
         
