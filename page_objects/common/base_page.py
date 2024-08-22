@@ -40,6 +40,12 @@ class BasePage:
         ORGS_LINK = "//li//a[@href='/organizations']"
         # Needs update once development has started
         INSTA_LINK = "//li//a[text()='Installations']"
+        # Dropdown choices from Definitions link
+        COUNTRIES_LINK = "//a[@href='/countries']"
+        IUCNSTATUS_LINK = "//a[@href='/iucnStatus']"
+        POP_TREND_LINK = "//a[@href='/populationTrend']"
+        SPECIES_LINK = "//a[@href='/species']"
+        TAGS_LINK = "//a[@href='/tags']"
 
         
     # Basic methods
@@ -90,37 +96,37 @@ class BasePage:
     
     # Navigation methods
     
-    def find_videos_button(self):
+    def find_videos_link(self):
         return self.locator.is_element_present(self.NavigationLocators.VIDEOS_LINK)
     
     def go_videos_page(self):
         self.interactor.element_click(self.NavigationLocators.VIDEOS_LINK)
         
-    def find_collections_button(self):
+    def find_collections_link(self):
         return self.locator.is_element_present(self.NavigationLocators.COLLECTIONS_LINK)
     
     def go_collections_page(self):
         self.interactor.element_click(self.NavigationLocators.COLLECTIONS_LINK)
         
-    def find_portals_button(self):
+    def find_portals_link(self):
         return self.locator.is_element_present(self.NavigationLocators.PORTALS_LINK)
     
     def go_portals_page(self):
         self.interactor.element_click(self.NavigationLocators.PORTALS_LINK)
     
-    def find_users_button(self):
+    def find_users_link(self):
         return self.locator.is_element_present(self.NavigationLocators.USERS_LINK)
     
     def go_users_page(self):
         self.interactor.element_click(self.NavigationLocators.USERS_LINK)
 
-    def find_organizations_button(self):
+    def find_organizations_link(self):
         return self.locator.is_element_present(self.NavigationLocators.ORGS_LINK)
     
     def go_organizations_page(self):
         self.interactor.element_click(self.NavigationLocators.ORGS_LINK)
         
-    def find_installations_button(self):
+    def find_installations_link(self):
         return self.locator.is_element_present(self.NavigationLocators.INSTA_LINK)
     
     def go_installations_page(self):
@@ -128,5 +134,40 @@ class BasePage:
         
     # Handle Definitions as it is a dropdown list
     
-    def find_definitions_buttons(self):
+    def find_definitions_button(self):
         self.locator.is_element_present(self.NavigationLocators.DEFINITIONS_BUTTON)
+        
+    def click_definitions_button(self):
+        self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+        
+    # Navigate the Definitions dropdown elements
+        
+    def find_countries_link(self):
+        self.locator.is_element_present(self.NavigationLocators.COUNTRIES_LINK)
+
+    def go_countries_page(self):
+        self.interactor.element_click(self.NavigationLocators.COUNTRIES_LINK)
+    
+    def find_iucnstatus_link(self):
+        self.locator.is_element_present(self.NavigationLocators.IUCNSTATUS_LINK)
+
+    def go_iucnstatus_page(self):
+        self.interactor.element_click(self.NavigationLocators.IUCNSTATUS_LINK)
+    
+    def find_pop_trend_link(self):
+        self.locator.is_element_present(self.NavigationLocators.POP_TREND_LINK)
+
+    def go_pop_trend_page(self):
+        self.interactor.element_click(self.NavigationLocators.POP_TREND_LINK)
+    
+    def find_species_link(self):
+        self.locator.is_element_present(self.NavigationLocators.SPECIES_LINK)
+
+    def go_species_page(self):
+        self.interactor.element_click(self.NavigationLocators.SPECIES_LINK)
+    
+    def find_tags_link(self):
+        self.locator.is_element_present(self.NavigationLocators.TAGS_LINK)
+
+    def go_tags_page(self):
+        self.interactor.element_click(self.NavigationLocators.TAGS_LINK)
