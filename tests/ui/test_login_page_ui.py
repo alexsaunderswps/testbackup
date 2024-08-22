@@ -32,6 +32,7 @@ def login_page(setup_isolated):
 class TestLoginPageUI:
     
     @pytest.mark.UI 
+    @pytest.mark.login
     def test_login_page_elements(self, login_page):
         """_summary_
 
