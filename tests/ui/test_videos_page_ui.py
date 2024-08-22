@@ -17,7 +17,8 @@ def videos_page(logged_in_browser):
 
 class TestVideoPageUI:
     
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.video 
     def test_video_page_nav_elements(self, videos_page):
         """_summary_
 
@@ -30,7 +31,8 @@ class TestVideoPageUI:
         check.is_true(all_elements, "Navigation elements missing from Videos Page")
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")
 
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.video 
     def test_video_page_definition_elements(self, videos_page):
         """_summary_
 
@@ -43,7 +45,8 @@ class TestVideoPageUI:
         check.is_true(all_elements, "Navigation elements missing from Videos Page")
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")
     
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.video 
     def test_video_page_search_elements(self, videos_page):
         """_summary_
 
@@ -56,7 +59,8 @@ class TestVideoPageUI:
         check.is_true(all_elements, "Navigation elements missing from Videos Page")
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")
         
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.video 
     def test_video_pagination_elements(self, videos_page):
         """_summary_
 
@@ -68,6 +72,34 @@ class TestVideoPageUI:
         all_elements = vp.verify_all_video_pagination_elements_present()
         check.is_true(all_elements, "Navigation elements missing from Videos Page")
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")    
+
+    @pytest.mark.UI
+    @pytest.mark.video
+    @pytest.mark.table 
+    def test_video_table_elements(self, videos_page):
+        """_summary_
+
+        Args:
+            login_page (_type_): _description_
+        """
+        vp = videos_page
+        
+        all_elements = vp.verify_all_video_table_elements_present()
+        check.is_true(all_elements, "Navigation elements missing from Videos Page")
+        logger.info("Verification Successful :: All Navigation elements found on Videos Page")   
+        
+    @pytest.mark.UI
+    @pytest.mark.video
+    @pytest.mark.table
+    def test_video_table_rows(self, videos_page):
+        """_summary_
+
+        Args:
+            videos_page (_type_): _description_
+        """
+        vp = videos_page
+        row_count = vp.count_table_rows()
+        logger.info(f"Verificaiton Successful :: Able to count all table rows. {row_count} Rows found")
         
 if __name__ == "__main__":
     TV = TestVideoPageUI()
