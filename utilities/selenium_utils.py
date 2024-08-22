@@ -75,7 +75,7 @@ def wait_for_element(driver: WebDriver, locator: str, locator_type: str = "xpath
         return None
 
 def wait_for_elements(driver: WebDriver, locator: str, locator_type: str = "xpath", timeout: int = DEFAULT_TIMEOUT) -> list[WebElement]:
-    """Wait for multiple elements to be in a certain present
+    """Wait for multiple elements to be present
 
     Args:
         driver (WebDriver): The Selenium WebDriver instance.
