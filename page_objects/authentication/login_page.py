@@ -86,7 +86,7 @@ class LoginPage(BasePage):
         Returns:
             _type_: _description_
         """
-        self.logger.info("Verifying that all expected elements are present")
+        self.logger.info("Verifying that all expected elements are present on: Login Page")
         try:
             for page_element in [self.CommonLocators.HEADER_LOGO,
                             self.CommonLocators.LOGIN_LINK,
