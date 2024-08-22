@@ -3,6 +3,8 @@
 import os
 import pytest
 from datetime import datetime
+from dotenv import load_dotenv
+from page_objects.authentication.login_page import LoginPage
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -16,9 +18,14 @@ from utilities.utils import logger, start_test_capture, end_test_capture, get_lo
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.element_locator import ElementLocator
 
+# Load and define environmental variables
+load_dotenv()
+ADMIN_USER = os.getenv("ADMIN_USERNAME")
+ADMIN_PASS = os.getenv("ADMIN_PASSWORD")
+LOGIN_URL = os.getenv("QA_LOGIN_URL")
+
 # Initialize ElementLocator
 locator = ElementLocator()
-
 
 # Define pytest addoption for Command Line running of Pytest with options
 def pytest_addoption(parser):
@@ -51,6 +58,18 @@ def pytest_addoption(parser):
         default=False,
         help="Run tests in private or incognito mode"
     )
+    parser.addoption(
+        "--username",
+        action="store",
+        default=ADMIN_USER,
+        help="Username for login"
+    )
+    parser.addoption(
+        "--password",
+        action="store",
+        default=ADMIN_PASS,
+        help="Password for login"
+    )
 
 @pytest.fixture(params=["chrome", "edge", "firefox"])
 def all_browsers(request):
@@ -79,6 +98,8 @@ def browser(request):
         return ["chrome", "edge", "firefox"]
     else:
         return browser_option
+
+# Define Setup and Teardown steps
 
 def perform_setup(browser_name, headless, private):
     """_summary_
@@ -215,7 +236,17 @@ def setup_continuous(request):
     request.cls.driver = driver
     request.cls.wait = wait
     yield driver, wait
-    
+
+@pytest.fixture
+def logged_in_browser(setup_isolated, request):
+    driver, wait = setup_isolated
+    driver.get(LOGIN_URL)
+    login_page = LoginPage(driver)
+    username = request.config.getoption("--username", default=ADMIN_USER)
+    password = request.config.getoption("--password", default=ADMIN_PASS)
+    login_page.login(username, password)
+    yield driver, wait
+
 def perform_teardown(driver, wait):
     """_summary_
 
@@ -247,7 +278,9 @@ def perform_teardown(driver, wait):
                 logger.error(f"Error while quitting driver: {str(e)}")
     except Exception as e:
         logger.error(f"Unexcepted error while executing perform_teardown: {str(e)}")
-        
+
+# Define pytest configuration and reporting
+
 def pytest_configure(config):
     """_summary_
 
@@ -325,7 +358,3 @@ def pytest_runtest_teardown(item):
     end_test_capture(item.name)
     yield
     
-# @pytest.fixture(scope="fucntion")
-# def element_locator(setup):
-#     driver, wait = setup
-#     return ElementLocator(driver)
