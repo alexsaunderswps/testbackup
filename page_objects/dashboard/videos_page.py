@@ -193,7 +193,7 @@ class VideosPage(BasePage):
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
             
-    def get_name_values(self) -> list[str]:
+    def get_video_name_values(self) -> list[str]:
         
         self.logger.info("Attempting to get the names of videos in the Videos table")
         video_names = []
@@ -207,7 +207,9 @@ class VideosPage(BasePage):
                     video_names.append(name)
                     logger.debug(f"Here is the row: {name}")
                     logger.debug(f"Here is the names list: {video_names}")
-                    return video_names
+                return video_names
+            else:
+                logger.error(f"Unable to find table with locator: {table}")
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
                 
