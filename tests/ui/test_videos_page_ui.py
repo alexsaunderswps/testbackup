@@ -101,5 +101,10 @@ class TestVideoPageUI:
         row_count = vp.count_table_rows()
         logger.info(f"Verificaiton Successful :: Able to count all table rows. {row_count} Rows found")
         
+    @pytest.mark.debug
+    def test_video_name_retreval(self, videos_page):
+        vp = videos_page
+        vp.get_video_name_values()
+        
 if __name__ == "__main__":
     TV = TestVideoPageUI()
