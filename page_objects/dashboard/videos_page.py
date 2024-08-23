@@ -81,6 +81,7 @@ class VideosPage(BasePage):
                 self.logger.info(f"{page_element} was located successfully.")
             return True
         except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
             self.logger.error(f"Could not find {page_element} on page.")
             return False
         except Exception as e:
@@ -103,6 +104,7 @@ class VideosPage(BasePage):
             self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
             return True
         except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
             self.logger.error(f"Could not find {page_element} on page.")
             return False
         except Exception as e:
@@ -122,6 +124,7 @@ class VideosPage(BasePage):
                 self.logger.info(f"{page_element} was located successfully.")
             return True
         except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
             self.logger.error(f"Could not find {page_element} on page.")
             return False
         except Exception as e:
@@ -142,6 +145,7 @@ class VideosPage(BasePage):
                 self.logger.info(f"{page_element} was located successfully.")
             return True
         except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
             self.logger.error(f"Could not find {page_element} on page.")
             return False
         except Exception as e:
@@ -164,6 +168,7 @@ class VideosPage(BasePage):
                 self.logger.info(f"{page_element} was located successfully.")
             return True
         except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
             self.logger.error(f"Could not find {page_element} on page.")
             return False
         except Exception as e:
@@ -183,7 +188,26 @@ class VideosPage(BasePage):
                 logger.info(f'Found {num_rows} rows in table')
                 return num_rows
             else:
+                self.screenshot.take_screenshot(self.driver, f"Video_Table_Not_Found")
                 logger.error(f"Unable to find the video table on this page.")
+        except Exception as e:
+            logger.error(f"Unable to count table rows: {str(e)}")
+            
+    def get_name_values(self) -> list[str]:
+        
+        self.logger.info("Attempting to get the names of videos in the Videos table")
+        video_names = []
+        try:
+            table = self.locator.check_elements_present(self.VideoTableElements.VIDEO_TABLE_BODY)
+            if table:
+                table_rows = self.locator.get_elements(self.VideoTableElements.VIDEO_TABLE_ROW)
+                for index, row in enumerate(table_rows, start=1):
+                    text_container = self.locator.get_element(f"({self.VideoTableElements.VIDEO_TABLE_ROW})[{index}]/td[2]")
+                    name = text_container.text
+                    video_names.append(name)
+                    logger.debug(f"Here is the row: {name}")
+                    logger.debug(f"Here is the names list: {video_names}")
+                    return video_names
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
                 
