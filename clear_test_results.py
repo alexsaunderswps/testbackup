@@ -1,4 +1,4 @@
-# Folder Cleaner Script
+# Folder Cleaner Script - cleans logs, reports, and screenshots from folders
 import os
 import shutil
 
