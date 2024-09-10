@@ -55,6 +55,7 @@ class VideosPage(BasePage):
         
     class PaginationElements:
         PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
+        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
         NEXT_PAGE= "//ul//a[@aria-label='Next page']"
         CURRENT_PAGE = "//ul//a[@aria-current='page']"
         FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
@@ -180,6 +181,7 @@ class VideosPage(BasePage):
     def count_table_rows(self) -> int:
         
         self.logger.info("Attempting to count the number of rows in the Videos table")
+        num_rows = 0
         try:
             table = self.locator.check_elements_present(self.VideoTableElements.VIDEO_TABLE_BODY)
             if table:
@@ -213,10 +215,29 @@ class VideosPage(BasePage):
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
                 
+    # def count_total_videos_shown(self) -> int:
+    #     total_videos = 0
+    #     while 
+
+
 # Check Pagination
+
+
 
     def get_page_locator(page_number):
         return f"//ul//a[@aria-label='Page {page_number}']"
             
     def check_current_page(page_number):
         return f"//ul//a[@aria-label='Page {page_number} is your current page']"
+    
+    def move_next_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.NEXT_PAGE)
+    
+    def move_prev_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.PREVIOUS_PAGE)
+        
+    def move_next_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELIPSIS)
+    
+    def move_prev_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELIPSIS)
