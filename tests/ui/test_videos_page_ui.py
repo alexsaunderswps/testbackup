@@ -19,7 +19,6 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         """_summary_
 
@@ -33,7 +32,7 @@ class TestVideoPageUI:
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")
 
     @pytest.mark.UI
-    @pytest.mark.video 
+    @pytest.mark.video
     def test_video_page_definition_elements(self, videos_page):
         """_summary_
 
@@ -47,7 +46,7 @@ class TestVideoPageUI:
         logger.info("Verification Successful :: All Navigation elements found on Videos Page")
     
     @pytest.mark.UI
-    @pytest.mark.video 
+    @pytest.mark.video
     def test_video_page_search_elements(self, videos_page):
         """_summary_
 
