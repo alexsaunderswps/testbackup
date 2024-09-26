@@ -1,5 +1,6 @@
 #screenshot_manager.py
 import os
+import re
 import time
 from .config import SCREENSHOT_DIR
 from utilities.utils import logger
@@ -20,7 +21,10 @@ class ScreenshotManager:
             shot_directory (str): Directory to save the screenshot. If None, uses SCREENSHOT_DIR from config
         """
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        file_name = f"{file_name}_{timestamp}.png"
+        
+        # Clean the file name to ensure it is valid
+        clean_file_name = re.sub(r'[^\w\-_\. ]', '_', file_name)
+        file_name = f"{clean_file_name}_{timestamp}.png"
 
         # Use the provided shot_directory or fall back to SCREENSHOT_DIR from config
         screenshot_dir = shot_directory or SCREENSHOT_DIR
