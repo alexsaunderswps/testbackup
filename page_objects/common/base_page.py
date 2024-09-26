@@ -45,7 +45,7 @@ class BasePage:
         IUCNSTATUS_LINK = "//a[@href='/iucnStatus']"
         POP_TREND_LINK = "//a[@href='/populationTrend']"
         SPECIES_LINK = "//a[@href='/species']"
-        TAGS_LINK = "//a[@href='/tags']"
+        TAGS_LINK = "//a[text()='Tags']"
 
         
     # Basic methods
