@@ -209,7 +209,7 @@ def setup_isolated(request):
     yield driver, wait
     
     # logger.info(f"Performing teardown of isolated test")
-    # perform_teardown(driver, wait)
+    perform_teardown(driver, wait)
     
 @pytest.fixture(scope="class")
 def setup_continuous(request):
@@ -263,7 +263,7 @@ def perform_teardown(driver, wait):
             logout_button.click()
             try:
                 login_present = wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
-                logger.info(f"Successfully logged out, loing button is present.")
+                logger.info(f"Successfully logged out, login button is present.")
             except TimeoutException:
                 logger.error("Timeout while waiting for login button to appear after logout.")
             except Exception as e:
@@ -272,7 +272,7 @@ def perform_teardown(driver, wait):
                 logger.error(f"Error during logout process: {str(e)}")
         finally:
             try:
-                driver.quit()
+                driver.close()
                 logger.info("Driver quit successfully.")
             except WebDriverException as e:
                 logger.error(f"Error while quitting driver: {str(e)}")
