@@ -18,7 +18,8 @@ def videos_page(logged_in_browser):
 class TestVideoPageUI:
     
     @pytest.mark.UI
-    @pytest.mark.video 
+    @pytest.mark.video
+    @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         """_summary_
 
@@ -101,7 +102,7 @@ class TestVideoPageUI:
         row_count = vp.count_table_rows()
         logger.info(f"Verificaiton Successful :: Able to count all table rows. {row_count} Rows found")
         
-    @pytest.mark.debug
+
     def test_video_name_retreval(self, videos_page):
         vp = videos_page
         vp.get_video_name_values()
