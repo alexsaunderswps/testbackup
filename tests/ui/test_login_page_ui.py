@@ -24,10 +24,13 @@ VALID_PASS = os.getenv("VALID_PASSWORD")
 
 @pytest.fixture
 def login_page(setup_isolated):
-    driver, wait = setup_isolated
-    logger.info(f"Navigating to login page on {driver.name}")
-    driver.get(BASE_URL)
-    return LoginPage(driver)
+    login_pages = []
+    for driver, wait in setup_isolated:
+        logger.info(f"Navigating to login page on {driver.name}")
+        driver.get(BASE_URL)
+        login_pages.append(LoginPage(driver))
+        
+    yield login_pages
 
 class TestLoginPageUI:
     
@@ -39,11 +42,11 @@ class TestLoginPageUI:
         Args:
             login_page (_type_): _description_
         """
-        lp = login_page
+        for lp in login_page:
         
-        all_elements = lp.verify_all_elements_present()
-        check.is_true(all_elements, "Elements missing from Login Page")
-        logger.info("Verification Successful :: All Elements found on Login Page")
+            all_elements = lp.verify_all_elements_present()
+            check.is_true(all_elements, "Elements missing from Login Page")
+            logger.info("Verification Successful :: All Elements found on Login Page")
         
 if __name__ == "__main__":
     TL = TestLoginPageUI()
