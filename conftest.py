@@ -13,6 +13,7 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+from typing import Union, List, Tuple
 from utilities.config import LOGIN_BUTTON, LOGOUT_BUTTON
 from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_test
 from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
@@ -79,34 +80,6 @@ def pytest_addoption(parser):
         help="Password for login"
     )
 
-# TODO - impliment all browser testing ability through command line
-# @pytest.fixture(params=["chrome", "edge", "firefox"])
-# def all_browsers(request):
-#     """_summary_
-
-#     Args:
-#         request (_type_): _description_
-
-#     Returns:
-#         _type_: _description_
-#     """
-#     return request.param
-
-# @pytest.fixture(scope="class")
-# def browser(request):
-#     """_summary_
-
-#     Args:
-#         request (_type_): _description_
-
-#     Returns:
-#         _type_: _description_
-#     """
-#     browser_option = request.config.getoption("--browser")
-#     if browser_option == "all":
-#         return ["chrome", "edge", "firefox"]
-#     else:
-#         return browser_option
 
 # Define Setup and Teardown steps
 def chrome_setup(headless: bool, private: bool) -> webdriver:
@@ -142,17 +115,17 @@ def firefox_setup(headless:bool, private:bool) -> webdriver:
         options.add_argument("--private")
     return webdriver.Firefox(options=options)
 
-def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[webdriver, WebDriverWait]: # type: ignore
+def perform_setup(browser_name: str, headless: bool, private: bool):
     """
-    Sets up a WebDriver instance for the specified browser with given options.
+    Sets up WebDriver instance(s) for the specified browser with given options.
     
-    This function initializes a WebDriver for Chrome, Edge, or Firefox browsers.
-    It configures the browser according to the headless and private browsing options,
-    maximizes the window, sets up a WebDriverWait instance, and prepares for test capture.
+    This function initializes WebDriver(s) for Chrome, Edge, or Firefox browsers.
+    It configures the browser(s) according to the headless and private browsing options,
+    maximizes the window(s), sets up a WebDriverWait instance(s), and prepares for test capture.
 
     Args:
         browser_name (str): The name of the browser to set up.
-                            Must be one of "chrome", "edge", or "firefox".
+                            Must be one of "chrome", "edge", "firefox", or "all".
         headless (bool): If True, the browser will run in headless mode.
         private (bool): If True, the browser will run in private/incognito mode.
 
@@ -160,30 +133,60 @@ def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[web
         ValueError: If an unsupported browser name is provided.
 
     Returns:
-        Tuple[WebDriver, WebDriverWait]: A tuple containing"
-        - The configured WebDriver instance.
-        -A WebDriverWait instance set to the default timout.
+        Union[Tuple[WebDriver, WebDriverWait], List[Tuple[WebDriver, WebDriverWait]]]:
+            - If browser_name is not "all": A tuple containing the WebDriver and WebDriverWait instances.
+            - If browser_name is "all": A list of tuples, each containing WebDriver and WebDriverWait instances
+            for each supported browser.
     
     Example:
+        # Set up a single browser
         driver, wait = perform_setup("chrome", headless=True, private=False)
-    
-    Note:
-        - The function starts with a blank page (about:blank) after setup.
-        - Test capture is initiated using the driver's session ID.
-        - The WebDriver window is maximized by default.
+
+        # Set up all supported browsers
+        all_browsers = perform_setup("all", headless=False, private=True)
+        for driver, wait in all_browsers:
+            # Use each driver and wait instance
     """
+    logger.info("*" * 80)
     logger.info(f"Setting up {browser_name} browser in setup")
-    
+    logger.info("*" * 80)
     setup_functions = {
         "chrome": chrome_setup,
         "edge": edge_setup,
         "firefox": firefox_setup
     }
-    
+    if browser_name.lower() == "all":
+        return [setup_single_browser(browser, setup_functions[browser], headless, private) 
+                for browser in setup_functions.keys()]
+
     setup_func = setup_functions.get(browser_name.lower())
     if not setup_func:
         raise ValueError(f"Unsupported browser requrest: {browser_name}")
     
+    return setup_single_browser(browser_name, setup_func, headless, private)
+
+def setup_single_browser(browser_name: str, setup_func, headless: bool, private: bool):
+    """
+    Sets up a single browser instance and works with perform_setup to allow multiple browser instances
+
+    Args:
+        browser_name (str): The name of the browser to set up.
+            Must be one of "chrome", "edge", "firefox", or "all".
+        setup_func (function): passed from perform_setup
+        headless (bool): If True, the browser will run in headless mode.
+        private (bool): If True, the browser will run in private/incognito mode.
+
+    Returns:
+        Tuple: A tuple containing the WebDriver and WebDriverWait instances.
+        
+    Note:
+    - The function starts with a blank page (about:blank) after setup.
+    - Attempts to delete all cookies and, if not a Firefox instances, clears local storage.
+    Firefox throws a security warning.
+    - Test capture is initiated using the driver's session ID.
+    - The WebDriver window is maximized by default.
+    
+    """
     driver = setup_func(headless, private)
     driver.maximize_window()
     wait = WebDriverWait(driver, DEFAULT_TIMEOUT)
@@ -192,7 +195,7 @@ def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[web
     driver.get("about:blank")
     
     # Clear cookies and cache just in case
-    logger.critical("Clearing browser data.")
+    logger.info("Clearing browser data.")
     try:
         driver.delete_all_cookies()
         if browser_name != 'firefox':
@@ -208,26 +211,27 @@ def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[web
     
     return driver, wait
 
-@pytest.fixture(scope="function")
-def setup(request):
-    """_summary_
+# TODO eventually used in tests to allow either isolated or continuous testing
+# @pytest.fixture(scope="function")
+# def setup(request):
+#     """_summary_
 
-    Args:
-        request (_type_): _description_
+#     Args:
+#         request (_type_): _description_
 
-    Raises:
-        ValueError: _description_
+#     Raises:
+#         ValueError: _description_
 
-    Yields:
-        _type_: _description_
-    """
-    setup_type = request.config.getoption("--setup_type")
-    if setup_type == "isolated":
-        yield from setup_isolated(request)
-    elif setup_type == "continuous":
-        yield from setup_continuous(request)
-    else:
-        raise ValueError(f"Invalid setup type: {setup_type}. Should be either isolated or continuous.")
+#     Yields:
+#         _type_: _description_
+#     """
+#     setup_type = request.config.getoption("--setup_type")
+#     if setup_type == "isolated":
+#         yield from setup_isolated(request)
+#     elif setup_type == "continuous":
+#         yield from setup_continuous(request)
+#     else:
+#         raise ValueError(f"Invalid setup type: {setup_type}. Should be either isolated or continuous.")
     
 @pytest.fixture(scope="function")
 def setup_isolated(request):
@@ -242,60 +246,77 @@ def setup_isolated(request):
     browser = request.config.getoption("--browser")
     headless = request.config.getoption("--headless")
     private = request.config.getoption("--private")
-    drivers = []
+    result = perform_setup(browser, headless, private)
     
-    for browser_name in (browser if isinstance(browser,list) else [browser]):
-        driver, wait = perform_setup(browser_name, headless, private)
-        drivers.append((driver,wait))
+    if not isinstance(result, list):
+        result = [result]
     
-    logger.info("Setting up an isolated test.")
+    logger.info(f"setup_isolated fixture: yielding {len(result)} browser(s)")
+    yield result
     
-    if len(drivers) == 1:
-        driver, wait = drivers[0]
-    else:
-        driver, wait = drivers
-        request.node.driver = driver # Attach driver to the test node for teardown
-        
-    yield driver, wait
+    logger.info("setup_isolated fixture: starting teardown")
     
-    logger.info(f"Performing teardown of isolated test")
-    perform_teardown(driver, wait)
+    # Teardown
+    for driver, wait in result:
+        logger.info(f"Performing teardown of isolated test for {driver.name}")
+        perform_teardown(driver, wait)
+    logger.info("setup_isolated fixture: teardown complete")
+
+# TODO eventually to be used to allow multiple tests on one browser instance.
+# @pytest.fixture(scope="class")
+# def setup_continuous(request):
+#     """_summary_
+
+#     Args:
+#         request (_type_): _description_
+
+#     Yields:
+#         _type_: _description_
+#     """
+#     browser = request.config.getoption("--browser")
+#     headless = request.config.getoption("--headless")
+#     private = request.config.getoption("--private")
     
-@pytest.fixture(scope="class")
-def setup_continuous(request):
-    """_summary_
+#     drivers = []
+#     for browser_name in (browser if isinstance(browser,list) else [browser]):
+#         driver, wait = perform_setup(browser_name, headless, private)
+#         drivers.append((driver,wait))
+    
+#     logger.info("Setting up a continuous test environment.")
+    
+#     driver, wait = drivers[0] if len(drivers) == 1 else drivers
+#     request.cls.driver = driver
+#     request.cls.wait = wait
+#     yield driver, wait
+
+@pytest.fixture
+
+def logged_in_browser(setup_isolated, request):
+    """
+    Provides a loggin in browser instance for use when logging in is not part of the test
 
     Args:
+        setup_isolated (_type_): _description_
         request (_type_): _description_
 
     Yields:
         _type_: _description_
     """
-    browser = request.config.getoption("--browser")
-    headless = request.config.getoption("--headless")
-    private = request.config.getoption("--private")
-    
-    drivers = []
-    for browser_name in (browser if isinstance(browser,list) else [browser]):
-        driver, wait = perform_setup(browser_name, headless, private)
-        drivers.append((driver,wait))
-    
-    logger.info("Setting up a continuous test environment.")
-    
-    driver, wait = drivers[0] if len(drivers) == 1 else drivers
-    request.cls.driver = driver
-    request.cls.wait = wait
-    yield driver, wait
-
-@pytest.fixture
-def logged_in_browser(setup_isolated, request):
-    driver, wait = setup_isolated
-    driver.get(LOGIN_URL)
-    login_page = LoginPage(driver)
-    username = request.config.getoption("--username", default=ADMIN_USER)
-    password = request.config.getoption("--password", default=ADMIN_PASS)
-    login_page.login(username, password)
-    yield driver, wait
+    logger.info("Starting logged_in_browser fixture")
+    login_pages = []
+    for driver, wait in setup_isolated:
+        logger.info("=" * 80)
+        logger.info(f"Logging in on {driver.name}")
+        logger.info("=" * 80)
+        driver.get(LOGIN_URL)
+        login_page = LoginPage(driver)
+        username = request.config.getoption("--username", default=ADMIN_USER)
+        password = request.config.getoption("--password", default=ADMIN_PASS)
+        login_page.login(username, password)
+        login_pages.append(login_page)
+    logger.info(f"logged_in_browser fixture: yielding {len(login_pages)} logged-in page(s)")
+    yield login_pages
+    logger.info("logged_in_browser fixture: finished")
 
 def perform_teardown(driver, wait):
     """_summary_
