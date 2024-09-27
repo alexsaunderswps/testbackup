@@ -79,33 +79,34 @@ def pytest_addoption(parser):
         help="Password for login"
     )
 
-@pytest.fixture(params=["chrome", "edge", "firefox"])
-def all_browsers(request):
-    """_summary_
+# TODO - impliment all browser testing ability through command line
+# @pytest.fixture(params=["chrome", "edge", "firefox"])
+# def all_browsers(request):
+#     """_summary_
 
-    Args:
-        request (_type_): _description_
+#     Args:
+#         request (_type_): _description_
 
-    Returns:
-        _type_: _description_
-    """
-    return request.param
+#     Returns:
+#         _type_: _description_
+#     """
+#     return request.param
 
-@pytest.fixture(scope="class")
-def browser(request):
-    """_summary_
+# @pytest.fixture(scope="class")
+# def browser(request):
+#     """_summary_
 
-    Args:
-        request (_type_): _description_
+#     Args:
+#         request (_type_): _description_
 
-    Returns:
-        _type_: _description_
-    """
-    browser_option = request.config.getoption("--browser")
-    if browser_option == "all":
-        return ["chrome", "edge", "firefox"]
-    else:
-        return browser_option
+#     Returns:
+#         _type_: _description_
+#     """
+#     browser_option = request.config.getoption("--browser")
+#     if browser_option == "all":
+#         return ["chrome", "edge", "firefox"]
+#     else:
+#         return browser_option
 
 # Define Setup and Teardown steps
 def chrome_setup(headless: bool, private: bool) -> webdriver:
@@ -191,12 +192,17 @@ def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[web
     driver.get("about:blank")
     
     # Clear cookies and cache just in case
-    # try:
-    #     driver.delete_all_cookies()
-    #     driver.execute_script("localStorage.clear();")
-    #     driver.execute_script("sessionStorage.clear();")
-    # except Exception as e:
-    #     logger.error(f"Error clearing browser data: {str(e)}")
+    logger.critical("Clearing browser data.")
+    try:
+        driver.delete_all_cookies()
+        if browser_name != 'firefox':
+            driver.get(LOGIN_URL)
+            driver.execute_script("localStorage.clear();")
+            driver.execute_script("sessionStorage.clear();")
+    except Exception as e:
+        logger.error(f"Error clearing browser data: {str(e)}")
+    finally:
+        driver.get("about:blank")
     
     start_test_capture(driver.session_id)
     
