@@ -55,6 +55,7 @@ class VideosPage(BasePage):
         
     class PaginationElements:
         PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
+        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
         NEXT_PAGE= "//ul//a[@aria-label='Next page']"
         CURRENT_PAGE = "//ul//a[@aria-current='page']"
         FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
@@ -66,120 +67,142 @@ class VideosPage(BasePage):
     def verify_all_nav_elements_present(self) -> bool:
 
         self.logger.info("Verifying that all expected navigation elements are present on: Videos Page")
-        try:
-            for page_element in [self.CommonLocators.HEADER_LOGO,
-                            self.CommonLocators.LOGOUT_BUTTON,
-                            self.NavigationLocators.VIDEOS_LINK,
-                            self.NavigationLocators.COLLECTIONS_LINK,
-                            self.NavigationLocators.PORTALS_LINK,
-                            self.NavigationLocators.USERS_LINK,
-                            self.NavigationLocators.DEFINITIONS_BUTTON,
-                            self.NavigationLocators.ORGS_LINK,
-                            self.NavigationLocators.INSTA_LINK,
-                            ]:
-                self.locator.check_elements_present(page_element)
-                self.logger.info(f"{page_element} was located successfully.")
-            return True
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-            self.logger.error(f"Could not find {page_element} on page.")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-            return False
+        all_elements_present = True
+        
+        for page_element in [self.CommonLocators.HEADER_LOGO,
+                        self.CommonLocators.LOGOUT_BUTTON,
+                        self.NavigationLocators.VIDEOS_LINK,
+                        self.NavigationLocators.COLLECTIONS_LINK,
+                        self.NavigationLocators.PORTALS_LINK,
+                        self.NavigationLocators.USERS_LINK,
+                        self.NavigationLocators.DEFINITIONS_BUTTON,
+                        self.NavigationLocators.ORGS_LINK,
+                        self.NavigationLocators.INSTA_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
         
     def verify_all_definition_links_present(self) -> bool:
 
         self.logger.info("Verifying that all expected naivigation elements are present in: Definintions Dropdown")
-        try:
-            self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
-            for page_element in [self.NavigationLocators.COUNTRIES_LINK,
-                            self.NavigationLocators.IUCNSTATUS_LINK,
-                            self.NavigationLocators.POP_TREND_LINK,
-                            self.NavigationLocators.SPECIES_LINK,
-                            self.NavigationLocators.TAGS_LINK,
-                            ]:
-                self.locator.check_elements_present(page_element)
-                self.logger.info(f"{page_element} was located successfully.")
-            self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
-            return True
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-            self.logger.error(f"Could not find {page_element} on page.")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-            return False
+        all_elements_present = True
+        self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+        
+        for page_element in [self.NavigationLocators.COUNTRIES_LINK,
+                        self.NavigationLocators.IUCNSTATUS_LINK,
+                        self.NavigationLocators.POP_TREND_LINK,
+                        self.NavigationLocators.SPECIES_LINK,
+                        self.NavigationLocators.TAGS_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+                # self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
     
     def verify_all_video_search_elements_present(self) -> bool:
 
         self.logger.info("Verifying that all expected video search elements are present in: Definintions Dropdown")
-        try:
-            for page_element in [self.VideoElements.FILTER_NAME_FIELD,
-                            self.VideoElements.SEARCH_BUTTON,
-                            self.VideoElements.CANCEL_BUTTON,
-                            self.VideoElements.ADD_BUTTON,
-                            ]:
-                self.locator.check_elements_present(page_element)
-                self.logger.info(f"{page_element} was located successfully.")
-            return True
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-            self.logger.error(f"Could not find {page_element} on page.")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-            return False
+        all_elements_present = True
+        
+        for page_element in [self.VideoElements.FILTER_NAME_FIELD,
+                        self.VideoElements.SEARCH_BUTTON,
+                        self.VideoElements.CANCEL_BUTTON,
+                        self.VideoElements.ADD_BUTTON,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
     
     def verify_all_video_pagination_elements_present(self) -> bool:
 
         self.logger.info("Verifying that all expected pagination elements are present in: Definintions Dropdown")
-        try:
-            for page_element in [self.PaginationElements.PREVIOUS_PAGE,
-                            self.PaginationElements.CURRENT_PAGE,
-                            self.PaginationElements.FW_BREAK_ELIPSIS,
-                            self.PaginationElements.NEXT_PAGE,
-                            self.PaginationElements.SHOWING_COUNT
-                            ]:
-                self.locator.check_elements_present(page_element)
-                self.logger.info(f"{page_element} was located successfully.")
-            return True
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-            self.logger.error(f"Could not find {page_element} on page.")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-            return False
+        all_elements_present = True
+        
+        for page_element in [self.PaginationElements.PREVIOUS_PAGE,
+                        self.PaginationElements.CURRENT_PAGE,
+                        self.PaginationElements.FW_BREAK_ELIPSIS,
+                        self.PaginationElements.NEXT_PAGE,
+                        self.PaginationElements.SHOWING_COUNT
+        ]:
+                
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
     
     def verify_all_video_table_elements_present(self) -> bool:
 
         self.logger.info("Verifying that all expected pagination elements are present in: Definintions Dropdown")
-        try:
-            for page_element in [self.VideoTableElements.THUMBNAIL_HEADER,
-                            self.VideoTableElements.NAME_HEADER,
-                            self.VideoTableElements.PUBLISHED_HEADER,
-                            self.VideoTableElements.DESCRIPTION_HEADER,
-                            self.VideoTableElements.COUNTRY_HEADER,
-                            self.SortingElements.NAME_SORT,
-                            self.SortingElements.PUBLISHED_SORT
-                            ]:
-                self.locator.check_elements_present(page_element)
-                self.logger.info(f"{page_element} was located successfully.")
-            return True
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-            self.logger.error(f"Could not find {page_element} on page.")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-            return False
+        all_elements_present = True
         
+        for page_element in [self.VideoTableElements.THUMBNAIL_HEADER,
+                        self.VideoTableElements.NAME_HEADER,
+                        self.VideoTableElements.PUBLISHED_HEADER,
+                        self.VideoTableElements.DESCRIPTION_HEADER,
+                        self.VideoTableElements.COUNTRY_HEADER,
+                        self.SortingElements.NAME_SORT,
+                        self.SortingElements.PUBLISHED_SORT
+        ]:
+            try:        
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} was Not Found")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
+    
 # Check Table Body contents
 
     def count_table_rows(self) -> int:
         
         self.logger.info("Attempting to count the number of rows in the Videos table")
+        num_rows = 0
         try:
             table = self.locator.check_elements_present(self.VideoTableElements.VIDEO_TABLE_BODY)
             if table:
@@ -188,7 +211,7 @@ class VideosPage(BasePage):
                 logger.info(f'Found {num_rows} rows in table')
                 return num_rows
             else:
-                self.screenshot.take_screenshot(self.driver, f"Video_Table_Not_Found")
+                self.screenshot.take_screenshot(self.driver, "Video_Table_Not_Found")
                 logger.error(f"Unable to find the video table on this page.")
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
@@ -213,10 +236,29 @@ class VideosPage(BasePage):
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
                 
+    # def count_total_videos_shown(self) -> int:
+    #     total_videos = 0
+    #     while 
+    
+
 # Check Pagination
+
+
 
     def get_page_locator(page_number):
         return f"//ul//a[@aria-label='Page {page_number}']"
             
     def check_current_page(page_number):
         return f"//ul//a[@aria-label='Page {page_number} is your current page']"
+    
+    def move_next_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.NEXT_PAGE)
+    
+    def move_prev_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.PREVIOUS_PAGE)
+        
+    def move_next_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELIPSIS)
+    
+    def move_prev_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELIPSIS)

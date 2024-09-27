@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from threading import Lock
 from .config import LOG_DIR
+from colorlog import ColoredFormatter
 
 class HTMLReportLogger:
     
@@ -113,10 +114,26 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
     
-    # Formatter
+    #Formatters
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    color_formatter = ColoredFormatter(
+        "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s%(reset)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        reset=True,
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        },
+        secondary_log_colors={},
+        style='%'
+    )
+    
+    # Apply formatters to handlers
+    console_handler.setFormatter(color_formatter)
     file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
     
     # Add handlers to Logger
     logger.addHandler(file_handler)

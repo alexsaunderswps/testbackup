@@ -1,0 +1,17 @@
+Get table
+Get rows
+Save1 - Get text for column from all rows
+Move forward 
+Get table
+Get rows
+Save2 - Get text for column for all rows
+Compare Save1 and Save2 
+if not equal, success
+if equal, error
+
+Get table
+while page forward not disabled
+	Get rows
+	return row int
+	add row int to total
+	page forward
