@@ -75,7 +75,8 @@ class TestLoginPageFunctionality:
         
         
     @pytest.mark.functionality 
-    @pytest.mark.fails 
+    @pytest.mark.fails
+    @pytest.mark.debug
     def test_login_failure(self, login_page):
         lp = login_page
         
