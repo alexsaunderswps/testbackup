@@ -29,10 +29,18 @@ locator = ElementLocator()
 
 # Define pytest addoption for Command Line running of Pytest with options
 def pytest_addoption(parser):
-    """_summary_
-
+    """
+    Add custom command line options to pytest.
+    
+    This function is called by pytest to add custom options to the command line parser.
+    It defines options for browser selection, test setup type, headless and private mode,
+    and login credentials
+    
     Args:
-        parser (_type_): _description_
+        parser (argparse.Parser): The pytest command line parser.
+        
+    Example:
+        pytest --browser firefox --headless True
     """
     parser.addoption(
         "--browser",
@@ -100,46 +108,82 @@ def browser(request):
         return browser_option
 
 # Define Setup and Teardown steps
+def chrome_setup(headless: bool, private: bool) -> webdriver:
+    """
+    Sets up a Chrome WebDriver with specified options.
+    """
+    options = ChromeOptions()
+    if headless:
+        options.add_argument("--headless")
+    if private:
+        options.add_argument("--incognito")
+    return webdriver.Chrome(options=options)
 
-def perform_setup(browser_name, headless, private):
-    """_summary_
+def edge_setup(headless:bool, private: bool) -> webdriver:
+    """
+    Sets up an Edge WebDriver with specified options
+    """
+    options = EdgeOptions()
+    if headless:
+        options.add_argument("--headless")
+    if private:
+        options.add_argument("--inprivate")
+    return webdriver.Edge(options=options)
+
+def firefox_setup(headless:bool, private:bool) -> webdriver:
+    """
+    Sets up a Firefox WebDriver with specified options
+    """
+    options = FirefoxOptions()
+    if headless:
+        options.add_argument("--headless")
+    if private:
+        options.add_argument("--private")
+    return webdriver.Firefox(options=options)
+
+def perform_setup(browser_name: str, headless: bool, private: bool) -> tuple[webdriver, WebDriverWait]: # type: ignore
+    """
+    Sets up a WebDriver instance for the specified browser with given options.
+    
+    This function initializes a WebDriver for Chrome, Edge, or Firefox browsers.
+    It configures the browser according to the headless and private browsing options,
+    maximizes the window, sets up a WebDriverWait instance, and prepares for test capture.
 
     Args:
-        browser_name (_type_): _description_
-        headless (_type_): _description_
-        private (_type_): _description_
+        browser_name (str): The name of the browser to set up.
+                            Must be one of "chrome", "edge", or "firefox".
+        headless (bool): If True, the browser will run in headless mode.
+        private (bool): If True, the browser will run in private/incognito mode.
 
     Raises:
-        ValueError: _description_
+        ValueError: If an unsupported browser name is provided.
 
     Returns:
-        _type_: _description_
+        Tuple[WebDriver, WebDriverWait]: A tuple containing"
+        - The configured WebDriver instance.
+        -A WebDriverWait instance set to the default timout.
+    
+    Example:
+        driver, wait = perform_setup("chrome", headless=True, private=False)
+    
+    Note:
+        - The function starts with a blank page (about:blank) after setup.
+        - Test capture is initiated using the driver's session ID.
+        - The WebDriver window is maximized by default.
     """
     logger.info(f"Setting up {browser_name} browser in setup")
-    if browser_name == "chrome":
-        options = ChromeOptions()
-        if headless:
-            options.add_argument("--headless")
-        if private:
-            options.add_argument("--incognito")
-        driver = webdriver.Chrome(options=options)
-    elif browser_name == "edge":
-        options = EdgeOptions()
-        if headless:
-            options.add_argument("--headless")
-        if private:
-            options.add_argument("--private")
-        driver = webdriver.Edge(options=options)
-    elif browser_name == "firefox":
-        options = FirefoxOptions()
-        if headless:
-            options.add_argument("--headless")
-        if private:
-            options.add_argument("--inprivate")
-        driver = webdriver.Firefox(options=options)
-    else:
-        raise ValueError(f"Unsupported browser request: {browser_name}")
     
+    setup_functions = {
+        "chrome": chrome_setup,
+        "edge": edge_setup,
+        "firefox": firefox_setup
+    }
+    
+    setup_func = setup_functions.get(browser_name.lower())
+    if not setup_func:
+        raise ValueError(f"Unsupported browser requrest: {browser_name}")
+    
+    driver = setup_func(headless, private)
     driver.maximize_window()
     wait = WebDriverWait(driver, DEFAULT_TIMEOUT)
     
@@ -208,7 +252,7 @@ def setup_isolated(request):
         
     yield driver, wait
     
-    # logger.info(f"Performing teardown of isolated test")
+    logger.info(f"Performing teardown of isolated test")
     perform_teardown(driver, wait)
     
 @pytest.fixture(scope="class")
