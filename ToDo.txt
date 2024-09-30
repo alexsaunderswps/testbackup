@@ -1,0 +1,17 @@
+Consider adding a fixtures folder to root.
+    In this folder, add files that supply test data across the test suite to all pages
+    Files could be users_fixtures data_fixtures, etc.
+    Centralizes test data for manipulation (think testing -1, 0 , +1 scenarios)
+    Import these fixtures into the conftest.py file to make them available cross testsuite
+    Need to balance this with simplicity
+    Use Faker in fixture file to supply randomly generated data.
+
+Consider using parameterized fixture to supply data.
+    Could be used to test the various levels of autherization within the suite
+    Can pass multiple parameterized fixtures to a test to test all permitations
+    Can use a parameterized fixture to supply various expected failure entries as well
+        invalid creds 
+        too short creds
+        too long creds
+        missing creds
+    Consider this for multiple data entry points (Video Titles, Catalogue titles, etc)
