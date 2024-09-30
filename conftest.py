@@ -325,7 +325,7 @@ def close_browser(driver):
         logger.debug("WebDriver session ended successfully")
     except WebDriverException as e:
         logger.error(f"Error while quitting WebDriver: {str(e)}")
-          
+
 def perform_teardown(driver, wait):
     """
     Performs the teardown of a WebDriver instance after a test case is complete.
