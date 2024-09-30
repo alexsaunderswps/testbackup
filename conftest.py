@@ -407,11 +407,23 @@ def pytest_html_report_title(report):
     
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """_summary_
+    """
+    Pytest hook for customizing test reports.
+
+    This function captures logs for each test and adds them to the HTML report.
+    It only operates during the 'call' phase of testing (the actual test execution).
 
     Args:
-        item (_type_): _description_
-        call (_type_): _description_
+        item (pytest.Item): The test item object, representing a single test.
+        call (pytest.CallInfo): Object containing information about the test function call.
+
+    Yields:
+        Generator: Yields control back to pytest to generate the report.
+
+    Note:
+        - This function is a hookwrapper, allowing it to modify pytest's report generation behavior.
+        - Logs are captured using a custom 'get_logs_for_test' function.
+        - Logs are added to the report's 'extra' section, which appears in the HTML report.
     """
     outcome = yield
     report = outcome.get_result()
@@ -427,10 +439,23 @@ def pytest_runtest_makereport(item, call):
         
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_setup(item):
-    """_summary_
+    """
+    Pytest hook that runs before the setup of each test.
+
+    This function initializes the log capture for a test before it runs.
+    It's set to run before other plugins and wrap around the actual setup process.
 
     Args:
-        item (_type_): _description_
+        item (pytest.Item): The test item object, representing a single test.
+
+    Yields:
+        None: Control is yielded back to pytest to perform the actual test setup.
+
+    Note:
+        - This hook uses 'tryfirst=True' to attempt to run before other plugins.
+        - It's a hookwrapper, allowing it to wrap around the actual setup process.
+        - The log capture is started using the test item's name.
+        - After yielding, the actual test setup occurs, but this hook doesn't do anything post-setup.
     """
     # Clear the log capture for this test
     start_test_capture(item.name)
@@ -438,10 +463,24 @@ def pytest_runtest_setup(item):
     
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_teardown(item):
-    """_summary_
+    """
+    Pytest hook that runs after the teardown of each test.
+
+    This function finalizes the log capture for a test after it has run.
+    It's set to run before other plugins and wrap around the actual teardown process.
 
     Args:
-        item (_type_): _description_
+        item (pytest.Item): The test item object, representing a single test.
+
+    Yields:
+        None: Control is yielded back to pytest to perform the actual test teardown.
+
+    Note:
+        - This hook uses 'tryfirst=True' to attempt to run before other plugins.
+        - It's a hookwrapper, allowing it to wrap around the actual teardown process.
+        - The log capture is ended using the test item's name.
+        - After calling end_test_capture, it yields control for the actual teardown, 
+          but doesn't perform any actions post-teardown.
     """
     end_test_capture(item.name)
     yield
