@@ -348,10 +348,24 @@ def perform_teardown(driver, wait):
 # Define pytest configuration and reporting
 
 def pytest_configure(config):
-    """_summary_
+    """
+    Configure pytest reporting structure.
+    
+    This function sets up the HTML report configuration for pytest. It performs the following actions:
+        1. Determines the test suite name.
+        2. Generates a timestamp for the report.
+        3. Constructs a unqiue report name.
+        4. Creates a 'reports' directory if one does not exist.
+        5. Sets the HTML report path
 
     Args:
-        config (_type_): _description_
+        config (pytest.Config): The pytest configuration object.
+    
+    Note:
+        - If a directory named 'pytestpackage' exists in the root directory, it is used as the suite name.
+        - Otherwise, the name of the root directory is used as the suite name.
+        - The report name format is: "{suitname}_{timestamp}_report.html".
+        - The function only modifies the htmlpath if it is already set in the pytest configuration.
     """
     # Get the test suite name
     suite_name = "pytestpackage"
@@ -374,14 +388,22 @@ def pytest_configure(config):
         config.option.htmlpath = report_path
 
 def pytest_html_report_title(report):
-    """_summary_
+    """
+    Customize the title of the pytest HTML report.
+
+    This function is a pytest hook that sets a custom title for the HTML report,
+    including the current date and time.
 
     Args:
-        report (_type_): _description_
+        report (pytest.HTMLReport): The HTML report object.
+
+    Note:
+        The title is set using the `title` attribute of the `report` object.
     """
-    datestamp = datetime.now().strftime("%A - %m%Y")
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    report_title = f"Tesing WildXR Website on - {datestamp} @ {timestamp}"
+    current_time = datetime.now()
+    datestamp = current_time.strftime("%A - %B %Y")
+    timestamp = current_time.strftime("%H:%M:%S")
+    report.title = f"Testing WildXR Website on - {datestamp} @ {timestamp}"
     
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
