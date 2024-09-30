@@ -3,7 +3,7 @@ import os
 import logging
 from datetime import datetime
 from threading import Lock
-from .config import LOG_DIR
+from .config import LOG_DIR, LOG_LEVEL_FILE, LOG_LEVEL_CONSOLE, LOG_LEVEL_OVERALL
 from colorlog import ColoredFormatter
 
 class HTMLReportLogger:
@@ -153,10 +153,28 @@ class CustomLogger(logging.Logger):
 
 # Set Up logging
 def setup_logging():
-    """_summary_
+    """
+    Set up and configure the logging system for the application.
+
+    This function performs the following tasks:
+    1. Ensures the log directory exists.
+    2. Creates a unique log file with a timestamp.
+    3. Configures a CustomLogger as the logger class.
+    4. Sets up both file and console logging handlers.
+    5. Configures formatters for log messages, including colored output for console.
+    6. Sets the logging level to DEBUG for comprehensive logging.
+
+    The log messages will have the following format:
+    "timestamp - logger_name - log_level - message"
+
+    Console output will be color-coded based on the log level for better readability.
 
     Returns:
-        _type_: _description_
+        logging.Logger: A configured logger instance ready for use in the application.
+
+    Note:
+        This function uses a global LOG_DIR variable to determine where log files should be stored.
+        Ensure this variable is properly set before calling this function.
     """
     # Ensure the directory exists
     os.makedirs(LOG_DIR, exist_ok=True)
@@ -168,15 +186,16 @@ def setup_logging():
     # Setup logging
     logging.setLoggerClass(CustomLogger)
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    print(f"Effective Log Level: {logging.getLevelName(logger.getEffectiveLevel())}")
+    logger.setLevel(LOG_LEVEL_OVERALL)
     
     # File Handler
     file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(LOG_LEVEL_FILE)
     
     # Console Handler
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(LOG_LEVEL_CONSOLE)
     
     #Formatters
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -203,7 +222,7 @@ def setup_logging():
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
     
-    logger.info(f"Logging initialized. Log file: {log_file}")
+    logger.info(f"Logging initialized. Log file: {log_file}, Log Levels: Console {logging.getLevelName(LOG_LEVEL_CONSOLE)}, File {logging.getLevelName(LOG_LEVEL_FILE)}")
     
     return logger
 
