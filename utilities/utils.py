@@ -89,34 +89,67 @@ class HTMLReportLogger:
                 self.test_logs[self.current_test].append(f"{level}: {message}")
                 
 class CustomLogger(logging.Logger):
-    """_summary_
-
-    Args:
-        logging (_type_): _description_
     """
-    def __init__(self, name: str, level=logging.NOTSET) -> None:
-        """_summary_
+    A custom logger class that extends the functionality of the standard logging.Logger.
+
+    This logger adds HTML report logging capabilities on top of the standard logging
+    functions. It uses an HTMLReportLogger instance to capture logs for HTML reports
+    while still maintaining all the functionality of the standard Logger.
+
+    Inherits from:
+        logging.Logger: The standard Python logging class.
+    """
+    def __init__(self, name: str, level: int =logging.NOTSET) -> None:
+        """
+        Initialize the CustomLogger.
+
+        This constructor sets up both the standard logging capabilities and
+        the HTML report logging functionality.
 
         Args:
-            name (str): _description_
-            level (_type_, optional): _description_. Defaults to logging.NOTSET.
+            name (str): The name of the logger.
+            level (int, optional): The logging level. Defaults to logging.NOTSET.
+                This determines the minimum severity of messages that the logger
+                will handle.Standard levels are:
+            - CRITICAL = 50
+            - ERROR = 40
+            - WARNING = 30
+            - INFO = 20
+            - DEBUG = 10
+            - NOTSET = 0
+
+        Returns:
+            None
         """
         super().__init__(name, level)
         self.html_logger = HTMLReportLogger()
         
     def log(self, level, msg, args, exc_info=None, extra=None, stack_info=False):
-        """_summary_
+        """
+        Log a message with the specified level and additional context.
+
+        This method extends the standard logging functionality by also logging
+        the message to the HTML report logger.
 
         Args:
-            level (_type_): _description_
-            msg (_type_): _description_
-            args (_type_): _description_
-            exc_info (_type_, optional): _description_. Defaults to None.
-            extra (_type_, optional): _description_. Defaults to None.
-            stack_info (bool, optional): _description_. Defaults to False.
+            level (int): The logging level (e.g., logging.INFO, logging.ERROR).
+            msg (str): The message format string.
+            args (tuple): Arguments to merge into msg.
+            exc_info (tuple, optional): Exception information to be added to the log.
+                Can be an exception tuple or a boolean. Defaults to None.
+            extra (dict, optional): A dictionary of additional attributes to add to the log record.
+                Defaults to None.
+            stack_info (bool, optional): If True, stack information is added to the log.
+                Defaults to False.
+
+        Note:
+            This method first calls the standard logging method and then logs
+            the message to the HTML report logger.
         """
         super().log(level, msg, args, exc_info, extra, stack_info)
-        self.html_logger.log(logging.getLevelName(level), msg % args if args else msg)
+        level_name = logging.getLevelName(level)
+        formatted_msg = msg % args if args else msg
+        self.html_logger.log(level_name, formatted_msg)
 
 # Set Up logging
 def setup_logging():
