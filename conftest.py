@@ -2,6 +2,7 @@
 
 import os
 import pytest
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 from page_objects.authentication.login_page import LoginPage
@@ -298,6 +299,33 @@ def logged_in_browser(setup_isolated, request):
     yield login_pages
     logger.debug("logged_in_browser fixture: finished")
 
+def logout(driver, wait):
+    """
+    Attempt to log out of the website and verify logout success
+    """
+    logger.debug("Attemping to log out of website")
+    locator.set_driver(driver)
+    try:
+        logout_button = locator.get_element(LOGOUT_BUTTON)
+        logout_button.click()
+        time.sleep(1)
+        wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
+        logger.debug("Successfully logged out, login button is present")
+    except TimeoutException:
+        logger.error("Timeout while waiting for login button to appear after logout.")
+    except Exception as e:
+        logger.error(f"Unexpected error during logout: {str(e)}")
+    
+def close_browser(driver):
+    """
+    Attempt to fully close the browser and end the WebDriver session
+    """
+    try:
+        driver.quit()
+        logger.debug("WebDriver session ended successfully")
+    except WebDriverException as e:
+        logger.error(f"Error while quitting WebDriver: {str(e)}")
+          
 def perform_teardown(driver, wait):
     """
     Performs the teardown of a WebDriver instance after a test case is complete.
@@ -309,39 +337,13 @@ def perform_teardown(driver, wait):
     Args:
         driver (WebDriver): The WebDriver instance to be torn down.
         wait (_type_): The WebDriverWait instance associated with the driver.
-        
-    Side Effects:
-        - Attempts to click the logout button on the current page.
-        - Waits for the login button to appear after logout
-        - Closes the browser window.
-    
-    Notes:
-        - The function will attempt to close the driver even if logout fails.
     """
-    locator.set_driver(driver)
     try:
-        logger.info(f"Attempting teardown with perform_teardown.")
-        try:
-            logger.info(f"Attempting to log out of website")
-            logout_button = locator.get_element(LOGOUT_BUTTON)
-            logout_button.click()
-            try:
-                login_present = wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
-                logger.info(f"Successfully logged out, login button is present.")
-            except TimeoutException:
-                logger.error("Timeout while waiting for login button to appear after logout.")
-            except Exception as e:
-                logger.error(f"Unexpected error while waiting for login button to appear: {str(e)}")
-        except Exception as e:
-                logger.error(f"Error during logout process: {str(e)}")
-        finally:
-            try:
-                driver.close()
-                logger.info("Driver quit successfully.")
-            except WebDriverException as e:
-                logger.error(f"Error while quitting driver: {str(e)}")
+        logout(driver, wait)
     except Exception as e:
-        logger.error(f"Unexcepted error while executing perform_teardown: {str(e)}")
+        logger.error(f"Error while logout process: {str(e)}")
+    finally:
+        close_browser(driver)
 
 # Define pytest configuration and reporting
 
