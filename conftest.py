@@ -314,7 +314,7 @@ def logout(driver, wait):
             wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
             logger.debug("Successfully logged out, login button is present")
         else:
-            logger.debug("Logout button not found. User might not be logged in.")
+            logger.warning("Logout button not found. User might not be logged in.")
     except TimeoutException:
         logger.error("Timeout while waiting for login button to appear after logout.")
     except Exception as e:
