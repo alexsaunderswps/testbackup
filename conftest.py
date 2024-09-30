@@ -115,7 +115,7 @@ def firefox_setup(headless:bool, private:bool) -> webdriver:
         options.add_argument("--private")
     return webdriver.Firefox(options=options)
 
-def perform_setup(browser_name: str, headless: bool, private: bool):
+def perform_setup(browser_name: str, headless: bool, private: bool) -> webdriver:
     """
     Sets up WebDriver instance(s) for the specified browser with given options.
     
@@ -165,7 +165,7 @@ def perform_setup(browser_name: str, headless: bool, private: bool):
     
     return setup_single_browser(browser_name, setup_func, headless, private)
 
-def setup_single_browser(browser_name: str, setup_func, headless: bool, private: bool):
+def setup_single_browser(browser_name: str, setup_func, headless: bool, private: bool) -> webdriver:
     """
     Sets up a single browser instance and works with perform_setup to allow multiple browser instances
 
@@ -195,10 +195,11 @@ def setup_single_browser(browser_name: str, setup_func, headless: bool, private:
     driver.get("about:blank")
     
     # Clear cookies and cache just in case
-    logger.info("Clearing browser data.")
+    logger.debug("Clearing browser data.")
     try:
         driver.delete_all_cookies()
         if browser_name != 'firefox':
+            logger.debug("Attempting to clear local and session storage")
             driver.get(LOGIN_URL)
             driver.execute_script("localStorage.clear();")
             driver.execute_script("sessionStorage.clear();")
@@ -211,37 +212,33 @@ def setup_single_browser(browser_name: str, setup_func, headless: bool, private:
     
     return driver, wait
 
-# TODO eventually used in tests to allow either isolated or continuous testing
-# @pytest.fixture(scope="function")
-# def setup(request):
-#     """_summary_
-
-#     Args:
-#         request (_type_): _description_
-
-#     Raises:
-#         ValueError: _description_
-
-#     Yields:
-#         _type_: _description_
-#     """
-#     setup_type = request.config.getoption("--setup_type")
-#     if setup_type == "isolated":
-#         yield from setup_isolated(request)
-#     elif setup_type == "continuous":
-#         yield from setup_continuous(request)
-#     else:
-#         raise ValueError(f"Invalid setup type: {setup_type}. Should be either isolated or continuous.")
-    
 @pytest.fixture(scope="function")
 def setup_isolated(request):
-    """_summary_
+    """
+    Sets up an isolated test environment for each test function
+    
+    This fixture creates a new browser instance for each test, configured according
+    to the command line options. It handles the setup before the test and 
+    ensures proper teardown after the test is complete.
 
     Args:
-        request (_type_): _description_
+        request (FixtureRequest): The pytest request object, containing information
+                                    about the requesting test function.
 
     Yields:
-        _type_: _description_
+        tuple or list of tuples: A tuple containing (WebDriver, WebDriverWait) if
+                                    a single browser is configured, or a list of 
+                                    such tuples if multiple browsers are set up.
+                                    
+    Notes:
+        - After yielding the driver(s), the fixture performs cleanup operations.
+        
+    Example:
+        def test_example(setup_isolated):
+            test_pages = []
+            for driver, wait in setup_isolated:
+                test_pages.append(TestPage(driver))
+            yield test_pages
     """
     browser = request.config.getoption("--browser")
     headless = request.config.getoption("--headless")
@@ -251,56 +248,39 @@ def setup_isolated(request):
     if not isinstance(result, list):
         result = [result]
     
-    logger.info(f"setup_isolated fixture: yielding {len(result)} browser(s)")
+    logger.debug(f"setup_isolated fixture: yielding {len(result)} browser(s)")
     yield result
     
-    logger.info("setup_isolated fixture: starting teardown")
+    logger.debug("setup_isolated fixture: starting teardown")
     
     # Teardown
     for driver, wait in result:
         logger.info(f"Performing teardown of isolated test for {driver.name}")
         perform_teardown(driver, wait)
-    logger.info("setup_isolated fixture: teardown complete")
-
-# TODO eventually to be used to allow multiple tests on one browser instance.
-# @pytest.fixture(scope="class")
-# def setup_continuous(request):
-#     """_summary_
-
-#     Args:
-#         request (_type_): _description_
-
-#     Yields:
-#         _type_: _description_
-#     """
-#     browser = request.config.getoption("--browser")
-#     headless = request.config.getoption("--headless")
-#     private = request.config.getoption("--private")
-    
-#     drivers = []
-#     for browser_name in (browser if isinstance(browser,list) else [browser]):
-#         driver, wait = perform_setup(browser_name, headless, private)
-#         drivers.append((driver,wait))
-    
-#     logger.info("Setting up a continuous test environment.")
-    
-#     driver, wait = drivers[0] if len(drivers) == 1 else drivers
-#     request.cls.driver = driver
-#     request.cls.wait = wait
-#     yield driver, wait
+    logger.debug("setup_isolated fixture: teardown complete")
 
 @pytest.fixture
-
 def logged_in_browser(setup_isolated, request):
     """
-    Provides a loggin in browser instance for use when logging in is not part of the test
+    Fixture that provides logged-in browser instance(s) for tests that require pre-authenitcation.
 
     Args:
-        setup_isolated (_type_): _description_
-        request (_type_): _description_
+        setup_isolated (fixture): A pytest fixture that provides a list of tuples,
+                                    each containing a WebDriver and WebDriverWait instance.
+        request (FixtureRequest): The pytest request object, containing information
+                                    about the requesting test function, including test configuration.
 
     Yields:
-        _type_: _description_
+        List[LoginPage]: A list of LoginPage objects, one for each logged-in browser session.
+                            Each LoginPage object represents a logged-in browser state and
+                            can be used to interact with the authenticated application.
+    
+    Note:
+        - This fixture uses the suername and password specified in the pytest command-lie options
+            (--username and --password), falling back to default admin credentials if not provided.
+        - The fixture logs the start and end of its execution, as well as login attempts for each browser.
+        - After yielding the logged-in pages, any necessary teardown could be performed here,
+            but is currently included in the setup_isolated fixture.
     """
     logger.info("Starting logged_in_browser fixture")
     login_pages = []
@@ -314,16 +294,29 @@ def logged_in_browser(setup_isolated, request):
         password = request.config.getoption("--password", default=ADMIN_PASS)
         login_page.login(username, password)
         login_pages.append(login_page)
-    logger.info(f"logged_in_browser fixture: yielding {len(login_pages)} logged-in page(s)")
+    logger.debug(f"logged_in_browser fixture: yielding {len(login_pages)} logged-in page(s)")
     yield login_pages
-    logger.info("logged_in_browser fixture: finished")
+    logger.debug("logged_in_browser fixture: finished")
 
 def perform_teardown(driver, wait):
-    """_summary_
+    """
+    Performs the teardown of a WebDriver instance after a test case is complete.
+    
+    This function attempts to log out of the website, verify the logout was successful, 
+    and then close the browser. It handles various exceptions that might occur during this
+    process and logs appropriate messages
 
     Args:
-        driver (_type_): _description_
-        wait (_type_): _description_
+        driver (WebDriver): The WebDriver instance to be torn down.
+        wait (_type_): The WebDriverWait instance associated with the driver.
+        
+    Side Effects:
+        - Attempts to click the logout button on the current page.
+        - Waits for the login button to appear after logout
+        - Closes the browser window.
+    
+    Notes:
+        - The function will attempt to close the driver even if logout fails.
     """
     locator.set_driver(driver)
     try:
@@ -429,3 +422,51 @@ def pytest_runtest_teardown(item):
     end_test_capture(item.name)
     yield
     
+# TODO eventually used in tests to allow either isolated or continuous testing
+# @pytest.fixture(scope="function")
+# def setup(request):
+#     """_summary_
+
+#     Args:
+#         request (_type_): _description_
+
+#     Raises:
+#         ValueError: _description_
+
+#     Yields:
+#         _type_: _description_
+#     """
+#     setup_type = request.config.getoption("--setup_type")
+#     if setup_type == "isolated":
+#         yield from setup_isolated(request)
+#     elif setup_type == "continuous":
+#         yield from setup_continuous(request)
+#     else:
+#         raise ValueError(f"Invalid setup type: {setup_type}. Should be either isolated or continuous.")
+    
+# TODO eventually to be used to allow multiple tests on one browser instance.
+# @pytest.fixture(scope="class")
+# def setup_continuous(request):
+#     """_summary_
+
+#     Args:
+#         request (_type_): _description_
+
+#     Yields:
+#         _type_: _description_
+#     """
+#     browser = request.config.getoption("--browser")
+#     headless = request.config.getoption("--headless")
+#     private = request.config.getoption("--private")
+    
+#     drivers = []
+#     for browser_name in (browser if isinstance(browser,list) else [browser]):
+#         driver, wait = perform_setup(browser_name, headless, private)
+#         drivers.append((driver,wait))
+    
+#     logger.info("Setting up a continuous test environment.")
+    
+#     driver, wait = drivers[0] if len(drivers) == 1 else drivers
+#     request.cls.driver = driver
+#     request.cls.wait = wait
+#     yield driver, wait
