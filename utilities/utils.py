@@ -7,51 +7,82 @@ from .config import LOG_DIR
 from colorlog import ColoredFormatter
 
 class HTMLReportLogger:
+    """
+    A thread-safe logger for capturing test-specific logs for HTML reporting.
+
+    This class allows for the capture, retrieval, and management of logs
+    on a per-test basis, making it suitable for use in concurrent testing
+    environments where logs need to be associated with specific tests.
+    """
     
     def __init__(self):
-        """_summary_
+        """
+        Initialize the HTMLReportLogger.
+
+        Sets up the necessary data structures for log management and
+        ensures thread-safety through the use of a lock:
+        - test_logs: A dictionary to store logs for each test.
+        - current_test: A variable to track the currently running test.
+        - lock: A threading Lock to ensure thread-safety in concurrent environments.
         """
         self.test_logs = {}
         self.current_test = None
         self.lock = Lock()
         
     def start_test_capture(self, test_name):
-        """_summary_
+        """
+        Start capturing logs for a specific test.
+
+        This method should be called at the beginning of each test. It sets up
+        the logging environment for the specified test.
 
         Args:
-            test_name (_type_): _description_
+            test_name (str): The name of the test for which to start capturing logs.
         """
         with self.lock:
             self.current_test = test_name
             self.test_logs[test_name] = []
     
     def end_test_capture(self, test_name):
-        """_summary_
+        """
+        End the log capture for a specific test.
+
+        This method should be called at the end of each test. It resets the
+        current test to None, indicating that no test is currently running.
 
         Args:
-            test_name (_type_): _description_
+            test_name (str): The name of the test for which to end capturing logs.
         """
         with self.lock:
-            self.current_tests = None
+            self.current_test = None
             
     def get_logs_for_test(self, test_name):
-        """_summary_
+        """
+        Retrieve the logs for a specific test.
+
+        This method returns all captured logs for the specified test as a single string,
+        with each log entry separated by a newline.
 
         Args:
-            test_name (_type_): _description_
+            test_name (str): The name of the test for which to retrieve logs.
 
         Returns:
-            _type_: _description_
+            str: A string containing all log entries for the specified test,
+                or an empty string if no logs are found.
         """
         with self.lock:
             return "\n".join(self.test_logs.get(test_name,[]))
     
     def log(self, level, message):
-        """_summary_
+        """
+        Add a log entry for the current test.
+
+        This method adds a log entry with the specified level and message to the
+        current test's log. If no test is currently set, the log entry is ignored.
 
         Args:
-            level (_type_): _description_
-            message (_type_): _description_
+            level (str): The log level (e.g., 'INFO', 'WARNING', 'ERROR').
+            message (str): The log message to be recorded.
         """
         with self.lock:
             if self.current_test:
