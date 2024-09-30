@@ -11,7 +11,7 @@ screenshot = ScreenshotManager()
 
 @pytest.fixture
 def videos_page(logged_in_browser):
-    logger.info("Starting videos_page fixture")
+    logger.debug("Starting videos_page fixture")
     video_pages = []
     for login_page in logged_in_browser:
         driver = login_page.driver
@@ -21,7 +21,7 @@ def videos_page(logged_in_browser):
     logger.info(f"videos_page fixture: yielding {len(video_pages)} video page(s)")
     logger.info(80 * "-")
     yield video_pages
-    logger.info("videos_page fixture: finished")
+    logger.debug("videos_page fixture: finished")
 
 class TestVideoPageUI:
     
