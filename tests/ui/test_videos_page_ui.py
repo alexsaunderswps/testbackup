@@ -30,12 +30,19 @@ class TestVideoPageUI:
     @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         logger.info("Starting test_video_page_nav_elements")
+        all_browsers_passed = True
+            
         for index, vp in enumerate(videos_page):
             logger.info(f"Testing video page nav elements on browser {index + 1}: {vp.driver.name}")
             all_elements = vp.verify_all_nav_elements_present()
-            check.is_true(all_elements, f"Navigation elements missing from Videos Page on {vp.driver.name}")
-            logger.info(f"Verification Successful :: All Navigation elements found on Videos Page for {vp.driver.name}")
+            if all_elements:
+                logger.info(f"Verification Successful :: All Navigation elements found on Videos Page for {vp.driver.name}")
+            else:
+                logger.error(f"Verification failed :: Some elements missing from Videos Page for {vp.driver.name}")
+                all_browsers_passed = False
         logger.info("Finished test_video_page_nav_elements")
+        assert all_browsers_passed, "One or more browsers failed the navigation elements check"        
+        
 
     @pytest.mark.UI
     @pytest.mark.video
