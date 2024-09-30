@@ -68,7 +68,7 @@ class VideosPage(BasePage):
 
         self.logger.info("Verifying that all expected navigation elements are present on: Videos Page")
         all_elements_present = True
-        
+        missing_elements = []
         for page_element in [self.CommonLocators.HEADER_LOGO,
                         self.CommonLocators.LOGOUT_BUTTON,
                         self.NavigationLocators.VIDEOS_LINK,
@@ -88,9 +88,14 @@ class VideosPage(BasePage):
                 self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
                 self.logger.error(f"Could not find {page_element} on page.")
                 all_elements_present = False
+                missing_elements.append(page_element)
             except Exception as e:
                 self.logger.error(f"Unexpected error while finding elements: {str(e)}")
                 all_elements_present = False
+                missing_elements.append(page_element)
+        if not all_elements_present:
+            self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
+            
         return all_elements_present
         
     def verify_all_definition_links_present(self) -> bool:
