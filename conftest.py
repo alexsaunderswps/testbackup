@@ -306,11 +306,15 @@ def logout(driver, wait):
     logger.debug("Attemping to log out of website")
     locator.set_driver(driver)
     try:
-        logout_button = locator.get_element(LOGOUT_BUTTON)
-        logout_button.click()
-        time.sleep(1)
-        wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
-        logger.debug("Successfully logged out, login button is present")
+        # Check for the logout button before attempting to log out
+        if locator.is_element_present(LOGOUT_BUTTON):
+            logout_button = locator.get_element(LOGOUT_BUTTON)
+            logout_button.click()
+            time.sleep(1)
+            wait.until(EC.presence_of_element_located((By.XPATH, LOGIN_BUTTON)))
+            logger.debug("Successfully logged out, login button is present")
+        else:
+            logger.debug("Logout button not found. User might not be logged in.")
     except TimeoutException:
         logger.error("Timeout while waiting for login button to appear after logout.")
     except Exception as e:
