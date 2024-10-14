@@ -34,7 +34,8 @@ class VideosPage(BasePage):
         self.logger = logger
         
     class VideoElements:
-        FILTER_NAME_FIELD = "//div//input[@placeholder='Filter by name']"
+        FILTER_NAME_FIELD = "//div[text()='Name']/button"
+        FILTER_PUBLISHED_FIELD = "//div[text()='Published']/button"
         SEARCH_BUTTON = "//button[text()='Search']"
         CANCEL_BUTTON = "//div//button[2]"
         ADD_BUTTON = "//a[@href='/video/add']"
