@@ -120,10 +120,17 @@ class ElementInteractor:
         """
         element = wait_for_element(self.driver, locator, locator_type, "clickable", self.timeout)
         if element:
-            element.click()
-            self.logger.info(f"Element clicked successfully: {element.text}")
-            return True
-        return False
+            try:
+                element_text = element.text
+                element.click()
+                self.logger.info(f"Element clicked successfully: {element_text}")
+                return True
+            except Exception as e:
+                self.logger.error(f"Unexpected error clicking element: {str(e)}")
+                return False
+        else:
+            self.logger.error(f"Element not found with locator: {locator}")
+            return False
             
             
     def element_send_input(self, data: str, locator: str, locator_type: str ="xpath", clear_first: bool = False) -> None:
