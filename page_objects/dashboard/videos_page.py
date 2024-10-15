@@ -65,7 +65,7 @@ class VideosPage(BasePage):
         SHOWING_COUNT = "//span[contains(text(),'Showing')]"
 
 
-# Check Element presence
+    # Check Element presence
     def verify_page_title_present(self) -> bool:
         self.logger.info("Verifying that the Videos Page title is present")
         try:
@@ -73,17 +73,24 @@ class VideosPage(BasePage):
                 self.logger.info("Videos Page title was located successfully.")
                 return True
             else:
-                raise NoSuchElementException("Element Not Found")
+                raise NoSuchElementException("Video Page Title Not Found")
         except NoSuchElementException:
             self.screenshot.take_screenshot(self.driver, "Videos_Page_Title_Not_Found")
             self.logger.error("Could not find Videos Page title on page.")
             return False
         except Exception as e:
-            self.logger.error(f"Unexpected error while finding element: {str(e)}")
+            self.logger.error(f"Unexpected error while trying to locate Video Page title: {str(e)}")
             return False
 
     def verify_all_nav_elements_present(self) -> bool:
+        """_summary_
 
+        Raises:
+            NoSuchElementException: _description_
+
+        Returns:
+            bool: _description_
+        """
         self.logger.info("Verifying that all expected navigation elements are present on: Videos Page")
         all_elements_present = True
         missing_elements = []
@@ -112,8 +119,7 @@ class VideosPage(BasePage):
                 all_elements_present = False
                 missing_elements.append(page_element)
         if not all_elements_present:
-            self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
-            
+            self.logger.error(f"Missing elements: {', '.join(missing_elements)}")   
         return all_elements_present
         
     def verify_all_definition_links_present(self) -> bool:
