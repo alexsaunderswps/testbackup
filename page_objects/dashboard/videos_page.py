@@ -34,6 +34,7 @@ class VideosPage(BasePage):
         self.logger = logger
         
     class VideoElements:
+        VIDEO_PAGE_TITLE = "//h1[contains(text(),'Videos')]"
         FILTER_NAME_FIELD = "//div[text()='Name']/button"
         FILTER_PUBLISHED_FIELD = "//div[text()='Published']/button"
         SEARCH_BUTTON = "//button[text()='Search']"
@@ -65,6 +66,22 @@ class VideosPage(BasePage):
 
 
 # Check Element presence
+    def verify_page_title_present(self) -> bool:
+        self.logger.info("Verifying that the Videos Page title is present")
+        try:
+            if self.locator.is_element_present(self.VideoElements.VIDEO_PAGE_TITLE):
+                self.logger.info("Videos Page title was located successfully.")
+                return True
+            else:
+                raise NoSuchElementException("Element Not Found")
+        except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, "Videos_Page_Title_Not_Found")
+            self.logger.error("Could not find Videos Page title on page.")
+            return False
+        except Exception as e:
+            self.logger.error(f"Unexpected error while finding element: {str(e)}")
+            return False
+
     def verify_all_nav_elements_present(self) -> bool:
 
         self.logger.info("Verifying that all expected navigation elements are present on: Videos Page")
