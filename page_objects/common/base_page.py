@@ -85,6 +85,32 @@ class BasePage:
         if not all_elements_present:
             self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
         return all_elements_present
+    
+    def verify_all_definition_links_present(self) -> bool:
+        self.logger.info("Verifying that all expected naivigation elements are present in: Definintions Dropdown")
+        all_elements_present = True
+        self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+    
+        for page_element in [self.NavigationLocators.COUNTRIES_LINK,
+                        self.NavigationLocators.IUCNSTATUS_LINK,
+                        self.NavigationLocators.POP_TREND_LINK,
+                        self.NavigationLocators.SPECIES_LINK,
+                        self.NavigationLocators.TAGS_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+                # self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
 
     # Basic methods
     def find_logo(self):

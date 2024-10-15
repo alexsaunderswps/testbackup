@@ -55,7 +55,7 @@ class TestCountriesPageUI:
         logger.debug("Starting test_countries_page_title")
         for cp in countries_page:
             title = cp.verify_page_title_present()
-            check.equal(title, True, "Title does not match")
+            check.is_true(title, "Title does not match")
             logger.info("Verification Successful :: Countries Page Title found")
             
     @pytest.mark.UI
@@ -79,3 +79,19 @@ class TestCountriesPageUI:
                 all_browsers_passed = False
         logger.info("Finished test_countries_page_nav_elements")
         assert all_browsers_passed, "One or more browsers failed the navigation elements check"
+        
+    @pytest.mark.UI
+    @pytest.mark.countries
+    @pytest.mark.debug 
+    def test_countries_page_definition_elements(self, countries_page):
+        """_summary_
+
+        Args:
+            countries_page (_type_): _description_
+        """
+        for cp in countries_page:
+            logger.debug("Starting test_countries_page_definition_elements")
+            all_elements = cp.verify_all_definition_links_present()
+            check.is_true(all_elements, "Definition elements not found")
+            logger.info("Verification Successful :: All Definition elements found on Countries Page")
+            logger.debug("Finished test_countries_page_definition_elements")

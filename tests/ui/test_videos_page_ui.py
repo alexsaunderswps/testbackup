@@ -61,6 +61,7 @@ class TestVideoPageUI:
 
     @pytest.mark.UI
     @pytest.mark.video
+    @pytest.mark.debug
     def test_video_page_definition_elements(self, videos_page):
         """_summary_
 
