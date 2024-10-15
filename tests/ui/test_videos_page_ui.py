@@ -27,7 +27,7 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_video_page_title(self, videos_page):
         """_summary_
 
@@ -74,7 +74,7 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_video_page_search_elements(self, videos_page):
         """_summary_
 
