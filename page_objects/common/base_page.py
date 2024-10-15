@@ -3,9 +3,11 @@ from utilities.config import DEFAULT_TIMEOUT, SCREENSHOT_DIR
 from utilities.element_interactor import ElementInteractor
 from utilities.element_locator import ElementLocator
 from utilities.screenshot_manager import ScreenshotManager
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from utilities.utils import logger
 
 class BasePage:
     """Base class for all page objects"""
@@ -21,6 +23,7 @@ class BasePage:
         self.locator = ElementLocator(driver)
         self.interactor = ElementInteractor(driver)
         self.screenshot = ScreenshotManager()
+        self.logger = logger
         
     class CommonLocators:
         HEADER_LOGO = "//section//img[@alt='logo']"
@@ -44,6 +47,44 @@ class BasePage:
         POP_TREND_LINK = "//a[@href='/populationTrend']"
         SPECIES_LINK = "//a[@href='/species']"
         TAGS_LINK = "//a[text()='Tags']"
+    
+    # Check for common Navigation elements across pages
+    def verify_all_nav_elements_present(self) -> bool:
+        """_summary_
+
+        Returns:
+            bool: _description_
+        """
+        self.logger.info("Verifying all expected navigation elements are present on: Countries page")
+        all_elements_present = True
+        missing_elements = []
+        for page_element in [self.CommonLocators.HEADER_LOGO,
+                        self.CommonLocators.LOGOUT_BUTTON,
+                        self.NavigationLocators.VIDEOS_LINK,
+                        self.NavigationLocators.VIDEO_CATALOGUES_LINK,
+                        self.NavigationLocators.MAP_MARKERS_LINK,
+                        self.NavigationLocators.USERS_LINK,
+                        self.NavigationLocators.DEFINITIONS_BUTTON,
+                        self.NavigationLocators.ORGS_LINK,
+                        self.NavigationLocators.INSTA_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"Element {page_element} was located successfully")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} not found")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page")
+                all_elements_present = False
+                missing_elements.append(page_element)
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+                missing_elements.append(page_element)
+        if not all_elements_present:
+            self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
+        return all_elements_present
 
     # Basic methods
     def find_logo(self):

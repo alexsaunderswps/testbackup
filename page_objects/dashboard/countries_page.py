@@ -71,40 +71,40 @@ class CountriesPage(BasePage):
             self.logger.error(f"An error occurred while trying to locate Countries Page Title: {e}")
             return False
         
-    def verify_all_nav_elements_present(self) -> bool:
-        """_summary_
+    # def verify_all_nav_elements_present(self) -> bool:
+    #     """_summary_
 
-        Returns:
-            bool: _description_
-        """
-        self.logger.info("Verifying all expected navigation elements are present on: Countries page")
-        all_elements_present = True
-        missing_elements = []
-        for page_element in [self.CommonLocators.HEADER_LOGO,
-                        self.CommonLocators.LOGOUT_BUTTON,
-                        self.NavigationLocators.VIDEOS_LINK,
-                        self.NavigationLocators.VIDEO_CATALOGUES_LINK,
-                        self.NavigationLocators.MAP_MARKERS_LINK,
-                        self.NavigationLocators.USERS_LINK,
-                        self.NavigationLocators.DEFINITIONS_BUTTON,
-                        self.NavigationLocators.ORGS_LINK,
-                        self.NavigationLocators.INSTA_LINK,
-        ]:
-            try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"Element {page_element} was located successfully")
-                else:
-                    raise NoSuchElementException(f"Element {page_element} not found")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-                self.logger.error(f"Could not find {page_element} on page")
-                all_elements_present = False
-                missing_elements.append(page_element)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(page_element)
-        if not all_elements_present:
-            self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
-        return all_elements_present
+    #     Returns:
+    #         bool: _description_
+    #     """
+    #     self.logger.info("Verifying all expected navigation elements are present on: Countries page")
+    #     all_elements_present = True
+    #     missing_elements = []
+    #     for page_element in [self.CommonLocators.HEADER_LOGO,
+    #                     self.CommonLocators.LOGOUT_BUTTON,
+    #                     self.NavigationLocators.VIDEOS_LINK,
+    #                     self.NavigationLocators.VIDEO_CATALOGUES_LINK,
+    #                     self.NavigationLocators.MAP_MARKERS_LINK,
+    #                     self.NavigationLocators.USERS_LINK,
+    #                     self.NavigationLocators.DEFINITIONS_BUTTON,
+    #                     self.NavigationLocators.ORGS_LINK,
+    #                     self.NavigationLocators.INSTA_LINK,
+    #     ]:
+    #         try:
+    #             if self.locator.is_element_present(page_element):
+    #                 self.logger.info(f"Element {page_element} was located successfully")
+    #             else:
+    #                 raise NoSuchElementException(f"Element {page_element} not found")
+    #         except NoSuchElementException:
+    #             self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+    #             self.logger.error(f"Could not find {page_element} on page")
+    #             all_elements_present = False
+    #             missing_elements.append(page_element)
+    #         except Exception as e:
+    #             self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+    #             all_elements_present = False
+    #             missing_elements.append(page_element)
+    #     if not all_elements_present:
+    #         self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
+    #     return all_elements_present
     
