@@ -1,5 +1,6 @@
 #test_countries_page_ui.py
 import pytest
+import time
 from pytest_check import check
 from page_objects.dashboard.countries_page import CountriesPage
 from page_objects.common.base_page import BasePage
@@ -20,20 +21,22 @@ def countries_page(logged_in_browser):
     country_pages = []
     for login_page in logged_in_browser:
         driver = login_page.driver
-        bp = BasePage(driver)
-        logger.info(80 * "-")
+        base_page = BasePage(driver)
+        logger.info("=" * 80)
         logger.info(f"Navigating to Countries page on {driver.name}")
-        # Navigate to Countries Page
-        bp.click_definitions_button()
-        bp.go_countries_page()
-        # Verify that we're on the Countries Page
+        logger.info("=" * 80)
+        
+        # Navigate to Countries page
+        base_page.click_definitions_button()
+        base_page.go_countries_page()
+        # Verify that we're on the Countries page
         countries_page = CountriesPage(driver)
         if countries_page.verify_page_title_present():
-            logger.info("Successfully navigated to Countries Page :: Countries Page Title found")
-            country_pages.append(CountriesPage(driver))
+            logger.info("Successfully navigated to Countries page")
+            country_pages.append(countries_page)
         else:
-            logger.error("Failed to navigate to Countries Page :: Countries Page Title not found")  
-            logger.error(f"Failed to navigate to Countries Page on {driver.name}")
+            logger.error(f"Failed to navigate to Countries page on {driver.name}")
+    
     logger.info(f"countries_page fixture: yielding {len(country_pages)} country page(s)")
     yield country_pages
     logger.debug("countries_page fixture: finished")
