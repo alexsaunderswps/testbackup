@@ -30,7 +30,7 @@ class CountriesPage(BasePage):
         self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
         self.locator = ElementLocator(driver)
         self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager(driver)
+        self.screenshot = ScreenshotManager()
         self.logger = logger
         
     class CountryPageElements:
