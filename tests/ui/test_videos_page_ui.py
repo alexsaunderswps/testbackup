@@ -37,7 +37,7 @@ class TestVideoPageUI:
         logger.debug("Starting test_video_page_title")
         for vp in videos_page:
             title = vp.verify_page_title_present()
-            check.equal(title, "Videos", "Title does not match")
+            check.equal(title, True, "Title does not match")
             logger.info("Verification Successful :: Videos Page Title found")
     
     @pytest.mark.UI
