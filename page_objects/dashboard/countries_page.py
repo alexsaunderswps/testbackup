@@ -1,4 +1,4 @@
-# videos_page.py
+# countries_page.py
 import os
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
