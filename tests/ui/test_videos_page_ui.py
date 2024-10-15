@@ -27,6 +27,21 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
+    @pytest.mark.debug
+    def test_video_page_title(self, videos_page):
+        """_summary_
+
+        Args:
+            login_page (_type_): _description_
+        """
+        logger.debug("Starting test_video_page_title")
+        for vp in videos_page:
+            title = vp.verify_page_title_present()
+            check.equal(title, "Videos", "Title does not match")
+            logger.info("Verification Successful :: Videos Page Title found")
+    
+    @pytest.mark.UI
+    @pytest.mark.video
     # @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         logger.info("Starting test_video_page_nav_elements")
@@ -53,7 +68,6 @@ class TestVideoPageUI:
             login_page (_type_): _description_
         """
         for vp in videos_page:
-            
             all_elements = vp.verify_all_definition_links_present()
             check.is_true(all_elements, "Navigation elements missing from Videos Page")
             logger.info("Verification Successful :: All Navigation elements found on Videos Page")
