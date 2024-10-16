@@ -36,5 +36,13 @@ class APIBase:
 
         return response
     
-    def post(self, endpoint, data):
-        return requests.post(f"{self.base_url}{endpoint}", headers=self.get_headers(), json=data)
+    def post(self, endpoint, params=None, data=None):
+        url = f"{self.base_url}{endpoint}"
+        headers = self.get_headers()
+        self.context.set_current_request("POST", url, headers, params, data)
+        logger.info(f"Sending POST request to {url}")
+        
+        response = requests.post(url, headers=headers, params=params, json=data)
+        
+        self.context.set_current_response(response.status_code, response.headers, response.text)
+        logger.info(f"Received response with status code {response.status_code}")
