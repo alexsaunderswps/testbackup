@@ -35,8 +35,9 @@ def login_page(setup_isolated):
         
 class TestLoginPageFunctionality:
     
+    @pytest.mark.login
     @pytest.mark.functionality
-    @pytest.mark.succeeds
+    @pytest.mark.valid_credentials
     def test_valid_admin_login(self, login_page):
         for lp in login_page:
             lp.login(ADMIN_USER, ADMIN_PASS)
@@ -55,9 +56,9 @@ class TestLoginPageFunctionality:
 
             lp.logout_site()
 
-
+    @pytest.mark.login
     @pytest.mark.functionality
-    @pytest.mark.succeeds
+    @pytest.mark.valid_credentials
     def test_valid_user_login(self, login_page):        
         for lp in login_page:
             lp.login(VALID_USER,VALID_PASS)
@@ -76,9 +77,9 @@ class TestLoginPageFunctionality:
 
             lp.logout_site()
         
-        
+    @pytest.mark.login    
     @pytest.mark.functionality 
-    @pytest.mark.fails
+    @pytest.mark.invalid_credentials
     # @pytest.mark.debug
     def test_login_failure(self, login_page):
         for lp in login_page:
