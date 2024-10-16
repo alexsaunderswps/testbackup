@@ -136,6 +136,9 @@ class TestVideoPageUI:
     def test_video_name_retreval(self, videos_page):
         for vp in videos_page:
             vp.get_video_name_values()
+
+# TODO - check videos_page.py for Todo items before writing tests here
+
         
 if __name__ == "__main__":
     TV = TestVideoPageUI()

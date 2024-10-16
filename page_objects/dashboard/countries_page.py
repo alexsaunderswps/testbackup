@@ -116,3 +116,7 @@ class CountriesPage(BasePage):
                 logger.error(f"Unable to find the country table on this page with locator {table}.")
         except Exception as e:
             logger.error(f"An error occurred while trying to get the names of countries in the table: {str(e)}")
+            
+# TODO - check table elements if needed
+# TODO - with table names can check sort order
+# TODO - check search functionality

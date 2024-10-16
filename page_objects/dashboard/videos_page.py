@@ -198,6 +198,12 @@ class VideosPage(BasePage):
         except Exception as e:
             logger.error(f"Unable to count table rows: {str(e)}")
                 
+# TODO - with names, check sort functionality
+# TODO - check if published column should be populated
+# TODO - gather other table data if needed
+# TODO - with Published, check sort functionality
+# TODO - Check search functionality - modal window interaction                
+                
     # def count_total_videos_shown(self) -> int:
     #     total_videos = 0
     #     while 
