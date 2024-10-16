@@ -45,7 +45,7 @@ class TestCountriesPageUI:
     
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_countries_page_title(self, countries_page):
         """_summary_
 
@@ -60,7 +60,7 @@ class TestCountriesPageUI:
             
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_countries_page_nav_elements(self, countries_page):
         """_summary_
 
@@ -82,7 +82,7 @@ class TestCountriesPageUI:
         
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug 
+    #@pytest.mark.debug 
     def test_countries_page_definition_elements(self, countries_page):
         """_summary_
 
@@ -95,3 +95,38 @@ class TestCountriesPageUI:
             check.is_true(all_elements, "Definition elements not found")
             logger.info("Verification Successful :: All Definition elements found on Countries Page")
             logger.debug("Finished test_countries_page_definition_elements")
+            
+    @pytest.mark.UI
+    @pytest.mark.countries
+    @pytest.mark.table
+    @pytest.mark.debug
+    def test_countries_table_rows(self, countries_page):
+        """_summary_
+
+        Args:
+            countries_page (_type_): _description_
+        """
+        for cp in countries_page:
+            logger.debug("Starting test_countries_table_rows")
+            row_count = cp.count_table_rows()
+            check.is_true(row_count > 0, "No rows found in table")
+            logger.info(f"Verification Successful :: Countries Table has {row_count} rows")
+            logger.debug("Finished test_countries_table_rows")
+            
+    @pytest.mark.UI
+    @pytest.mark.countries
+    @pytest.mark.table
+    @pytest.mark.debug
+    def test_country_name_retreval(self, countries_page):
+        """_summary_
+
+        Args:
+            countries_page (_type_): _description_
+        """
+        for cp in countries_page:
+            logger.debug("Starting test_country_name_retreval")
+            country_names = cp.get_country_name_values()
+            check.is_true(len(country_names) > 0, "No country names found")
+            logger.info(f"Verification Successful :: Found {len(country_names)} country names")
+            logger.debug("Finished test_country_name_retreval")
+            
