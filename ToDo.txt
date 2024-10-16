@@ -15,3 +15,23 @@ Consider using parameterized fixture to supply data.
         too long creds
         missing creds
     Consider this for multiple data entry points (Video Titles, Catalogue titles, etc)
+
+Add static pages:
+IUCN Status
+Population Trend 
+
+Continue building out static page:
+Countries
+
+Build out testing of Static pages:
+Countries
+IUCN Status 
+Population Trends 
+
+Add checks for Sorting:
+Videos 
+Countries 
+
+Add other dynamic pages:
+Video Catalogues
+Map Markers
