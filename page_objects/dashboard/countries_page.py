@@ -70,4 +70,49 @@ class CountriesPage(BasePage):
         except Exception as e:
             self.logger.error(f"An error occurred while trying to locate Countries Page Title: {e}")
             return False
-        
+    
+    # Check Table Body contents
+    def count_table_rows(self) -> int:
+        """_summary_
+
+        Returns:
+            int: _description_
+        """
+        self.logger.info("Counting the number of rows in the Countries Table")
+        num_rows = 0
+        try:
+            table = self.locator.check_elements_present(self.CountryTableElemenets.COUNTRIES_TABLE_BODY)
+            if table:
+                table_rows = self.locator.get_elements(self.CountryTableElemenets.COUNTRIES_TABLE_ROWS)
+                num_rows = len(table_rows)
+                logger.info(f"Found {num_rows} rows in the Countries Table")
+                return num_rows
+            else:
+                self.screenshot.take_screenshot(self.driver, "Countries_Table_Body_Not_Found")
+                logger.error(f"Unable to find the country table on this page.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while trying to count the number of rows in the Countries Table: {str(e)}")
+            
+    def get_country_name_values(self) -> list[str]:
+        """_summary_
+
+        Returns:
+            list[str]: _description_
+        """
+        self.logger.info("Getting the names of all countries in the table on current page")
+        country_names = []
+        try:
+            table = self.locator.check_elements_present(self.CountryTableElemenets.COUNTRIES_TABLE_BODY)
+            if table:
+                table_rows = self.locator.get_elements(self.CountryTableElemenets.COUNTRIES_TABLE_ROWS)
+                for index, row in enumerate(table_rows, start=1):
+                    text_container = self.locator.get_element(f"{self.CountryTableElemenets.COUNTRIES_TABLE_ROWS}[{index}]/td[1]")
+                    country = text_container.text
+                    country_names.append(country)
+                    logger.debug(f"Here is the row: {country}")
+                    logger.debug(f"Here is the list: {country_names}")
+                return country_names
+            else:
+                logger.error(f"Unable to find the country table on this page with locator {table}.")
+        except Exception as e:
+            logger.error(f"An error occurred while trying to get the names of countries in the table: {str(e)}")
