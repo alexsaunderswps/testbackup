@@ -28,6 +28,10 @@ class HTMLReportLogger:
         self.test_logs = {}
         self.current_test = None
         self.lock = Lock()
+        self.context = None
+        
+    def set_context(self, context):
+        self.context = context
         
     def start_test_capture(self, test_name):
         """
