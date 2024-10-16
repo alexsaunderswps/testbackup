@@ -80,7 +80,7 @@ class TestLoginPageFunctionality:
     @pytest.mark.login    
     @pytest.mark.functionality 
     @pytest.mark.invalid_credentials
-    # @pytest.mark.debug
+    #@pytest.mark.debug
     def test_login_failure(self, login_page):
         for lp in login_page:
             
