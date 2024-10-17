@@ -36,8 +36,10 @@ When desired, test can focus on specific test types using markers.
 Currently implimented markers in bold:
 
 authentication: marks authenitcation focused tests
+**api**: marks API focused tests
 chrome: marks test specifically designed to test Chrome Browsers
-**countries**: marks tess involving the countries page
+**connection**: marks tests involving connection to endpoints
+**countries**: marks test involving the countries page
 **debug**: marks tests being run for debugging purposes
 e2e: marks End-to-End tests
 edge: marks tests specifically designed to test Edge Browsers
