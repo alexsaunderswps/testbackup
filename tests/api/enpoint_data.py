@@ -1,4 +1,5 @@
 #endpoints_data.py
+import math
 
 class ENDPOINT_DATA:
     
@@ -22,3 +23,8 @@ class ENDPOINT_DATA:
         "/Tag": 0.3,
         "/Users": 0.3,
     }
+    
+    # Video collection size data
+    TOTAL_VIDEOS = 295
+    MAX_PAGE_SIZE = 25
+    TOTAL_PAGES = math.ceil(TOTAL_VIDEOS / MAX_PAGE_SIZE)
