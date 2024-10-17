@@ -46,3 +46,6 @@ class APIBase:
         
         self.context.set_current_response(response.status_code, response.headers, response.text)
         logger.info(f"Received response with status code {response.status_code}")
+        
+    def measure_response_time(self, response):
+        return response.elapsed.total_seconds()
