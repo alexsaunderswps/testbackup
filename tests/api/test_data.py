@@ -88,7 +88,7 @@ VIDEO_DATA = [
 },
 {
 "ID": "23adfdde-60c6-4810-8dd5-99d6e435f8d1",
-"Name": "A 360 Journey Through the Majestic Realm of North Pacific Jellyfish",
+"Name": "A 360° Journey Through the Majestic Realm of North Pacific Jellyfish",
 "Overview": "A Lion's mane jellyfish floats through the North Pacific Ocean near Alaska.\r\n\r\nLion's mane jellyfish is a species of jellyfish that is named after its striking appearance, which resembles the mane of a lion. It is known to be the largest jellyfish species, with a bell that can reach up to 2.5 meters (about 8 feet) in diameter and tentacles that can extend up to 36.5 meters (nearly 120 feet) in length.\r\n\r\nLion's mane jellyfish contain thousands of stinging cells called nematocysts that they use for defense and to capture their prey. These stinging cells can cause a painful and sometimes dangerous reaction in humans who encounter them, making it important to handle these jellyfish with caution."
 },
 {
