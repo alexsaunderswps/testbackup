@@ -1,0 +1,19 @@
+{
+    "name": "<string>",
+    "overview": "<string>",
+    "thumbnailUrl": "<string>",
+    "videoId": "<uuid>",
+    "dateCreated": "<dateTime>",
+    "portals": [],
+    "startTime": "00:00:00",
+    "endTime": "00:02:21",
+    "countryObtainedId": "<uuid>",
+    "tags": [],
+    "showInAllVideos": true,
+    "compilation": false,
+    "gameDrive": false,
+    "graphicSex": false,
+    "graphicDeath": true,
+    "species": [],
+    "videoFormat": 0
+}
