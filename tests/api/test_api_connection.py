@@ -1,11 +1,8 @@
 # test_api_connection.py is a test file that contains the test cases for the API connection.
 import pytest
-import random
-import requests
-from pytest_check import check
 from .api_base import APIBase
 from utilities.utils import logger
-from .test_data import VIDEO_DATA
+from .enpoint_data import ENDPOINT_DATA
 
 # Basic Connection tests
 
@@ -13,34 +10,28 @@ class TestAPIConnection:
     def setup_method(self):
         self.api = APIBase()
     
-    @pytest.fixture(scope="class")
-    def random_video_data(self):
-        return random.choice(VIDEO_DATA)
-    
-    # Paramertized test for valid status code and response time from multiple endpoints
+    # Paramertized test for using valid authorization, valid status code and response time from multiple endpoints
     @pytest.mark.api
     @pytest.mark.connection
-    @pytest.mark.parametrize("endpoint, threshold", [
-    ("/Videos", 0.4),
-    ("/VideoCatalogue", 0.3),
-    ("/MapMarker", 0.3),
-    ("/Countries", 0.3),
-    ("/IUCNStatus", 0.3),
-    ("/Organization", 0.3),
-    ("/PopulationTrend", 0.3),
-    ("/Species", 0.3),
-    ("/Site", 0.3),
-    ("/SpeciesCategory", 0.3),
-    ("/Tag", 0.3),
-    ("/Users", 0.3),
-    ("/Organization", 0.3),
+    @pytest.mark.parametrize("endpoint", ENDPOINT_DATA.ENDPOINTS)
+    @pytest.mark.parametrize("auth_type, expected_status_code", [
+        ('valid', 200),
+        ('invalid', 401),
+        ('none', 401)
     ])
-    def test_api_connection_parametrized(self, endpoint, threshold):
-        response = self.api.get(endpoint)
+    def test_api_connection_parametrized_valid(self, endpoint, auth_type, expected_status_code):
+        response = self.api.get(endpoint, auth_type)
         response_time = self.api.measure_response_time(response)
         logger.info('-' * 80)
-        logger.info(f"For {endpoint} - Response time: {response_time}, Status code: {response.status_code}")
+        logger.info(f"For {endpoint} & {auth_type} - Response time: {response_time:.3f} seconds, Status code: {response.status_code}")
         logger.info('-' * 80)
-        assert response.status_code == 200, f"Failed to get response from {endpoint}. Status code: {response.status_code}"
-        assert response_time < threshold, f"Response time is too high: {response_time}"
-        logger.info(f"{endpoint} response time: {response_time:.3f} seconds")
+        threshold = ENDPOINT_DATA.THRESHOLDS.get(endpoint, 0.3) # Default threshold is 0.3 seconds
+        assert response.status_code == expected_status_code, (
+            f"Unexpected status code for {endpoint} with {auth_type} auth. "
+            f"Expected {expected_status_code}, got {response.status_code}"
+        )
+        assert response_time < threshold, (
+            f"Response time for {endpoint} with {auth_type} auth is too high. "
+            f"Expected < {threshold}, got {response_time:.3f}"
+        )
+
