@@ -11,34 +11,39 @@ class TestAPIConnection:
     def setup_method(self):
         self.api = APIBase()
     
-
-    @pytest.mark.connection
-    def test_api_connection(self):
-        response = self.api.get("/")
-        print(response)
-        print(response.headers)
-        print(response.status_code)
-        assert response.status_code == 200
-    
-
+    @pytest.mark.api
     @pytest.mark.connection
     def test_api_connection_videos(self):
-        response = self.api.get("/Videos")
-        print(response)
-        print(response.headers)
-        print(response.status_code)
+        response = self.api.get("/api/Videos")
+        response_time = self.api.measure_response_time(response)
+        logger.info('-' * 80)
+        logger.info(f"Response time: {response_time}")
+        logger.info('-' * 80)
+        assert response.status_code == 200
+        assert response_time < 0.5, f"Response time is too high: {response_time}"
+    
+    @pytest.mark.api
+    @pytest.mark.connection
+    def test_api_connection(self):
+        response = self.api.get("/api/VideoCatalogue")
+        response_time = self.api.measure_response_time(response)
+        logger.info('-' * 80)
+        logger.info(f"Response time: {response_time}")
+        logger.info('-' * 80)
+        assert response.status_code == 200
+        assert response_time < 0.5, f"Response time is too high: {response_time}"
         assert response.status_code == 200
 
     @pytest.mark.api
     @pytest.mark.connection
     def test_get_video_by_id(self, video_id="5a618fcb-f36b-4a6d-976b-276b8714e354"):
         response = self.api.get(f"/api/Videos/{video_id}/Details")
-        print(f"This is the status code: {response.status_code}")
-        print('-' * 80)
-        print(f"This is the response: {response.text}")
-        print('-' * 80)
-        print(f"This is the headers: {response.headers}")
+        response_time = self.api.measure_response_time(response)
+        logger.info('-' * 80)
+        logger.info(f"Response time: {response_time}")
+        logger.info('-' * 80)
         assert response.status_code == 200, f"Failed to get video by ID. Status code: {response.status_code}"
+        assert response_time < 0.5, f"Response time is too high: {response_time}"
         
         content_type = response.headers.get("Content-Type")
         assert 'application/json' in content_type, f"Content-Type is not application/json. Content-Type: {content_type}"
