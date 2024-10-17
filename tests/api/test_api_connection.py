@@ -11,28 +11,28 @@ class TestAPIConnection:
     def setup_method(self):
         self.api = APIBase()
     
-    @pytest.mark.api
-    @pytest.mark.connection
-    def test_api_connection_videos(self):
-        response = self.api.get("/api/Videos")
-        response_time = self.api.measure_response_time(response)
-        logger.info('-' * 80)
-        logger.info(f"Response time: {response_time}")
-        logger.info('-' * 80)
-        assert response.status_code == 200
-        assert response_time < 0.5, f"Response time is too high: {response_time}"
+    # @pytest.mark.api
+    # @pytest.mark.connection
+    # def test_api_connection_videos(self):
+    #     response = self.api.get("/api/Videos")
+    #     response_time = self.api.measure_response_time(response)
+    #     logger.info('-' * 80)
+    #     logger.info(f"Response time: {response_time}")
+    #     logger.info('-' * 80)
+    #     assert response.status_code == 200
+    #     assert response_time < 0.5, f"Response time is too high: {response_time}"
     
-    @pytest.mark.api
-    @pytest.mark.connection
-    def test_api_connection(self):
-        response = self.api.get("/api/VideoCatalogue")
-        response_time = self.api.measure_response_time(response)
-        logger.info('-' * 80)
-        logger.info(f"Response time: {response_time}")
-        logger.info('-' * 80)
-        assert response.status_code == 200
-        assert response_time < 0.5, f"Response time is too high: {response_time}"
-        assert response.status_code == 200
+    # @pytest.mark.api
+    # @pytest.mark.connection
+    # def test_api_connection(self):
+    #     response = self.api.get("/api/VideoCatalogue")
+    #     response_time = self.api.measure_response_time(response)
+    #     logger.info('-' * 80)
+    #     logger.info(f"Response time: {response_time}")
+    #     logger.info('-' * 80)
+    #     assert response.status_code == 200
+    #     assert response_time < 0.5, f"Response time is too high: {response_time}"
+    #     assert response.status_code == 200
 
     @pytest.mark.api
     @pytest.mark.connection
@@ -58,3 +58,21 @@ class TestAPIConnection:
             logger.info(f"Video Overview: {json_response['overview']}")
         except requests.exceptions.JSONDecodeError:
             assert False, "Response is not in JSON format"
+    
+    @pytest.mark.api
+    @pytest.mark.connection
+    @pytest.mark.parametrize("endpoint, threshold", [
+    ("/api/Videos", 0.4),
+    ("/api/VideoCatalogue", 0.2),
+    ("/api/MapMarker", 0.2),
+    # Add more endpoints and their respective thresholds
+    ])
+    def test_api_connection_parametrized(self, endpoint, threshold):
+        response = self.api.get(endpoint)
+        response_time = self.api.measure_response_time(response)
+        logger.info('-' * 80)
+        logger.info(f"For {endpoint} - Response time: {response_time}, Status code: {response.status_code}")
+        logger.info('-' * 80)
+        assert response.status_code == 200, f"Failed to get response from {endpoint}. Status code: {response.status_code}"
+        assert response_time < threshold, f"Response time is too high: {response_time}"
+        logger.info(f"{endpoint} response time: {response_time:.3f} seconds")
