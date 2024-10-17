@@ -2,7 +2,6 @@
 import pytest
 import random
 import requests
-from pytest_check import check
 from .api_base import APIBase
 from utilities.utils import logger
 from .test_data import VIDEO_DATA
@@ -35,10 +34,10 @@ class TestAPIConnection:
         response = self.api.get(f"/Videos/{video_id}/Details")
         response_time = self.api.measure_response_time(response)
         
-        logger.info('-' * 80)
+        logger.info('*' * 80)
         logger.info(f"Testing Video ID: {video_id}")
-        logger.info(f"Response time: {response_time}")
-        logger.info('-' * 80)
+        logger.info(f"Response time: {response_time:.3f} seconds")
+        logger.info('*' * 80)
         assert response.status_code == 200, f"Failed to get video by ID. Status code: {response.status_code}"
         assert response_time < 0.5, f"Response time is too high: {response_time}"
         
