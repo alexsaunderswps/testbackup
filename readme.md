@@ -30,6 +30,8 @@ Not yet implimented
 ### Markers used
 When desired, test can focus on specific test types using markers.
 **Note** - marker uses a single dash, unlike other option flags
+If stacking markers, or excluding them, surround the marker with double-quotations
+`pytest -m "api and not slow"`
 `pytest -m debug`
 
 #### Markers Available
@@ -51,7 +53,7 @@ integration: marks Integration tests
 performance: marks performance focused tests
 regression: marks Regression tests
 security: marks security focused tests
-slow: marks tests that can be slow to run
+**slow**: marks tests that can be slow to run
 smoke: marks Smoke tests
 **table**: marks tests that involve table manipulation
 **UI**: marks UI focused tests
