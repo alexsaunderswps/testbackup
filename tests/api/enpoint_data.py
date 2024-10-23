@@ -25,6 +25,6 @@ class ENDPOINT_DATA:
     }
     
     # Video collection size data
-    TOTAL_VIDEOS = 295
+    TOTAL_VIDEOS = 296
     MAX_PAGE_SIZE = 25
     TOTAL_PAGES = math.ceil(TOTAL_VIDEOS / MAX_PAGE_SIZE)
