@@ -2,7 +2,7 @@
 import pytest
 from .api_base import APIBase
 from utilities.utils import logger
-from .enpoint_data import ENDPOINT_DATA
+from .endpoint_data import ENDPOINT_DATA
 
 # Basic Connection tests
 
