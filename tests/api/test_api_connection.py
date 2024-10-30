@@ -11,6 +11,7 @@ class TestAPIConnection:
         self.api = APIBase()
     
     # Paramertized test for using valid authorization, valid status code and response time from multiple endpoints
+    @pytest.mark.github
     @pytest.mark.api
     @pytest.mark.connection
     @pytest.mark.parametrize("endpoint", ENDPOINT_DATA.ENDPOINTS)
