@@ -47,7 +47,6 @@ class TestAPIConnection:
     
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.debug
     def test_video_count_per_page(self):
         errors = self.verify_video_count_per_page()
         assert not errors, f"Errors found in video count per page: {errors}"
@@ -110,6 +109,7 @@ class TestAPIConnection:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.slow
+    @pytest.mark.github
     @pytest.mark.parametrize("video_data", VIDEO_DATA)
     def test_get_all_videos_by_id(self, video_data):
         """_summary_
