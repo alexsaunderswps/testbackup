@@ -1,5 +1,6 @@
 #endpoints_data.py
 import math
+from .api_base import APIBase
 
 class ENDPOINT_DATA:
     
@@ -24,7 +25,10 @@ class ENDPOINT_DATA:
         "/Users": 0.3,
     }
     
+    def get_total_videos():
+        return APIBase().total_videos
+    
     # Video collection size data
-    TOTAL_VIDEOS = 299
+    TOTAL_VIDEOS = get_total_videos()
     MAX_PAGE_SIZE = 25
     TOTAL_PAGES = math.ceil(TOTAL_VIDEOS / MAX_PAGE_SIZE)
