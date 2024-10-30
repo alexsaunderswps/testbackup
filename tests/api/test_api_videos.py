@@ -20,6 +20,7 @@ class TestAPIConnection:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.debug
+    @pytest.mark.github
     def test_get_video_collection_size(self):
         response = self.api.get("/Videos", params={"pageNumber":1, "pageSize":25})
         try:
@@ -109,7 +110,6 @@ class TestAPIConnection:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.slow
-    @pytest.mark.github
     @pytest.mark.parametrize("video_data", VIDEO_DATA)
     def test_get_all_videos_by_id(self, video_data):
         """_summary_
