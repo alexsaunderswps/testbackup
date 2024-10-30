@@ -1,5 +1,7 @@
 import os
 import requests
+import json
+from urllib.parse import urljoin
 from dotenv import load_dotenv
 from api_test_context import APITestContext
 from utilities.utils import logger
@@ -7,14 +9,37 @@ from utilities.utils import logger
 load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL")
-API_TOKEN = os.getenv("API_TOKEN")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 class APIBase:
     def __init__(self):
         self.base_url = API_BASE_URL
-        self.token = API_TOKEN
+        self.auth_endpoint = "api/Users/Authenticate"
         self.context = APITestContext()
+        self.token = self._get_auth_token()
         logger.html_logger.set_context(self.context)
+        
+    def _get_auth_token(self):
+        """Fetch authentication token from the API.
+        """
+        auth_url = urljoin(self.base_url, self.auth_endpoint)
+        auth_data = {
+            "username": ADMIN_USERNAME,
+            "password": ADMIN_PASSWORD
+        }
+        
+        try:
+            response = requests.post(
+                auth_url,
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(auth_data)
+            )
+            response.raise_for_status()
+            return response.json().get("token")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to obtain authentication token: {str(e)}")
+            raise
         
     def get_headers(self, auth_type='valid'):
         """
