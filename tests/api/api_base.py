@@ -84,13 +84,13 @@ class APIBase:
 
         return response
     
-    def post(self, endpoint, auth_type='valid', params=None, data=None):
+    def post(self, endpoint, auth_type='valid', params=None, body=None):
         url = f"{self.base_url}{endpoint}"
         headers = self.get_headers(auth_type)
-        self.context.set_current_request("POST", url, headers, params, data)
+        self.context.set_current_request("POST", url, headers, params=params, body=body)
         logger.info(f"Sending POST request to {url}")
         
-        response = requests.post(url, headers=headers, params=params, json=data)
+        response = requests.post(url, headers=headers, params=params, json=body)
         
         self.context.set_current_response(response.status_code, response.headers, response.text)
         logger.info(f"Received response with status code {response.status_code}")
@@ -99,3 +99,25 @@ class APIBase:
         
     def measure_response_time(self, response):
         return response.elapsed.total_seconds()
+    
+    @property
+    def total_videos(self):
+        """_summary_
+        """
+        url = "/Videos/Query"
+        body = {
+            "page": 0,
+            "pageSize": 0,
+            "pageCount": 0,
+            "orderBy": "string",
+            "sortOrder": "string",
+            "name": "",
+            "overview": "string"
+            }
+        
+        try:
+            response = self.post(url, 'valid', None, body=body)
+            response.raise_for_status()
+            return response.json().get("totalCount")
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Failed to fetch total video count: {str(e)}")
