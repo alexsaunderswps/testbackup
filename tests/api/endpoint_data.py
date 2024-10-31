@@ -1,12 +1,24 @@
 # endpoints_data.py
 import math
+from .api_base import APIBase
+
 
 class ENDPOINT_DATA:
 
     ENDPOINTS = [
-        "/Videos", "/VideoCatalogue", "/MapMarker", "/Countries", "/IUCNStatus",
-        "/Organization", "/PopulationTrend", "/Species", "/Site", "/SpeciesCategory",
-        "/Tag", "/Users", "/Organization"
+        "/Videos",
+        "/VideoCatalogue",
+        "/MapMarker",
+        "/Countries",
+        "/IUCNStatus",
+        "/Organization",
+        "/PopulationTrend",
+        "/Species",
+        "/Site",
+        "/SpeciesCategory",
+        "/Tag",
+        "/Users",
+        "/Organization",
     ]
 
     THRESHOLDS = {
@@ -24,7 +36,10 @@ class ENDPOINT_DATA:
         "/Users": 2,
     }
 
+    def get_total_videos():
+        return APIBase().total_videos
+
     # Video collection size data
-    TOTAL_VIDEOS = 296
+    TOTAL_VIDEOS = get_total_videos()
     MAX_PAGE_SIZE = 25
     TOTAL_PAGES = math.ceil(TOTAL_VIDEOS / MAX_PAGE_SIZE)

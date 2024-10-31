@@ -5,7 +5,7 @@ import requests
 from .api_base import APIBase
 from utilities.utils import logger
 from .test_data import VIDEO_DATA
-from .enpoint_data import ENDPOINT_DATA
+from .endpoint_data import ENDPOINT_DATA
 
 # Basic Connection tests
 
@@ -20,6 +20,7 @@ class TestAPIConnection:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.debug
+    @pytest.mark.github
     def test_get_video_collection_size(self):
         response = self.api.get("/Videos", params={"pageNumber":1, "pageSize":25})
         try:
@@ -47,7 +48,6 @@ class TestAPIConnection:
     
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.debug
     def test_video_count_per_page(self):
         errors = self.verify_video_count_per_page()
         assert not errors, f"Errors found in video count per page: {errors}"
