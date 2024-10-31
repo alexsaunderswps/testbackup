@@ -8,6 +8,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      QA_BASE_URL: "https://wildxr-web-qa.azurewebsites.net/"
+      QA_LOGIN_URL: "https://wildxr-web-qa.azurewebsites.net/login"
+      API_BASE_URL: "https://wildxr-api-qa.azurewebsites.net/api"
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      VALID_USERNAME: ${{ secrets.VALID_USERNAME }}
+      VALID_PASSWORD: ${{ secrets.VALID_PASSWORD }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
