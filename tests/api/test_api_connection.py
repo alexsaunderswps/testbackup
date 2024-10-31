@@ -2,7 +2,7 @@
 import pytest
 from .api_base import APIBase
 from utilities.utils import logger
-from .enpoint_data import ENDPOINT_DATA
+from .endpoint_data import ENDPOINT_DATA
 
 # Basic Connection tests
 
@@ -11,9 +11,9 @@ class TestAPIConnection:
         self.api = APIBase()
     
     # Paramertized test for using valid authorization, valid status code and response time from multiple endpoints
-    @pytest.mark.github
     @pytest.mark.api
     @pytest.mark.connection
+    @pytest.mark.debug
     @pytest.mark.parametrize("endpoint", ENDPOINT_DATA.ENDPOINTS)
     @pytest.mark.parametrize("auth_type, expected_status_code", [
         ('valid', 200),
