@@ -68,6 +68,7 @@ class TestAPIConnection:
         expected_video_overview = random_video_data["Overview"]
         
         response = self.api.get(f"/Videos/{video_id}/Details")
+        expected_response_time = ENDPOINT_DATA.THRESHOLDS["/Videos"]
         response_time = self.api.measure_response_time(response)
         
         logger.info('*' * 80)
@@ -75,7 +76,7 @@ class TestAPIConnection:
         logger.info(f"Response time: {response_time:.3f} seconds")
         logger.info('*' * 80)
         assert response.status_code == 200, f"Failed to get video by ID. Status code: {response.status_code}"
-        assert response_time < 0.5, f"Response time is too high: {response_time}"
+        assert response_time < expected_response_time, f"Response time is too high: {response_time}"
         
         content_type = response.headers.get("Content-Type")
         assert 'application/json' in content_type, f"Content-Type is not application/json. Content-Type: {content_type}"
@@ -125,6 +126,7 @@ class TestAPIConnection:
         expected_video_overview = video_data["Overview"]
         
         response = self.api.get(f"/Videos/{video_id}/Details")
+        expected_response_time = ENDPOINT_DATA.THRESHOLDS["/Videos"]
         response_time = self.api.measure_response_time(response)
         
         logger.info('-' * 80)
@@ -132,7 +134,7 @@ class TestAPIConnection:
         logger.info(f"Response time: {response_time}")
         logger.info('-' * 80)
         assert response.status_code == 200, f"Failed to get video by ID. Status code: {response.status_code}"
-        assert response_time < 0.5, f"Response time is too high: {response_time}"
+        assert response_time < expected_response_time, f"Response time is too high: {response_time}"
         
         content_type = response.headers.get("Content-Type")
         assert 'application/json' in content_type, f"Content-Type is not application/json. Content-Type: {content_type}"
