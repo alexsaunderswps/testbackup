@@ -26,7 +26,7 @@ class TestAPIConnection:
         logger.info('-' * 80)
         logger.info(f"For {endpoint} & {auth_type} - Response time: {response_time:.3f} seconds, Status code: {response.status_code}")
         logger.info('-' * 80)
-        threshold = ENDPOINT_DATA.THRESHOLDS.get(endpoint, 0.3) # Default threshold is 0.3 seconds
+        threshold = ENDPOINT_DATA.THRESHOLDS.get(endpoint, ENDPOINT_DATA.DEFAULT_THRESHOLD) # Default threshold is 0.3 seconds
         assert response.status_code == expected_status_code, (
             f"Unexpected status code for {endpoint} with {auth_type} auth. "
             f"Expected {expected_status_code}, got {response.status_code}"

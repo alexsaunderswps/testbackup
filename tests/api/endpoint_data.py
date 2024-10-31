@@ -20,7 +20,9 @@ class ENDPOINT_DATA:
         "/Users",
         "/Organization",
     ]
-
+    
+    DEFAULT_THRESHOLD = 2
+    
     THRESHOLDS = {
         "/Videos": 2, # Sets both the /Videos and the /Videos/{video_id}/Details thresholds
         "/VideoCatalogue": 2,
