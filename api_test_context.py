@@ -7,12 +7,13 @@ class APITestContext:
         self.current_request = None
         self.current_response = None
 
-    def set_current_request(self, method, url, headers, body):
+    def set_current_request(self, method, url, headers, params=None, body=None):
         self.current_request = {
             'method': method,
             'url': url,
             'headers': headers,
-            'body': body
+            "params": params if params is not None else {},
+            'body': body if body is not None else {} 
         }
 
     def set_current_response(self, status_code, headers, body):
