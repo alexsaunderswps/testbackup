@@ -148,7 +148,7 @@ class TestAPIConnection:
                     results.append(result)
 
             # Log summary
-            logger.info("\nAPI Connection Test Summary:")
+            logger.info(f"\nAPI Connection Test for: {endpoint}")
             logger.info("=" * 80)
             
             total_tests = len(results)
