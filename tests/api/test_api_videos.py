@@ -216,63 +216,80 @@ class TestAPIVideos:
         endpoint_info = self.data_loader.get_endpoint_info("/Videos")
         threshold = endpoint_info["threshold"]
         
+        validation_errors = []
+        
         for video_data in video_data_list:
             video_id = video_data["ID"]
             expected_video_name = video_data["Name"]
             expected_video_overview = video_data["Overview"]
             
-            response = self.api.get(f"/Videos/{video_id}/Details")
-            response_time = self.api.measure_response_time(response)
-        
-        logger.info('-' * 80)
-        logger.info(f"Testing Video ID: {video_id}")
-        logger.info(f"Response time: {response_time}")
-        logger.info('-' * 80)
-        
-        assert response.status_code == 200, (
-            f"Failed to get video by ID. " 
-            f"Status code: {response.status_code}"
-        )
-        
-        assert response_time < threshold, (
-            f"Response time is too high: {response_time}"
-        )
-        
-        content_type = response.headers.get("Content-Type")
-        assert 'application/json' in content_type, (
-            f"Content-Type is not application/json." 
-            f"Content-Type: {content_type}"
-        )
-        
-        try:
-            json_response = response.json()
+            logger.info('-' * 80)
+            logger.info(f"Testing Video ID: {video_id}")
+            logger.info(f"Expected Name: {expected_video_name}")
+            logger.info(f"Expected Overview: {expected_video_overview}")
+            logger.info('-' * 80)
             
-            fields_to_check = [
-                ("videoId", video_id),
-                ("name", expected_video_name),
-                ("overview", expected_video_overview)
-            ]
-            
-            for field, expected_value in fields_to_check:
-                try:
-                    assert json_response[field] == expected_value, (
-                        f"{field} does not match." 
-                        f"Expected: {expected_value}, " 
-                        f"Actual: {json_response[field]}"
+            try:
+                # Make API request
+                response = self.api.get(f"/Videos/{video_id}/Details")
+                response_time = self.api.measure_response_time(response)
+        
+                # Log response details
+                logger.info(f"Response time: {response_time:.3f} seconds")
+                logger.info(f"Status Code: {response.status_code}")
+        
+                # Validate response code
+                if response_time >= threshold:
+                    validation_errors.append(
+                        f"Video {video_id}: Response time is too high: {response_time:.3f}"
                     )
-                    logger.info(f"{field}: {json_response[field]}")
-                except AssertionError as e:
-                    logger.error(str(e))
-                    raise
-                except KeyError:
-                    logger.error(f"Field: {field} not found in response")
-                    raise
                 
-        except requests.exceptions.JSONDecodeError:
-            logger.error("Response is not in JSON format")
-            raise AssertionError("Response is not in JSON format")
-        except Exception as e:
-            logger.error(f"Unexpected error occured: {str(e)}")
-            raise
+                # Validate content tyoe
+                content_type = response.headers.get("Content-Type")
+                if 'application/json' not in content_type: 
+                    validation_errors.append(
+                    f"Content-Type is not application/json for Video {video_id}." 
+                    f"Content-Type: {content_type}"
+                    )
+                    continue
             
+                # Validate response data
+                json_response = response.json()
+                
+                # Check each field
+                fields_to_check = [
+                    ("videoId", video_id),
+                    ("name", expected_video_name),
+                    ("overview", expected_video_overview)
+                ]
+                
+                for field, expected_value in fields_to_check:
+                    actual_value = json_response.get(field)
+                    if actual_value != expected_value:
+                        validation_errors.append(
+                            f"Video {video_id}: {field} does not match. "
+                            f"Expected: {expected_value}, Actual: {actual_value}"
+                        )
+                    else:
+                        logger.info(f"✓ {field}: matches {json_response[field]}")
+        
+            except Exception as e:
+                validation_errors.append(f"Video {video_id}: Error during validation: {str(e)}")
+                logger.error(f"Error during validation: {str(e)} of Video: {video_id}")
+                
+        # After all videos are processed, report results
+        total_videos = len(video_data_list)
+        failed_videos = len(validation_errors)
+        
+        logger.info("\n ")
+        logger.info("\nValidation Summary:")
+        logger.info(f"Total Videos: {total_videos}")
+        logger.info(f"Failed Videos: {failed_videos}")
+        logger.info("\n ")
+        
+        if validation_errors:
+            logger.error("\nFailed Videos:")
+            for error in validation_errors:
+                logger.error(error)
+            raise AssertionError(f"Failed Videos: {failed_videos}")    
             
