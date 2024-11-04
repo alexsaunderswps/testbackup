@@ -315,6 +315,146 @@ class DataLoader:
         self.data_cache.clear()
         logger.info("Test data cache cleared")
         
+    def get_video_schema_data(self, cache: bool = True) -> Dict[str, Any]:
+        """
+        Get video schema data.
+
+        Args:
+            cache (bool, optional): Whether to cache the data or not. Defaults to True.
+
+        Returns:
+            Dict[str, Any]: Complete video endpoint schema.
+        """
+        if cache and "video_schema" in self.data_cache:
+            return self.data_cache["video_schema"]
+        
+        # Load from Python module
+        try:
+            module_path = self._get_module_path("schema_validation")
+            logger.debug(f"Attempting to load endpoint data from: {module_path}")
+            
+            if not os.path.exists(module_path):
+                logger.error(f"Endpoint data file not found at: {module_path}")
+                # Log directory contents for debugging
+                parent_dir = os.path.dirname(module_path)
+                if os.path.exists(parent_dir):
+                    logger.debug(f"Contents of {parent_dir}:")
+                    for item in os.listdir(parent_dir):
+                        logger.debug(f"  - {item}")
+                raise FileNotFoundError(f"Schema data file not found at: {module_path}")
+        
+            module = self._load_python_module(module_path)
+            data = module.VIDEO_OBJECT_SCHEMA
+            
+            # Need to write _validate_video_schema_data method
+            if not self._validate_video_schema_data(data):
+                raise ValueError("Invalid video schema data format")
+            
+            if cache:
+                self.data_cache["video_schema"] = data
+            return data
+        except Exception as e:
+            logger.error(f"Failed to load video_schema data: {str(e)}")
+            logger.error(f"Searched path: {module_path}")
+            raise
+
+    def _validate_video_schema_data(self, data: Dict[str, Any]) -> bool:
+        """
+        Validates the video_schema data structure.
+
+        Args:
+            data (Dict[str, Any]): Video Schema to validate.
+
+        Returns:
+            bool: True if valid, False if otherwise.
+        """
+        if not isinstance(data, dict):
+            return False
+        
+        required_keys = ["VIDEO_OBJECT_SCHEMA"]
+        required_fields = [
+            "rowVersion", 
+            "videoId", 
+            "name", 
+            "overview", 
+            "dateCreated", 
+            "thumbnailUrl", 
+            "youTubeUrl", 
+            "totalViews", 
+            "totalLikes", 
+            "totalDislikes", 
+            "rating", 
+            "mapMarkers", 
+            "startTime", 
+            "endTime", 
+            "countryObtainedId", 
+            "tags", 
+            "lastEditedBy", 
+            "lastEditedDate", 
+            "species", 
+            "videoFormat", 
+            "videoStatusId", 
+            "videoResolutionId"
+            ]
+        
+        # Check required top-level keys
+        if not all(key in data for key in required_keys):
+            return False
+        
+        # Check schema data structure
+        for config in data["VIDEO_OBJECT_SCHEMA"].items():
+            if not all(field in config for field in required_fields):
+                return False
+            
+            # Validate field types
+            if not isinstance(config["rowVersion"], (str)):
+                return False
+            if not isinstance(config["videoId"], str):
+                return False
+            if not isinstance(config["name"], str):
+                return False
+            if not isinstance(config["overview"], str):
+                return False
+            if not isinstance(config["dateCreated"], str):
+                return False
+            if not isinstance(config["thumbnailUrl"], str):
+                return False
+            if not isinstance(config["youTubeUrl"], str):
+                return False
+            if not isinstance(config["totalViews"], int):
+                return False
+            if not isinstance(config["totalLikes"], int):
+                return False
+            if not isinstance(config["totalDislikes"], int):
+                return False
+            if not isinstance(config["rating"], float):
+                return False
+            if not isinstance(config["mapMarkers"], list):
+                return False
+            if not isinstance(config["startTime"], str):
+                return False
+            if not isinstance(config["endTime"], str):
+                return False
+            if not isinstance(config["countryObtainedId"], str):
+                return False
+            if not isinstance(config["tags"], list):
+                return False
+            if not isinstance(config["lastEditedBy"], str):
+                return False
+            if not isinstance(config["lastEditedDate"], str):
+                return False
+            if not isinstance(config["species"], list):
+                return False
+            if not isinstance(config["videoFormat"], int):
+                return False
+            if not isinstance(config["videoStatusId"], int):
+                return False
+            if not isinstance(config["videoResolutionId"], int):
+                return False
+            
+        return True
+        
+# Endpoint Manager
     @property
     def endpoint_manager(self) -> 'EndpointManager':
         """
