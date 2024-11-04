@@ -3,6 +3,7 @@ import json
 import os
 import random
 import importlib.util
+from jsonschema import validate, ValidationError
 from typing import Any, Dict, List, Optional, Union
 from test_data.api.qa.api_endpoints import EndpointManager
 from utilities.utils import logger
@@ -368,92 +369,41 @@ class DataLoader:
         Returns:
             bool: True if valid, False if otherwise.
         """
-        if not isinstance(data, dict):
-            return False
+        try:
+            # Check if data is a dictionary and has expected structure
+            if not isinstance(data, dict):
+                logger.error("Video schema data is not a dictionary")
+                return False
         
-        required_keys = ["VIDEO_OBJECT_SCHEMA"]
-        required_fields = [
-            "rowVersion", 
-            "videoId", 
-            "name", 
-            "overview", 
-            "dateCreated", 
-            "thumbnailUrl", 
-            "youTubeUrl", 
-            "totalViews", 
-            "totalLikes", 
-            "totalDislikes", 
-            "rating", 
-            "mapMarkers", 
-            "startTime", 
-            "endTime", 
-            "countryObtainedId", 
-            "tags", 
-            "lastEditedBy", 
-            "lastEditedDate", 
-            "species", 
-            "videoFormat", 
-            "videoStatusId", 
-            "videoResolutionId"
-            ]
-        
-        # Check required top-level keys
-        if not all(key in data for key in required_keys):
-            return False
-        
-        # Check schema data structure
-        for config in data["VIDEO_OBJECT_SCHEMA"].items():
-            if not all(field in config for field in required_fields):
+            # Extract schema if it is nested under VIDEO_OBJECT_SCHEMA
+            schema = data.get("VIDEO_OBJECT_SCHEMA", data)
+
+            # Validate schema structure
+            required_top_level_keys = ["type", "required", "properties"]
+            if not all(key in schema for key in required_top_level_keys):
+                logger.error("Video schema data is missing required top-level keys: {required_top_level_keys}")
                 return False
             
-            # Validate field types
-            if not isinstance(config["rowVersion"], (str)):
+            # Try to use it as a JSON schema
+            try:
+                # Validate against a simple test object to verify schema validity
+                test_object = {
+                    "name": "Test Video",
+                    "overview": "This is a test video",
+                    "thumbnailUrl": "https://test.com/thumbnail.jpg",
+                    "country": "USb4e7c055-2f2a-4626-8224-f0a263f16963",
+                    "videoResolutionId": 1,
+                    "species": ["Lionf8a87a6b-f4e4-4e90-bb61-76aeff840a82"]
+                } 
+                validate(instace=test_object, schema=schema)
+                return True
+            except ValidationError as e:
+                logger.error(f"Video schema data is not a valid JSON schema: {str(e)}")
                 return False
-            if not isinstance(config["videoId"], str):
-                return False
-            if not isinstance(config["name"], str):
-                return False
-            if not isinstance(config["overview"], str):
-                return False
-            if not isinstance(config["dateCreated"], str):
-                return False
-            if not isinstance(config["thumbnailUrl"], str):
-                return False
-            if not isinstance(config["youTubeUrl"], str):
-                return False
-            if not isinstance(config["totalViews"], int):
-                return False
-            if not isinstance(config["totalLikes"], int):
-                return False
-            if not isinstance(config["totalDislikes"], int):
-                return False
-            if not isinstance(config["rating"], float):
-                return False
-            if not isinstance(config["mapMarkers"], list):
-                return False
-            if not isinstance(config["startTime"], str):
-                return False
-            if not isinstance(config["endTime"], str):
-                return False
-            if not isinstance(config["countryObtainedId"], str):
-                return False
-            if not isinstance(config["tags"], list):
-                return False
-            if not isinstance(config["lastEditedBy"], str):
-                return False
-            if not isinstance(config["lastEditedDate"], str):
-                return False
-            if not isinstance(config["species"], list):
-                return False
-            if not isinstance(config["videoFormat"], int):
-                return False
-            if not isinstance(config["videoStatusId"], int):
-                return False
-            if not isinstance(config["videoResolutionId"], int):
-                return False
-            
-        return True
-        
+        except Exception as e:
+            logger.error(f"Failed to validate video schema data: {str(e)}")
+            return False
+
 # Endpoint Manager
     @property
     def endpoint_manager(self) -> 'EndpointManager':
