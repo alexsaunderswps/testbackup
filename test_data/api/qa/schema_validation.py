@@ -13,28 +13,41 @@ class WildXRSchemas:
     
     # Schema for single video object
     VIDEO_OBJECT_SCHEMA = {
-        "rowVersion": str,
-        "videoId": str,
-        "name": str,
-        "overview": str,
-        "dateCreated": str,
-        "thumbnailUrl": str,
-        "youTubeUrl" : str,
-        "totalViews": int,
-        "totalLikes": int,
-        "totalDislikes": int,
-        "rating": float,
-        "mapMarkers": list,
-        "startTime": str,
-        "endTime": str,
-        "countryObtainedId": str,
-        "tags": list,
-        "lastEditedBy": str,
-        "lastEditedDate": str,
-        "species": list,
-        "videoFormat": int,
-        "videoStatusId": int,
-        "videoResolutionId": int
+        "type": "object",
+        "required": ["name", "overview", "thumbnailUrl", "country", "videoResolutionId", "species"],
+        "properties": {
+            "rowVersion": {"type": "string"},
+            "videoId": {"type": "string", "format": "uuid"},
+            "name": {"type": "string", "minLength": 1},
+            "overview": {"type": "string"},
+            "dateCreated": {"type": "string", "format": "date-time"},
+            "thumbnailUrl": {"type": "string", "format": "uri"},
+            "youTubeUrl": {"type": "string", "format": "uri"},
+            "totalViews": {"type": "integer", "minimum": 0},
+            "totalLikes": {"type": "integer", "minimum": 0},
+            "totalDislikes": {"type": "integer", "minimum": 0},
+            "rating": {"type": "number", "minimum": 0, "maximum": 5},
+            "mapMarkers": {
+                "type": "array",
+                "items": {"type": "object"}  # Can be more specific if needed
+            },
+            "startTime": {"type": "string", "format": "time"},
+            "endTime": {"type": "string", "format": "time"},
+            "countryObtainedId": {"type": "string", "format": "uuid"},
+            "tags": {
+                "type": "array",
+                "items": {"type": "string"}
+            },
+            "lastEditedBy": {"type": "string"},
+            "lastEditedDate": {"type": "string", "format": "date-time"},
+            "species": {
+                "type": "array",
+                "items": {"type": "string", "format": "uuid"}
+            },
+            "videoFormat": {"type": "integer", "minimum": 0},
+            "videoStatusId": {"type": "integer", "minimum": 0},
+            "videoResolutionId": {"type": "integer", "minimum": 0}
+        }
     }
     
     
