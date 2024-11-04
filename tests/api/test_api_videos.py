@@ -235,7 +235,10 @@ class TestAPIVideos:
                 response_time = self.api.measure_response_time(response)
         
                 # Log response details
-                logger.info(f"Response time: {response_time:.3f} seconds")
+                if response_time >= threshold:
+                    logger.error(f"Response time is too high: {response_time:.3f} seconds vs. {threshold:.3f}")
+                else:
+                    logger.info(f"Response time: {response_time:.3f} seconds")
                 logger.info(f"Status Code: {response.status_code}")
         
                 # Validate response code
