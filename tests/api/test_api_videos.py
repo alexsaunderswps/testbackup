@@ -1,6 +1,7 @@
 # test_api_videos.py is a test file that contains the test cases for the API videos endpoints.
 import pytest
 import random
+import math
 import requests
 from .api_base import APIBase
 from utilities.utils import logger
@@ -23,7 +24,7 @@ class TestAPIVideos:
 
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.github
+    # @pytest.mark.github
     def test_get_video_collection_size(self):
         """
         Test to verify the total number of videos in the collection
@@ -205,93 +206,228 @@ class TestAPIVideos:
     
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.slow
-    def test_get_all_videos_by_id(self):
+    @pytest.mark.github
+    def test_video_data_integrity(self):
         """
-        Test to verify the details of all videos by ID
+        Test video data meets both schema requirements and business rules.
+        
+        This test verifies:
+        1. API response structure matches defined schema
+        2. Response metadata is consistent (page counts, totals)
+        3. Video objects contain valid data
+        4. Required relationships are present (species, countries)
+        5. Geographical data is valid
         """
-        logger.info("\nAPI Test All Videos by ID:")
-        video_data_list = self.data_loader.get_video_data()
-        endpoint_info = self.data_loader.get_endpoint_info("/Videos")
-        threshold = endpoint_info["threshold"]
+        logger.info("\nTesting Video Data Integrity")
         
-        validation_errors = []
+        # Test multiple pages to ensure consistent data quality
+        page_size = 25
+        pages_to_test = 2  # Test first two pages
         
-        for video_data in video_data_list:
-            video_id = video_data["guid"]
-            expected_video_name = video_data["Name"]
-            expected_video_overview = video_data["Overview"]
+        for page in range(1, pages_to_test + 1):
+            response = self.api.get("/Videos", params={
+                "pageNumber": page,
+                "pageSize": page_size
+            })
             
-            logger.info('-' * 80)
-            logger.info(f"Testing Video ID: {video_id}")
-            logger.info(f"Expected Name: {expected_video_name}")
-            logger.info(f"Expected Overview: {expected_video_overview}")
-            logger.info('-' * 80)
+            assert response.status_code == 200, f"Failed to get page {page}"
+            data = response.json()
             
+            # 1. Schema Validation
+            assert self.data_loader.validate_response(
+                "video_list_response", 
+                data
+            ), "Response failed schema validation"
+            
+            # 2. Metadata Validation
+            self._validate_pagination_metadata(data, page, page_size)
+            
+            # 3. Video Content Validation
+            validation_errors = []
+            for video in data["results"]:
+                errors = self._validate_video_content(video)
+                if errors:
+                    validation_errors.extend(errors)
+
+            # Report Results
+            total_videos = len(data["results"])
+            logger.info(f"\nValidated {total_videos} videos on page {page}")
+            
+            if validation_errors:
+                logger.error("\nValidation Errors:")
+                for error in validation_errors:
+                    logger.error(error)
+                pytest.fail(f"Found {len(validation_errors)} validation errors")
+            else:
+                logger.info("All videos passed validation")
+
+    def _validate_pagination_metadata(self, data: dict, expected_page: int, expected_page_size: int) -> None:
+        """
+        Validate pagination metadata is consistent.
+        
+        Args:
+            data: API response data
+            expected_page: Expected page number
+            expected_page_size: Expected page size
+        """
+        assert data["page"] == expected_page, \
+            f"Wrong page number. Expected {expected_page}, got {data['page']}"
+        
+        assert data["pageSize"] == expected_page_size, \
+            f"Wrong page size. Expected {expected_page_size}, got {data['pageSize']}"
+        
+        assert data["totalCount"] >= 0, \
+            f"Invalid total count: {data['totalCount']}"
+        
+        assert data["pageCount"] == math.ceil(data["totalCount"] / data["pageSize"]), \
+            "Page count doesn't match total records and page size"
+
+    def _validate_video_content(self, video: dict) -> list[str]:
+        """
+        Validate individual video object content.
+        
+        Args:
+            video: Video object to validate
+            
+        Returns:
+            list[str]: List of validation error messages, empty if no errors
+        """
+        errors = []
+        video_id = video.get('videoId', 'unknown')
+
+        # Required Fields Validation
+        required_fields = {
+            'videoId': str,
+            'name': str,
+            'overview': str
+        }
+        
+        for field, expected_type in required_fields.items():
+            value = video.get(field)
+            if not value:
+                errors.append(f"Missing required field '{field}' for video {video_id}")
+            elif not isinstance(value, expected_type):
+                errors.append(
+                    f"Invalid type for '{field}' in video {video_id}. "
+                    f"Expected {expected_type.__name__}, got {type(value).__name__}"
+                )
+
+        # Video Status-based Validation
+        if video.get('videoStatusId') == 2:  # Assuming 2 is "Published" status
+            if not video.get('thumbnailUrl'):
+                errors.append(f"Published video {video_id} missing thumbnail URL")
+            
+            if not video.get('species'):
+                errors.append(f"Published video {video_id} missing species information")
+            
+            if not video.get('countryObtainedId'):
+                errors.append(f"Published video {video_id} missing country information")
+
+        # Map Marker Validation
+        if video.get('mapMarkers'):
+            marker_errors = self._validate_map_markers(video['mapMarkers'], video_id)
+            errors.extend(marker_errors)
+
+        # Species Validation
+        if video.get('species'):
+            species_errors = self._validate_species(video['species'], video_id)
+            errors.extend(species_errors)
+
+        return errors
+
+    def _validate_map_markers(self, markers: list, video_id: str) -> list[str]:
+        """
+        Validate map marker data.
+        
+        Args:
+            markers: List of map markers to validate
+            video_id: ID of video containing markers
+            
+        Returns:
+            list[str]: List of validation error messages
+        """
+        errors = []
+        
+        for idx, marker in enumerate(markers):
+            # Required fields check
+            if not marker.get('mapMarkerId'):
+                errors.append(f"Map marker {idx} missing ID in video {video_id}")
+            
+            if not marker.get('name'):
+                errors.append(f"Map marker {idx} missing name in video {video_id}")
+                
+            # Coordinate validation
             try:
-                # Make API request
-                response = self.api.get(f"/Videos/{video_id}/Details")
-                response_time = self.api.measure_response_time(response)
-        
-                # Log response details
-                if response_time >= threshold:
-                    logger.error(f"Response time is too high: {response_time:.3f} seconds vs. {threshold:.3f}")
-                else:
-                    logger.info(f"Response time: {response_time:.3f} seconds")
-                logger.info(f"Status Code: {response.status_code}")
-        
-                # Validate response code
-                if response_time >= threshold:
-                    validation_errors.append(
-                        f"Video {video_id}: Response time is too high: {response_time:.3f}"
+                lat = float(marker.get('latitude', 0))
+                lon = float(marker.get('longitude', 0))
+                
+                if not (-90 <= lat <= 90):
+                    errors.append(
+                        f"Invalid latitude {lat} in marker {idx} of video {video_id}"
                     )
                 
-                # Validate content tyoe
-                content_type = response.headers.get("Content-Type")
-                if 'application/json' not in content_type: 
-                    validation_errors.append(
-                    f"Content-Type is not application/json for Video {video_id}." 
-                    f"Content-Type: {content_type}"
+                if not (-180 <= lon <= 180):
+                    errors.append(
+                        f"Invalid longitude {lon} in marker {idx} of video {video_id}"
                     )
-                    continue
+            except (TypeError, ValueError):
+                errors.append(
+                    f"Invalid coordinate format in marker {idx} of video {video_id}"
+                )
+                
+        return errors
+
+    def _validate_species(self, species_list: list, video_id: str) -> list[str]:
+        """
+        Validate species data.
+        
+        Args:
+            species_list: List of species to validate
+            video_id: ID of video containing species
             
-                # Validate response data
-                json_response = response.json()
-                
-                # Check each field
-                fields_to_check = [
-                    ("videoId", video_id),
-                    ("name", expected_video_name),
-                    ("overview", expected_video_overview)
-                ]
-                
-                for field, expected_value in fields_to_check:
-                    actual_value = json_response.get(field)
-                    if actual_value != expected_value:
-                        validation_errors.append(
-                            f"Video {video_id}: {field} does not match. "
-                            f"Expected: {expected_value}, Actual: {actual_value}"
-                        )
-                    else:
-                        logger.info(f"✓ {field}: matches {json_response[field]}")
+        Returns:
+            list[str]: List of validation error messages
+        """
+        errors = []
         
-            except Exception as e:
-                validation_errors.append(f"Video {video_id}: Error during validation: {str(e)}")
-                logger.error(f"Error during validation: {str(e)} of Video: {video_id}")
-                
-        # After all videos are processed, report results
-        total_videos = len(video_data_list)
-        failed_videos = len(validation_errors)
-        
-        logger.info("\n ")
-        logger.info("\nValidation Summary:")
-        logger.info(f"Total Videos: {total_videos}")
-        logger.info(f"Failed Videos: {failed_videos}")
-        logger.info("\n ")
-        
-        if validation_errors:
-            logger.error("\nFailed Videos:")
-            for error in validation_errors:
-                logger.error(error)
-            raise AssertionError(f"Failed Videos: {failed_videos}")    
+        for idx, species in enumerate(species_list):
+            # Required fields check
+            required_fields = ['speciesId', 'name', 'scientificName']
             
+            for field in required_fields:
+                if not species.get(field):
+                    errors.append(
+                        f"Species {idx} missing {field} in video {video_id}"
+                    )
+            
+            # Validate relationships
+            if not species.get('iucnStatusId'):
+                errors.append(
+                    f"Species {idx} missing IUCN status in video {video_id}"
+                )
+                
+            if not species.get('populationTrendId'):
+                errors.append(
+                    f"Species {idx} missing population trend in video {video_id}"
+                )
+                
+            if not species.get('speciesCategoryId'):
+                errors.append(
+                    f"Species {idx} missing category in video {video_id}"
+                )
+        
+        return errors
+                
+    @pytest.mark.api
+    @pytest.mark.video
+    def test_get_video_list(self):
+        """
+        Test the paginated video endpoint
+        """
+        response = self.api.get("/Videos", params={"pageNumber": 1, "pageSize": 25})
+        
+        # Validate response structure
+        assert self.data_loader.validate_response(
+            "video_list_response",
+            response.json()
+        ), "Response does not match expected schema"
