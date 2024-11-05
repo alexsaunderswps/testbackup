@@ -22,7 +22,7 @@ class TestAPIConnection:
     # Paramertized test for using valid authorization, valid status code and response time from multiple endpoints
     @pytest.mark.api
     @pytest.mark.connection
-    @pytest.mark.github
+    # @pytest.mark.github
     @pytest.mark.parametrize("endpoint", get_endpoints())
     @pytest.mark.parametrize("auth_type, expected_status_code", [
         ('valid', 200),
@@ -95,7 +95,7 @@ class TestAPIConnection:
     @pytest.mark.api
     @pytest.mark.connection
     @pytest.mark.bulk
-    @pytest.mark.github
+    # @pytest.mark.github
     def test_api_connection_bulk(self):
             """
             Alternative approach: Test all endpoints in a single test for better reporting
