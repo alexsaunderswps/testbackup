@@ -3,14 +3,33 @@ import jsonschema # type: ignore
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
+from utilities.utils import logger
 
 @dataclass
-class EndpointConfig:
+class BaseEndpointConfig:
+    """
+    Base class for endpoint configuration, all endpoint configurations should inherit from this class
+    """
     threshold: float
     description: str 
     methods: List[str]
     requires_auth: bool
-    max_page_size: Optional[int] = None
+
+@dataclass
+class PaginatedEndpointConfig(BaseEndpointConfig):
+    """
+    Paginated endpoint configuration
+    """
+    max_page_size: int = 25
+
+@dataclass
+class VideoEndpointConfig(BaseEndpointConfig):
+    """
+    Video endpoint configuration
+    """
+    video_id: int
+    video_name: str
+
 
 class DataLoader:
     """Enhanced data loader maintaining compatibility with existing test suite"""
@@ -60,17 +79,18 @@ class DataLoader:
         data = self._load_json_file(self.data_path / "endpoints.json")
         return list(data["ENDPOINTS"].keys())
 
-    def validate_response(self, endpoint: str, response_data: Dict) -> bool:
+    def validate_response(self, schema_name: str, response_data: Dict) -> bool:
         """Validate API response against schema"""
-        schema_file = self.schema_path / "response_schemas" / f"{endpoint}.json"
+        schema_file = self.schema_path / "response_schemas" / f"{schema_name}.json"
         if not schema_file.exists():
+            logger.warning(f"Schema file not found: {schema_file}")
             return True  # No schema defined = no validation needed
-            
-        schema = self._load_json_file(schema_file)
         try:
+            schema = self._load_json_file(schema_file)
             jsonschema.validate(instance=response_data, schema=schema)
             return True
-        except jsonschema.exceptions.ValidationError:
+        except jsonschema.exceptions.ValidationError as e:
+            logger.error(f"Schema validation failed: {str(e)}")
             return False
         
     def get_total_pages(self) -> int:
