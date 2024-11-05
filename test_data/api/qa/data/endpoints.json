@@ -1,0 +1,77 @@
+{
+    "DEFAULT_THRESHOLD": 2,
+    "ENDPOINTS": {
+        "/Videos": {
+            "threshold": 2,
+            "description": "Video management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/VideoCatalogue": {
+            "threshold": 2,
+            "description": "Video catalogue management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/MapMarker": {
+            "threshold": 2,
+            "description": "Map marker management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Countries": {
+            "threshold": 2,
+            "description": "Countries management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/IUCNStatus": {
+            "threshold": 2,
+            "description": "IUCN status management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/PopulationTrend": {
+            "threshold": 2,
+            "description": "Population trend management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Species": {
+            "threshold": 2,
+            "description": "Species management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Site": {
+            "threshold": 2,
+            "description": "Site management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/SpeciesCategory": {
+            "threshold": 2,
+            "description": "Species category management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Tag": {
+            "threshold": 2,
+            "description": "Tag management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Users": {
+            "threshold": 2,
+            "description": "Users management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Organization": {
+            "threshold": 2,
+            "description": "Organization management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        }
+    }
+}
