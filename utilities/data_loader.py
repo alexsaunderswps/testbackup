@@ -3,7 +3,8 @@ import json
 import os
 import random
 import importlib.util
-from jsonschema import validate, ValidationError
+
+from jsonschema import validate, ValidationError # type: ignore
 from typing import Any, Dict, List, Optional, Union
 from test_data.api.qa.api_endpoints import EndpointManager
 from utilities.utils import logger
