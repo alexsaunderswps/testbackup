@@ -5,7 +5,6 @@ import requests
 from .api_base import APIBase
 from utilities.utils import logger
 from utilities.data_handling import DataLoader
-from test_data.api.qa.api_endpoints import EndpointManager
 
 # Create module level dataloader instance for fixtures
 data_loader = DataLoader()

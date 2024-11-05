@@ -3,10 +3,8 @@ import json
 import os
 import random
 import importlib.util
-
 from jsonschema import validate, ValidationError # type: ignore
 from typing import Any, Dict, List, Optional, Union
-from test_data.api.qa.api_endpoints import EndpointManager
 from utilities.utils import logger
 
 class DataLoader:
@@ -407,7 +405,7 @@ class DataLoader:
 
 # Endpoint Manager
     @property
-    def endpoint_manager(self) -> 'EndpointManager':
+    def endpoint_manager(self):
         """
         Get an instance of the EndpointManager class.
 
