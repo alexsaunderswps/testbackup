@@ -1,7 +1,8 @@
 import pytest
 import random
 import requests
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError # type: ignore
+from api_base import APIBase
 from utilities.utils import logger
 from utilities.data_loader import DataLoader
 from test_data.api.qa.api_endpoints import EndpointManager
