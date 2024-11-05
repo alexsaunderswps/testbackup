@@ -2,7 +2,7 @@
 import pytest
 from typing import Dict, Any
 from .api_base import APIBase
-from utilities.data_loader import DataLoader
+from utilities.data_handling import DataLoader
 from utilities.utils import logger
 
 # Get endpoints needed

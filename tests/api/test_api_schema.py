@@ -2,9 +2,9 @@ import pytest
 import random
 import requests
 from jsonschema import validate, ValidationError # type: ignore
-from api_base import APIBase
+from .api_base import APIBase
 from utilities.utils import logger
-from utilities.data_loader import DataLoader
+from utilities.data_handling import DataLoader
 from test_data.api.qa.api_endpoints import EndpointManager
 
 # Create module level dataloader instance for fixtures
@@ -25,7 +25,7 @@ class TestAPISchemas:
         self.api = APIBase()
         self.data_loader = DataLoader()
         
-    @pytest.mark.api
+        
     @pytest.mark.schema
     def test_video_get_schema(self, video_schema_data, random_video_data):
         """_summary_

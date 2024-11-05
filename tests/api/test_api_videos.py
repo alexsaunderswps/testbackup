@@ -4,7 +4,7 @@ import random
 import requests
 from .api_base import APIBase
 from utilities.utils import logger
-from utilities.data_loader import DataLoader
+from utilities.data_handling import DataLoader
 from test_data.api.qa.api_endpoints import EndpointManager
 
 # Create module level dataloader instance for fixtures
@@ -144,7 +144,7 @@ class TestAPIVideos:
         Raises:
             AssertionError: If the response status code is not 200
         """
-        video_id = random_video_data["ID"]
+        video_id = random_video_data["guid"]
         expected_video_name = random_video_data["Name"]
         expected_video_overview = random_video_data["Overview"]
         
@@ -219,7 +219,7 @@ class TestAPIVideos:
         validation_errors = []
         
         for video_data in video_data_list:
-            video_id = video_data["ID"]
+            video_id = video_data["guid"]
             expected_video_name = video_data["Name"]
             expected_video_overview = video_data["Overview"]
             
