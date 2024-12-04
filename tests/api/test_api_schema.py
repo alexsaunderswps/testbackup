@@ -10,9 +10,9 @@ from utilities.data_handling import DataLoader
 # Create module level dataloader instance for fixtures
 data_loader = DataLoader()
 
-@pytest.fixture(scope='session')
-def video_schema_data():
-    return data_loader.get_video_schema_data()
+#@pytest.fixture(scope='session')
+#def video_schema_data():
+#    return data_loader.get_video_schema_data()
 
 @pytest.fixture(scope='session')
 def random_video_data():
