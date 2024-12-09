@@ -45,14 +45,14 @@ class VideosPage(BasePage):
         VIDEO_TABLE_BODY = "//table//tbody"
         THUMBNAIL_HEADER = "//table//th[text()='Thumbnail']"
         NAME_HEADER = "//table//div[text()='Name']"
-        PUBLISHED_HEADER = "//table//div[text()='Published']"
+        ORGANIZATION_HEADER = "//table//div[text()='Organization']"
         DESCRIPTION_HEADER = "//table//th[text()='Description']"
         COUNTRY_HEADER = "//table//th[text()='Country']"
         VIDEO_TABLE_ROW = "//table//tbody/tr"
     
     class SortingElements:
         NAME_SORT = "//table//div[text()='Name']//button//i"
-        PUBLISHED_SORT = "//table//div[text()='Published']//button//i"
+        ## PUBLISHED_SORT = "//table//div[text()='Published']//button//i"
         
         
     class PaginationElements:
@@ -139,11 +139,11 @@ class VideosPage(BasePage):
         
         for page_element in [self.VideoTableElements.THUMBNAIL_HEADER,
                         self.VideoTableElements.NAME_HEADER,
-                        self.VideoTableElements.PUBLISHED_HEADER,
+                        self.VideoTableElements.ORGANIZATION_HEADER,
                         self.VideoTableElements.DESCRIPTION_HEADER,
                         self.VideoTableElements.COUNTRY_HEADER,
                         self.SortingElements.NAME_SORT,
-                        self.SortingElements.PUBLISHED_SORT
+                        ## self.SortingElements.PUBLISHED_SORT
         ]:
             try:        
                 if self.locator.is_element_present(page_element):
