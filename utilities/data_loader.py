@@ -1,4 +1,6 @@
 # utilities/data_loader.py is a utility file that contains the data loader class.
+# This file has been sunsetted and is no longer in use. The functionality has been replaced by the data_handling.py file.
+
 import json
 import os
 import random
