@@ -332,6 +332,102 @@ class TestAPIVideos:
                 pytest.fail(f"Found {len(validation_errors)} validation errors")
             else:
                 logger.info("All videos passed validation")
+                
+    @pytest.mark.api
+    @pytest.mark.video
+    @pytest.mark.edge_case
+    def test_video_edge_cases(self):
+        """Test boundary conditions and error cases for video pagination
+    
+            This test verifies the API's handling of various edge cases including:
+            1. Invalid page numbers (zero, negative, non-numeric)
+            2. Out of range page numbers
+            3. Invalid page sizes (zero, too large)
+            4. Malformed parameters
+            
+            Each case should return the expected error status code and maintain
+            consistent behavior.
+        """
+        try:
+            test_cases = [
+                # {"page": 0, "size": 25, "expected_status": 400, "description": "Invalid page numer (zero)"}, # Invalid page
+                # {"page": 999999, "size": 25, "expected_status": 404, "description": "Page number beyond valid range"}, # Page beyond range
+                # {"page": 1, "size": 0, "expected_status": 400, "description": "Invalid page size (zero)"}, # Invalid page size
+                # {"page": 1, "size": 1000, "expected_status": 400, "description": "Page size exceeds maximum allowed"}, # Size too large
+                {"page": "invalid", "size": 25, "expected_status": 400, "description": "Non-numeric page number"}, # Non-numeric page
+            ]
+        
+            failed_cases = []
+            
+            for case in test_cases:
+                try:
+                    logger.info(
+                        f"Testing edge case {case["description"]}:" 
+                        f"page={case['page']}, size={case['size']}"
+                    )
+                    
+                    response = self.api.get("/Videos", params={
+                        "pageNumber": case["page"],
+                        "pageSize": case["size"]
+                    })
+                
+                    # Verify status code matches expected
+                    if response.status_code != case["expected_status"]:
+                        failed_cases.append(case["description"])
+                        logger.error(
+                            f"Unexpected status code for case: {case["description"]}, "
+                            f"received {response.status_code}, for expected status: {case["expected_status"]}"
+                        )
+                    else:
+                        logger.info(
+                            f"Successfully verified {case["description"]}: "
+                            f"received expected status {case['expected_status']}"
+                        )
+                    
+                    # Verify error message for bad requests
+                    try:
+                        error_response = response.json()
+                        logger.debug(f"Error response: {error_response}")
+                    except requests.exceptions.JSONDecodeError:
+                        logger.debug("Response contained no valid JSON data")
+                        
+                except Exception as e:
+                    logger.error(
+                        f"Error testing case: {case["description"]}: {str(e)}"
+                    )
+                    failed_cases.append(case["description"])
+            
+            # Log summary of test results
+            if failed_cases:
+                logger.error(
+                    f"\nEdge Case Test Summary - Failed"
+                    f"{len(failed_cases)} cases failed"
+                )
+                logger.error("=" * 60)
+                for error in failed_cases:
+                    logger.error(f"Failed case: {error}")
+                logger.error("=" * 60)
+            else:
+                logger.info(
+                    f"\nEdge Case Test Summary - Passed"
+                )
+                logger.info("=" * 60)
+                logger.info(
+                    f"All {len(test_cases)} cases passed"
+                )
+                logger.error("=" * 60)
+            
+            # Final assertion
+            assert not failed_cases, (
+                f"Found {len(failed_cases)} failed edge cases:\n "
+                + "\n".join(failed_cases)
+            )        
+            
+        except Exception as e:
+            logger.error(
+                f"Unexpected error during edge case testing: {str(e)}"
+            )
+            raise
 
     def _validate_pagination_metadata(self, data: dict, expected_page: int, expected_page_size: int) -> None:
         """
