@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "required": ["name", "overview", "thumbnailUrl", "country", "videoResolutionId", "species"],
+    "required": ["name", "overview", "thumbnailUrl", "countryObtainedId", "videoResolutionId", "species"],
     "properties": {
         "rowVersion": {"type": "string"},
         "videoId": {"type": "string", "format": "uuid"},
@@ -15,21 +15,64 @@
         "rating": {"type": "number", "minimum": 0, "maximum": 5},
         "mapMarkers": {
             "type": "array",
-            "items": {"type": "object"}
+            "items": {
+                "type": "object",
+                "properties": {
+                    "mapMarkerId": {"type": "string", "format": "uuid"},
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "rowVersion": {"type": "string"},
+                    "videos": {
+                        "type": "array",
+                        "items": {"type": ["string", "null"]}
+                    },
+                    "organizationId": {"type": "string", "format": "uuid"},   
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"},
+                    "iconID": {"type": "integer"}
+                }
+            }
         },
         "startTime": {"type": "string", "format": "time"},
         "endTime": {"type": "string", "format": "time"},
         "countryObtainedId": {"type": "string", "format": "uuid"},
         "tags": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tagId": {"type": "string", "format": "uuid"},
+                    "name": {"type": "string"},
+                    "videos": {
+                        "type": "array",
+                        "items": {"type": ["string", "null"]}
+                    }
+                }
+            }
         },
         "lastEditedBy": {"type": "string"},
         "lastEditedDate": {"type": "string", "format": "date-time"},
         "species": {
             "type": "array",
-            "items": {"type": "string", "format": "uuid"}
-        },
+            "items": {
+                "type": "object",
+                    "properties": {
+                    "speciesId": {"type": "string", "format": "uuid"},
+                    "name": {"type": "string"},
+                    "colloquialName": {"type": "string"},
+                    "scientificName": {"type": "string"},
+                    "description": {"type": "string"},
+                    "iucnStatusId": {"type": "string", "format": "uuid"},
+                    "populationTrendId": {"type": "string", "format": "uuid"},
+                    "speciesCategoryId": {"type": "string", "format": "uuid"},
+                    "rowVersion": {"type": "string"},
+                    "videos": {
+                        "type": "array",
+                        "items": {"type": ["string", "null"]}
+                    }
+                }
+        }
+    },
         "videoFormat": {"type": "integer", "minimum": 0},
         "videoStatusId": {"type": "integer", "minimum": 0},
         "videoResolutionId": {"type": "integer", "minimum": 0}
