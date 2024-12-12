@@ -279,6 +279,7 @@ class TestAPIVideos:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.github
+    @pytest.mark.debug
     def test_video_data_integrity(self):
         """
         Test video data meets both schema requirements and business rules.
@@ -293,45 +294,112 @@ class TestAPIVideos:
         logger.info("\nTesting Video Data Integrity")
         
         # Test multiple pages to ensure consistent data quality
-        page_size = 25
-        pages_to_test = 2  # Test first two pages
         
-        for page in range(1, pages_to_test + 1):
-            response = self.api.get("/Videos", params={
-                "pageNumber": page,
-                "pageSize": page_size
-            })
-            
-            assert response.status_code == 200, f"Failed to get page {page}"
-            data = response.json()
-            
-            # 1. Schema Validation
-            assert self.data_loader.validate_response(
-                "video_list_response", 
-                data
-            ), "Response failed schema validation"
-            
-            # 2. Metadata Validation
-            self._validate_pagination_metadata(data, page, page_size)
-            
-            # 3. Video Content Validation
-            validation_errors = []
-            for video in data["results"]:
-                errors = self._validate_video_content(video)
-                if errors:
-                    validation_errors.extend(errors)
-
-            # Report Results
-            total_videos = len(data["results"])
-            logger.info(f"\nValidated {total_videos} videos on page {page}")
-            
-            if validation_errors:
-                logger.error("\nValidation Errors:")
-                for error in validation_errors:
-                    logger.error(error)
-                pytest.fail(f"Found {len(validation_errors)} validation errors")
+        page_size = 25
+        test_pages = self._get_random_pages_to_test(3)
+        all_validation_errors = []
+        test_summary = []
+        
+        for page in test_pages:
+            try:
+                # Make API request
+                response = self.api.get("/Videos", params={
+                    "pageNumber": page,
+                    "pageSize": page_size
+                })
+                
+                if response.status_code != 200:
+                    error_msg = f"Failed to get page: {page}: Status code {response.status_code}"
+                    test_summary.append(error_msg)
+                    logger.error(error_msg)
+                    continue
+                
+                try:
+                    data = response.json()
+                except ValueError:
+                    error_msg = f"Page {page}: Failed to parse JSON response"
+                    test_summary.append(error_msg)
+                    logger.error(error_msg)
+                    continue
+                
+                # Verify response structure before processing
+                if not isinstance(data, dict):
+                    error_msg = f"Page {page}: Invalid response structure, not a dictionary"
+                    test_summary.append(error_msg)
+                    logger.error(error_msg)
+                    continue
+                
+                results = data.get("results")
+                if not isinstance(results, list):
+                    error_msg = f"Page {page}: Missing or invalid 'results' field in response"
+                    test_summary.append(error_msg)
+                    logger.error(error_msg)
+                    continue
+                
+                # Track validation errors for this page
+                page_validation = {
+                    "page": page,
+                    "total_videos": len(data["results"]),
+                    "errors": []
+                }
+                
+                # 1. Schema Validation
+                if not self.data_loader.validate_response("video_list_response", data):
+                    page_validation["errors"].append(f"Page {page}: Schema validation failed")
+                
+                # 2. Metadata Validation
+                try:
+                    self._validate_pagination_metadata(data, page, page_size)
+                except AssertionError as e:
+                    page_validation["errors"].append(f"Page {page}: Metadata validation failed: {str(e)}")
+                
+                # 3. Video Content Validation
+                page_errors = []
+                for video in data.get("results", []):
+                    errors = self._validate_video_content(video)
+                    if errors:
+                        page_errors.extend(errors)
+                
+                if page_errors:
+                    page_validation["errors"].extend(page_errors)
+                    
+                test_summary.append(page_validation)
+                all_validation_errors.extend(page_errors)
+                
+                # Log results for this page
+                logger.info(f"\nValidated {page_validation["total_videos"]} videos on page {page}")
+                if page_validation["errors"]:
+                    logger.error(
+                        f"Found {len(page_validation["errors"])} validation errors on page {page}"
+                    )
+            except Exception as e:
+                logger.error(f"Unexpected error processing page {page}: {str(e)}")
+                test_summary.append(f"Page {page}: Failed with exception {str(e)}")
+                
+        # Final test results reporting
+        logger.info("\n=== Test Summary ===")
+        for result in test_summary:
+            if isinstance(result, dict):
+                logger.info(
+                    f"Page {result["page"]}: Validated {result["total_videos"]} videos"
+                )
+                if result["errors"]:
+                    for errors in result["errors"]:
+                        logger.error(f" -  {errors}")
+                
             else:
-                logger.info("All videos passed validation")
+                logger.error(result) # For pages that failed completely
+        
+        # Final assertion that includes all errors
+        if all_validation_errors:
+            logger.error(
+                f"\nTotal validation errors across all pages: {len(all_validation_errors)}"
+            )
+            pytest.fail(
+                f"Found {len(all_validation_errors)} validation errors"
+                f"across {len(test_pages)} pages"
+                )
+
                 
     @pytest.mark.api
     @pytest.mark.video
@@ -466,6 +534,8 @@ class TestAPIVideos:
         """
         errors = []
         video_id = video.get('videoId', 'unknown')
+        
+        logger.debug(f"\nValidating video content for ID: {video_id}")
 
         # Required Fields Validation
         required_fields = {
@@ -551,44 +621,129 @@ class TestAPIVideos:
 
     def _validate_species(self, species_list: list, video_id: str) -> list[str]:
         """
-        Validate species data.
+        Validate species data associated with a video.
+        
+        This function performs comprehensive validation of species data including:
+        - Data structure validation (ensuring we have proper lists and dictionaries)
+        - Required field validation (checking for mandatory fields)
+        - Relationship validation (verifying required relationships exist)
         
         Args:
-            species_list: List of species to validate
-            video_id: ID of video containing species
+            species_list: List of species objects to validate
+            video_id: ID of the video these species belong to
             
         Returns:
-            list[str]: List of validation error messages
+            list[str]: List of validation error messages, empty if no errors found
         """
         errors = []
         
-        for idx, species in enumerate(species_list):
-            # Required fields check
-            required_fields = ['speciesId', 'name', 'scientificName']
+        # First, let's validate our input data structure
+        logger.debug(f"\nValidating species for video {video_id}")
+        logger.debug(f"Species list type: {type(species_list)}")
+        
+        # Early return if species_list isn't a list
+        if not isinstance(species_list, list):
+            error_msg = f"Invalid species data format for video {video_id}. Expected list, got {type(species_list)}"
+            logger.error(error_msg)
+            return [error_msg]
+        
+        # Process each species in the list    
+        for idx, species in enumerate(species_list, 1):
+            # Log the species data we're processing
+            logger.debug(f"Processing species {idx}: {species}")
             
-            for field in required_fields:
-                if not species.get(field):
-                    errors.append(
-                        f"Species {idx} missing {field} in video {video_id}"
-                    )
+            # Validate species entry is a dictionary
+            if not isinstance(species, dict):
+                error_msg = f"Invalid species entry format in video {video_id}. Expected dictionary, got {type(species)}"
+                errors.append(error_msg)
+                continue
             
-            # Validate relationships
-            if not species.get('iucnStatusId'):
-                errors.append(
-                    f"Species {idx} missing IUCN status in video {video_id}"
-                )
+            try:
+                # Safely get identifying information using the correct method name
+                species_name = species.get('name', 'Unknown Species')
+                species_id = species.get('speciesId', 'No ID')  # Fixed the typo here
                 
-            if not species.get('populationTrendId'):
-                errors.append(
-                    f"Species {idx} missing population trend in video {video_id}"
-                )
+                # Required fields validation
+                required_fields = {
+                    'speciesId': 'Species ID',
+                    'name': 'Name',
+                    'scientificName': 'Scientific Name'
+                }
                 
-            if not species.get('speciesCategoryId'):
-                errors.append(
-                    f"Species {idx} missing category in video {video_id}"
+                for field, display_name in required_fields.items():
+                    if not species.get(field):
+                        errors.append(
+                            f"Species '{species_name}' (ID: {species_id}) missing {display_name} "
+                            f"in video {video_id}"
+                        )
+                
+                # Only validate relationships if we have a valid species ID
+                if species.get('speciesId'):
+                    relationships = {
+                        'iucnStatusId': 'IUCN status',
+                        'populationTrendId': 'population trend',
+                        'speciesCategoryId': 'category'
+                    }
+                    
+                    for field, display_name in relationships.items():
+                        if not species.get(field):
+                            errors.append(
+                                f"Species '{species_name}' (ID: {species_id}) missing {display_name} "
+                                f"in video {video_id}"
+                            )
+                            
+            except Exception as e:
+                # Catch any unexpected errors during species validation
+                error_msg = (
+                    f"Unexpected error validating species {idx} in video {video_id}: {str(e)}"
                 )
+                logger.error(error_msg)
+                errors.append(error_msg)
         
         return errors
+    
+    def _get_random_pages_to_test(self, num_pages: int =2) -> tuple[int]:
+        """
+        Get a list of random page numbers to test
+        
+        Args:
+            num_pages: Number of pages to generate
+            
+        Returns:
+            tuple[int]: List of random page numbers
+        """
+        # Make the inital API call to get the total page count
+        response = self.api.get("/Videos", params={"pageNumber": 1, "pageSize": 25})
+        
+        try:
+            total_pages = response.json()["pageCount"]
+            
+            # If we request more pages than exist, adjust num_pages down
+            num_pages = min(num_pages, total_pages)
+            
+            if total_pages < 2:
+                # If there is only one page, reutn a tuple of that page repeated
+                return tuple([1] * num_pages)
+            
+            # Create a list to store our random pages
+            random_pages = []
+            
+            # Keep generating random pages until we have enough unique ones
+            while len(random_pages) < num_pages:
+                # Generate a new random page
+                new_page = random.randint(1, total_pages)
+                
+                # Only add it if we haven't seen this page number before
+                if new_page not in random_pages:
+                    random_pages.append(new_page)
+            
+            # Convert our list to a tuple before returning it
+            return tuple(random_pages)
+        
+        except (KeyError, ValueError) as e:
+            logger.error(f"Failed to get page count: {str(e)}")
+            # Fall back to testing sequential pages starting from page 1
+            return tuple(range(1, num_pages + 1))
                 
     @pytest.mark.api
     @pytest.mark.video
