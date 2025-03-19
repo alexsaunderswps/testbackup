@@ -277,7 +277,7 @@ def logged_in_browser(setup_isolated, request):
                             can be used to interact with the authenticated application.
     
     Note:
-        - This fixture uses the suername and password specified in the pytest command-lie options
+        - This fixture uses the username and password specified in the pytest command-lie options
             (--username and --password), falling back to default admin credentials if not provided.
         - The fixture logs the start and end of its execution, as well as login attempts for each browser.
         - After yielding the logged-in pages, any necessary teardown could be performed here,

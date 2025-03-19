@@ -2,7 +2,7 @@
 import pytest
 import time
 from pytest_check import check
-from page_objects.dashboard.countries_page import CountriesPage
+from page_objects.definitions_menu.countries_page import CountriesPage
 from page_objects.common.base_page import BasePage
 from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
