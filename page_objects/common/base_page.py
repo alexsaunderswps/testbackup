@@ -36,16 +36,20 @@ class BasePage:
         VIDEOS_LINK = "//li//a[contains(@href,'/') and contains(text(), 'Videos')]"
         VIDEO_CATALOGUES_LINK = "//li//a[@href='/videoCatalogues']"
         MAP_MARKERS_LINK = "//li//a[@href='/mapMarkers']"
-        USERS_LINK = "//li//a[@href='/users' and text()='Users']"
+        SPECIES_LINK = "//a[@href='/species']"
+        ADMIN_BUTTON = "//li//button[text()='Admin']"
         DEFINITIONS_BUTTON = "//li//button[text()='Definitions']"
-        ORGS_LINK = "//li//a[@href='/organizations']"
-        INSTA_LINK = "//li//a[@href='/developmentNotice' and text()='Installations']"
+        
+        #Dropdown choices from Admin button
+        INSTALLATIONS_LINK = "//a[@href='/installations']"
+        DEVICES_LINK = "//a[@href='/devices']"
+        USERS_LINK = "//a[@href='/users']"
+        ORGANIZATIONS_LINK = "//a[@href='/organizations']"
 
-        # Dropdown choices from Definitions link
+        # Dropdown choices from Definitions button
         COUNTRIES_LINK = "//a[@href='/countries']"
         IUCNSTATUS_LINK = "//a[@href='/iucnStatus']"
         POP_TREND_LINK = "//a[@href='/populationTrend']"
-        SPECIES_LINK = "//a[@href='/species']"
         TAGS_LINK = "//a[text()='Tags']"
     
     # Check for common Navigation elements across pages
@@ -63,10 +67,9 @@ class BasePage:
                         self.NavigationLocators.VIDEOS_LINK,
                         self.NavigationLocators.VIDEO_CATALOGUES_LINK,
                         self.NavigationLocators.MAP_MARKERS_LINK,
-                        self.NavigationLocators.USERS_LINK,
+                        self.NavigationLocators.SPECIES_LINK,
+                        self.NavigationLocators.ADMIN_BUTTON,
                         self.NavigationLocators.DEFINITIONS_BUTTON,
-                        self.NavigationLocators.ORGS_LINK,
-                        self.NavigationLocators.INSTA_LINK,
         ]:
             try:
                 if self.locator.is_element_present(page_element):
@@ -274,20 +277,20 @@ class BasePage:
         """
         self.interactor.element_click(self.NavigationLocators.MAP_MARKERS_LINK)
     
-    def find_users_link(self):
+    def find_admin_button(self):
         """
         Check if the Users link is present on the page.
 
         Returns:
             bool: True if the Users link is present, False otherwise.
         """
-        return self.locator.is_element_present(self.NavigationLocators.USERS_LINK)
+        return self.locator.is_element_present(self.NavigationLocators.ADMIN_BUTTON)
     
-    def go_users_page(self):
+    def click_admin_button(self):
         """
         Click the Users link to navigate to the Users page.
         """
-        self.interactor.element_click(self.NavigationLocators.USERS_LINK)
+        self.interactor.element_click(self.NavigationLocators.ADMIN_BUTTON)
 
     def find_organizations_link(self):
         """
