@@ -10,7 +10,6 @@ cffi==1.16.0
 cfgv==3.4.0
 chardet==5.2.0
 charset-normalizer==3.3.2
-chromedrivermanager==0.0.1
 cleo==2.1.0
 click==8.1.7
 colorama==0.4.6
