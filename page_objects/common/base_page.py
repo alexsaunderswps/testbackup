@@ -36,7 +36,7 @@ class BasePage:
         VIDEOS_LINK = "//li//a[contains(@href,'/') and contains(text(), 'Videos')]"
         VIDEO_CATALOGUES_LINK = "//li//a[@href='/videoCatalogues']"
         MAP_MARKERS_LINK = "//li//a[@href='/mapMarkers']"
-        USERS_LINK = "//li//a[@href='/developmentNotice' and text()='Users']"
+        USERS_LINK = "//li//a[@href='/users' and text()='Users']"
         DEFINITIONS_BUTTON = "//li//button[text()='Definitions']"
         ORGS_LINK = "//li//a[@href='/organizations']"
         INSTA_LINK = "//li//a[@href='/developmentNotice' and text()='Installations']"
