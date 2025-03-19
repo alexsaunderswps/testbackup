@@ -89,6 +89,32 @@ class BasePage:
             self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
         return all_elements_present
     
+    def verify_all_admin_links_present(self) -> bool:
+        self.logger.info("Verifying that all expected naivigation elements are present in: Admin Dropdown")
+        all_elements_present = True
+        self.interactor.element_click(self.NavigationLocators.ADMIN_BUTTON)
+    
+        for page_element in [self.NavigationLocators.INSTALLATIONS_LINK,
+                        self.NavigationLocators.DEVICES_LINK,
+                        self.NavigationLocators.USERS_LINK,
+                        self.NavigationLocators.ORGANIZATIONS_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"{page_element} was located successfully.")
+                else:
+                    raise NoSuchElementException(f"Element {page_element} Not Found")
+                # self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
+                self.logger.error(f"Could not find {page_element} on page.")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
+
+    
     def verify_all_definition_links_present(self) -> bool:
         self.logger.info("Verifying that all expected naivigation elements are present in: Definintions Dropdown")
         all_elements_present = True
@@ -277,50 +303,84 @@ class BasePage:
         """
         self.interactor.element_click(self.NavigationLocators.MAP_MARKERS_LINK)
     
+    # Handle Admin as it is a dropdown list
+    
     def find_admin_button(self):
         """
-        Check if the Users link is present on the page.
+        Check if the Admin button is present on the page.
 
         Returns:
-            bool: True if the Users link is present, False otherwise.
+            bool: True if the Admin button is present, False otherwise.
         """
         return self.locator.is_element_present(self.NavigationLocators.ADMIN_BUTTON)
     
     def click_admin_button(self):
         """
-        Click the Users link to navigate to the Users page.
+        Click the Admin Button to open the Admin dropdown.
         """
         self.interactor.element_click(self.NavigationLocators.ADMIN_BUTTON)
-
-    def find_organizations_link(self):
-        """
-        Check if the Organizations link is present on the page.
-
-        Returns:
-            bool: True if the Organizations link is present, False otherwise.
-        """
-        return self.locator.is_element_present(self.NavigationLocators.ORGS_LINK)
-    
-    def go_organizations_page(self):
-        """
-        Click the Organizations link to navigate to the Organizations page.
-        """
-        self.interactor.element_click(self.NavigationLocators.ORGS_LINK)
         
+    # Navigate the Admin dropdown elements
+    
     def find_installations_link(self):
         """
-        Check if the Installations link is present on the page.
+        Check if the Installations link is present in the Admin dropdown.
 
         Returns:
             bool: True if the Installations link is present, False otherwise.
         """
-        return self.locator.is_element_present(self.NavigationLocators.INSTA_LINK)
+        return self.locator.is_element_present(self.NavigationLocators.INSTALLATIONS_LINK)
     
     def go_installations_page(self):
         """
         Click the Installations link to navigate to the Installations page.
         """
-        self.interactor.element_click(self.NavigationLocators.INSTA_LINK)
+        self.interactor.element_click(self.NavigationLocators.INSTALLATIONS_LINK)
+        
+    def find_devices_link(self):
+        """
+        Check if the Devices link is present in the Admin dropdown.
+
+        Returns:
+            bool: True if the Devices link is present, False otherwise.
+        """
+        return self.locator.is_element_present(self.NavigationLocators.DEVICES_LINK)
+    
+    def go_devices_page(self):
+        """
+        Click the Devices link to navigate to the Devices page.
+        """
+        self.interactor.element_click(self.NavigationLocators.DEVICES_LINK)
+        
+    def find_users_link(self):
+        """
+        Check if the Users link is present in the Admin dropdown.
+
+        Returns:
+            bool: True if the Users link is present, False otherwise.
+        """
+        return self.locator.is_element_present(self.NavigationLocators.USERS_LINK)
+    
+    def go_users_page(self):
+        """
+        Click the Users link to navigate to the Users page.
+        """
+        self.interactor.element_click(self.NavigationLocators.USERS_LINK)
+
+    def find_organizations_link(self):
+        """
+        Check if the Organizations link is present in the Admin dropdown.
+
+        Returns:
+            bool: True if the Organizations link is present, False otherwise.
+        """
+        return self.locator.is_element_present(self.NavigationLocators.ORGANIZATIONS_LINK)
+    
+    def go_organizations_page(self):
+        """
+        Click the Organizations link to navigate to the Organizations page.
+        """
+        self.interactor.element_click(self.NavigationLocators.ORGANIZATIONS_LINK)
         
     # Handle Definitions as it is a dropdown list
     
