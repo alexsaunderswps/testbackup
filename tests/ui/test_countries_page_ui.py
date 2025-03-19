@@ -82,6 +82,22 @@ class TestCountriesPageUI:
         
     @pytest.mark.UI
     @pytest.mark.countries
+    @pytest.mark.debug 
+    def test_countries_page_admin_elements(self, countries_page):
+        """_summary_
+
+        Args:
+            countries_page (_type_): _description_
+        """
+        for cp in countries_page:
+            logger.debug("Starting test_countries_page_definition_elements")
+            all_elements = cp.verify_all_admin_links_present()
+            check.is_true(all_elements, "Admin elements not found in Admin dropdown menu on Countries Page")
+            logger.info("Verification Successful :: All Admin elements found in Admin dropdown menu on Countries Page")
+            logger.debug("Finished test_countries_page_admin_elements")
+        
+    @pytest.mark.UI
+    @pytest.mark.countries
     #@pytest.mark.debug 
     def test_countries_page_definition_elements(self, countries_page):
         """_summary_

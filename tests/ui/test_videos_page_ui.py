@@ -56,8 +56,23 @@ class TestVideoPageUI:
                 logger.error(f"Verification failed :: Some elements missing from Videos Page for {vp.driver.name}")
                 all_browsers_passed = False
         logger.info("Finished test_video_page_nav_elements")
-        assert all_browsers_passed, "One or more browsers failed the navigation elements check"        
+        assert all_browsers_passed, "One or more browsers failed the navigation elements check"      
         
+    @pytest.mark.UI
+    @pytest.mark.video
+    #@pytest.mark.debug
+    def test_video_page_admin_elements(self, videos_page):
+        """_summary_
+
+        Args:
+            login_page (_type_): _description_
+        """
+        for vp in videos_page:
+            logger.debug("Starting test_videos_page_admin_elements")
+            all_elements = vp.verify_all_admin_links_present()
+            check.is_true(all_elements, "Admin elements missing from Admin dropdown menu on Videos Page")
+            logger.info("Verification Successful :: All Admin elements found in Admin dropdown menu Videos Page")  
+            logger.debug("Finished test_video_page_admin_elements")
 
     @pytest.mark.UI
     @pytest.mark.video
@@ -69,9 +84,11 @@ class TestVideoPageUI:
             login_page (_type_): _description_
         """
         for vp in videos_page:
+            logger.debug("Starting test_videos_page_definition_elements")
             all_elements = vp.verify_all_definition_links_present()
-            check.is_true(all_elements, "Navigation elements missing from Videos Page")
-            logger.info("Verification Successful :: All Navigation elements found on Videos Page")
+            check.is_true(all_elements, "Definition elements missing from Definitions dropdown menu on Videos Page")
+            logger.info("Verification Successful :: All Definition elements found in Definitions dropdown menu Videos Page")
+            logger.debug("Finished test_videos_page_definition_elements")
     
     @pytest.mark.UI
     @pytest.mark.video
