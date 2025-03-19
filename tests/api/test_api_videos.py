@@ -24,7 +24,7 @@ class TestAPIVideos:
 
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     # @pytest.mark.github
     def test_basic_pagination_mathematics(self):
         """
@@ -82,7 +82,7 @@ class TestAPIVideos:
     
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_page_size_constraints(self):
         """
         Verifies that:
@@ -195,7 +195,7 @@ class TestAPIVideos:
     
     @pytest.mark.api
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_no_duplicate_videos(self):
         """
         This test verifies that:
@@ -279,7 +279,7 @@ class TestAPIVideos:
     @pytest.mark.api
     @pytest.mark.video
     @pytest.mark.github
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_video_data_integrity(self):
         """
         Test video data meets both schema requirements and business rules.
