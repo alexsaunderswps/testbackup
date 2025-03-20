@@ -33,32 +33,123 @@ class SpeciesPage(BasePage):
         self.screenshot = ScreenshotManager()
         self.logger = logger
         
-        class SpeciesPageElements:
-            """_summary_
-            """
-            SPECIES_PAGE_TITLE = "//h1[text()='Species']"
-            SEARCH_TEXT = '//input[@placeholder="Filter by name"]'
-            SEARCH_BUTTON = "//button[text()='Search']"
-            ADD_SPECIES_LINK = "//a[@href='/species/add']"
+    class SpeciesPageElements:
+        """_summary_
+        """
+        SPECIES_PAGE_TITLE = "//h1[text()='Species']"
+        SEARCH_TEXT = '//input[@placeholder="Filter by name"]'
+        SEARCH_BUTTON = "//button[text()='Search']"
+        ADD_SPECIES_LINK = "//a[@href='/species/add']"
 
-        class SpeciesTableElements:
-            """_summary_
-            """
-            SPECIES_TABLE_BODY = "//table//tbody"
-            SPECIES_TABLE_ROWS = "//table//tbody/tr"
-            SPECIES_NAME_HEADER = "//table//div[text()='Name']"
-            SPECIES_COLLOQUIAL_HEADER = "//table//div[text()='Colloquial Name']"
-            SPECIES_SCIENTIFIC_HEADER = "//table//th[text()='Scientific Name']"
-            SPECIES_DESCRIPTION_HEADER = "//table//th[text()='Description']"
-            SPECIES_IUCN_HEADER = "//table//th[text()='IUCN Status']"
-            SPECIES_POPULATION_HEADER = "//table//th[text()='Population Trend']"
-            SPECIES_CATEGORY_HEADER = "//table//th[text()='Species Category']"
+    class SpeciesTableElements:
+        """_summary_
+        """
+        SPECIES_TABLE_BODY = "//table//tbody"
+        SPECIES_TABLE_ROWS = "//table//tbody/tr"
+        SPECIES_NAME_HEADER = "//table//div[text()='Name']"
+        SPECIES_COLLOQUIAL_HEADER = "//table//div[text()='Colloquial Name']"
+        SPECIES_SCIENTIFIC_HEADER = "//table//th[text()='Scientific Name']"
+        SPECIES_DESCRIPTION_HEADER = "//table//th[text()='Description']"
+        SPECIES_IUCN_HEADER = "//table//th[text()='IUCN Status']"
+        SPECIES_POPULATION_HEADER = "//table//th[text()='Population Trend']"
+        SPECIES_CATEGORY_HEADER = "//table//th[text()='Species Category']"
+        
+    class PaginationElements:
+        PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
+        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
+        NEXT_PAGE= "//ul//a[@aria-label='Next page']"
+        CURRENT_PAGE = "//ul//a[@aria-current='page']"
+        FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
+        BW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump backward']"
+        SHOWING_COUNT = "//span[contains(text(),'Showing')]"
             
-        class PaginationElements:
-            PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
-            PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
-            NEXT_PAGE= "//ul//a[@aria-label='Next page']"
-            CURRENT_PAGE = "//ul//a[@aria-current='page']"
-            FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
-            BW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump backward']"
-            SHOWING_COUNT = "//span[contains(text(),'Showing')]"
+    # Check Page Element presence
+    def verify_page_title_present(self):
+        return super().verify_page_title_present(self.SpeciesPageElements.SPECIES_PAGE_TITLE)
+    
+    def verify_all_species_search_elements_present(self) -> bool:
+        """_summary_
+        
+        Returns:
+            _type_: _description_
+        """
+        self.logger.info("Verifying that all expected video search elements are present in: Species Page")
+        all_elements_present = True
+        
+        for page_element in [self.SpeciesPageElements.SEARCH_TEXT,
+                        self.SpeciesPageElements.SEARCH_BUTTON,
+                        self.SpeciesPageElements.ADD_SPECIES_LINK,
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"Element found: {page_element}")
+                else:
+                    raise NoSuchElementException(f"Element not found: {page_element}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {page_element}")
+                self.logger.error(f"Element not found: {page_element}")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
+    
+    def verify_all_species_table_elements_present(self) -> bool:
+        """_summary_
+        
+        Returns:
+            _type_: _description_
+        """
+        self.logger.info("Checking if all Species Table elements are present")
+        all_elements_present = True
+        
+        for page_element in [self.SpeciesTableElements.SPECIES_NAME_HEADER,
+                                self.SpeciesTableElements.SPECIES_COLLOQUIAL_HEADER,
+                                self.SpeciesTableElements.SPECIES_SCIENTIFIC_HEADER,
+                                self.SpeciesTableElements.SPECIES_DESCRIPTION_HEADER,
+                                self.SpeciesTableElements.SPECIES_IUCN_HEADER,
+                                self.SpeciesTableElements.SPECIES_POPULATION_HEADER,
+                                self.SpeciesTableElements.SPECIES_CATEGORY_HEADER
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"Element found: {page_element}")
+                else:
+                    raise NoSuchElementException(f"Element not found: {page_element}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {page_element}")
+                self.logger.error(f"Element not found: {page_element}")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
+    
+    def verify_all_pagination_elements_present(self) -> bool:
+        """_summary_
+        
+        Returns:
+            _type_: _description_
+        """
+        self.logger.info("Checking if all Pagination elements are present")
+        all_elements_present = True
+        
+        for page_element in [self.PaginationElements.PREVIOUS_PAGE,
+                                self.PaginationElements.NEXT_PAGE,
+                                self.PaginationElements.CURRENT_PAGE,
+                                self.PaginationElements.FW_BREAK_ELIPSIS,
+                                self.PaginationElements.SHOWING_COUNT
+        ]:
+            try:
+                if self.locator.is_element_present(page_element):
+                    self.logger.info(f"Element found: {page_element}")
+                else:
+                    raise NoSuchElementException(f"Element not found: {page_element}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"pagination_elements_missing: {page_element}")
+                self.logger.error(f"Element not found: {page_element}")
+                all_elements_present = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
+                all_elements_present = False
+        return all_elements_present
