@@ -57,26 +57,9 @@ class MapMarkersPage(BasePage):
         # MAP_MARKERS_TABLE_FOOTER = 
         
     # Check Page Element presence
-    def verify_page_title_present(self) -> bool:
-        """Checks if the Map Markers Page Title is present
-        
-        Returns:
-            bool: True if the Map Markers Page Title is present, False otherwise
-        """
-        self.logger.info("Checking if Map Markers Page Title is present")
-        try:
-            if self.locator.is_element_present(self.MapMarkersPageElements.MAP_MARKERS_PAGE_TITLE):
-                logger.info("Map Markers Page Title was located successfully")
-                return True
-            else:
-                raise NoSuchElementException("Map Markers Page Title not found")
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, "Map_Markers_Page_Title_Not_Found")
-            self.logger.error("Could not find Map Markers Page title on page")
-            return False
-        except Exception as e:
-            self.logger.error(f"Unexpected error while trying to locate Map Markers Page Title: {str(e)}")
-            return False
+    
+    def verify_page_title_present(self):
+        return super().verify_page_title_present(self.MapMarkersPageElements.MAP_MARKERS_PAGE_TITLE)
 
     def verify_all_core_map_marker_table_elements_present(self) -> bool:
         """_summary_

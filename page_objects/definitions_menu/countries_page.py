@@ -56,20 +56,7 @@ class CountriesPage(BasePage):
         Returns:
             _type_: _description_
         """
-        self.logger.info("Checking if Countries Page Title is present")
-        try:
-            if self.locator.is_element_present(self.CountryPageElements.COUNTRIES_PAGE_TITLE):
-                logger.info("Countries Page Title was located successfully")
-                return True
-            else:
-                raise NoSuchElementException("Countries Page Title not found")
-        except NoSuchElementException:
-            self.screenshot.take_screenshot(self.driver, "Countries_Page_Title_Not_Found")
-            self.logger.error("Could not find Countries Page title on page")
-            return False
-        except Exception as e:
-            self.logger.error(f"An error occurred while trying to locate Countries Page Title: {e}")
-            return False
+        super().verify_page_title_present(self.CountryPageElements.COUNTRIES_PAGE_TITLE)
     
     # Check Table Body contents
     def count_table_rows(self) -> int:
