@@ -56,7 +56,7 @@ class CountriesPage(BasePage):
         Returns:
             _type_: _description_
         """
-        super().verify_page_title_present(self.CountryPageElements.COUNTRIES_PAGE_TITLE)
+        return super().verify_page_title_present(self.CountryPageElements.COUNTRIES_PAGE_TITLE)
     
     # Check Table Body contents
     def count_table_rows(self) -> int:
