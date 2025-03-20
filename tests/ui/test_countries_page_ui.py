@@ -82,7 +82,7 @@ class TestCountriesPageUI:
         
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug 
+    #@pytest.mark.debug 
     def test_countries_page_admin_elements(self, countries_page):
         """_summary_
 

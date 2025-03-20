@@ -1,0 +1,39 @@
+#test_map_markers_page_ui.py
+import pytest
+from pytest_check import check
+from page_objects.dashboard.map_markers_page import MapMarkersPage
+from utilities.screenshot_manager import ScreenshotManager
+from utilities.utils import logger
+
+# Initialize Screenshot
+screenshot = ScreenshotManager()
+
+@pytest.fixture
+def map_markers_page(logged_in_browser):
+    logger.debug("Starting map_markers_page fixture")
+    map_markers_pages = []
+    for login_page in logged_in_browser:
+        driver = login_page.driver
+        logger.info("=" * 80)
+        logger.info(f"Navigating to Map Markers page on {driver.name}")
+        logger.info("=" * 80)
+        map_markers_pages.append(MapMarkersPage(driver))
+    logger.info(f"map_markers_page fixture: yielding {len(map_markers_pages)} map markers page(s)")
+    yield map_markers_pages
+    logger.debug("map_markers_page fixture: finished")
+    
+class TestMapMarkersPageUI:
+    
+    @pytest.mark.UI 
+    @pytest.mark.debug
+    def test_map_markers_page_title(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+        """
+        logger.debug("Starting test_map_markers_page_title")
+        for mp in map_markers_page:
+            title = mp.verify_page_title_present()
+            check.equal(title, True, "Title does not match")
+            logger.info("Verificaiton Successful :: Map Markers Page Title found")
