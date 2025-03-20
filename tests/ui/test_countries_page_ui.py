@@ -4,6 +4,7 @@ import time
 from pytest_check import check
 from page_objects.definitions_menu.countries_page import CountriesPage
 from page_objects.common.base_page import BasePage
+from tests.ui.test_base_page_ui import TestBasePageUI
 from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
 
@@ -41,11 +42,11 @@ def countries_page(logged_in_browser):
     yield country_pages
     logger.debug("countries_page fixture: finished")
         
-class TestCountriesPageUI:
+class TestCountriesPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.countries
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_countries_page_title(self, countries_page):
         """_summary_
 
@@ -60,58 +61,37 @@ class TestCountriesPageUI:
             
     @pytest.mark.UI
     @pytest.mark.countries
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_countries_page_nav_elements(self, countries_page):
         """_summary_
 
         Args:
             countries_page (_type_): _description_
         """
-        logger.info("Starting test_countries_page_nav_elements")
-        all_browsers_passed = True
-        for index, cp in enumerate(countries_page):
-            logger.info(f"Testing countries page nav elements on browser {index + 1}: {cp.driver.name}")
-            all_elements = cp.verify_all_nav_elements_present()
-            if all_elements:
-                logger.info(f"Verification Successful :: All Navigation elements found on Countries Page for {cp.driver.name}")
-            else:
-                logger.error(f"Verification failed :: Some elements missing from Countries Page for {cp.driver.name}")
-                all_browsers_passed = False
-        logger.info("Finished test_countries_page_nav_elements")
-        assert all_browsers_passed, "One or more browsers failed the navigation elements check"
-        
+        return super().test_page_nav_elements(countries_page)
+    
     @pytest.mark.UI
     @pytest.mark.countries
-    #@pytest.mark.debug 
+    @pytest.mark.debug 
     def test_countries_page_admin_elements(self, countries_page):
         """_summary_
 
         Args:
             countries_page (_type_): _description_
         """
-        for cp in countries_page:
-            logger.debug("Starting test_countries_page_definition_elements")
-            all_elements = cp.verify_all_admin_links_present()
-            check.is_true(all_elements, "Admin elements not found in Admin dropdown menu on Countries Page")
-            logger.info("Verification Successful :: All Admin elements found in Admin dropdown menu on Countries Page")
-            logger.debug("Finished test_countries_page_admin_elements")
+        super().test_page_admin_elements(countries_page)
         
     @pytest.mark.UI
     @pytest.mark.countries
-    #@pytest.mark.debug 
+    @pytest.mark.debug 
     def test_countries_page_definition_elements(self, countries_page):
         """_summary_
 
         Args:
             countries_page (_type_): _description_
         """
-        for cp in countries_page:
-            logger.debug("Starting test_countries_page_definition_elements")
-            all_elements = cp.verify_all_definition_links_present()
-            check.is_true(all_elements, "Definition elements not found")
-            logger.info("Verification Successful :: All Definition elements found on Countries Page")
-            logger.debug("Finished test_countries_page_definition_elements")
-            
+        return super().test_page_definition_elements(countries_page)
+    
     @pytest.mark.UI
     @pytest.mark.countries
     @pytest.mark.table
