@@ -134,7 +134,7 @@ class VideosPage(BasePage):
     
     def verify_all_video_table_elements_present(self) -> bool:
 
-        self.logger.info("Verifying that all expected pagination elements are present in: Definintions Dropdown")
+        self.logger.info("Verifying that all expected pagination elements are present in: Videos Table")
         all_elements_present = True
         
         for page_element in [self.VideoTableElements.THUMBNAIL_HEADER,
