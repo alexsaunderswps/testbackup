@@ -3,6 +3,7 @@ import pytest
 from pytest_check import check
 from page_objects.dashboard.map_markers_page import MapMarkersPage
 from page_objects.common.base_page import BasePage
+from tests.ui.test_base_page_ui import TestBasePageUI
 from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
 
@@ -34,7 +35,7 @@ def map_markers_page(logged_in_browser):
     yield map_markers_pages
     logger.debug("map_markers_page fixture: finished")
     
-class TestMapMarkersPageUI:
+class TestMapMarkersPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
     @pytest.mark.debug
@@ -54,16 +55,8 @@ class TestMapMarkersPageUI:
     @pytest.mark.debug
     def test_map_markers_page_nav_elements(self, map_markers_page):
         """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
         """
-        logger.info("Starting test_map_markers_page_nav_elements")
-        all_browsers_passed = True
-        for index, mp in enumerate(map_markers_page):
-            logger.info(f"Testing map marker page nav elements on browser {index+1}: {mp.driver.name}")
-            all_elements = mp.verify_all_nav_elements_present()
-            if all_elements:
-                logger.info(f"Verification Successful :: All Navigation elements found on Map Markers Page for {mp.driver.name}")
-            else:
-                logger.error(f"Verification failed :: Some elements missing from Map Markers Page for {mp.driver.name}")
-                all_browsers_passed = False
-        logger.info("Finished test_map_markers_page_nav_elements")
-        assert all_browsers_passed, "One or more browsers failed the navigation elements check"
+        return super().test_page_nav_elements(map_markers_page)

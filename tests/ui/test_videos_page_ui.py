@@ -2,6 +2,7 @@
 import pytest
 from pytest_check import check
 from page_objects.dashboard.videos_page import VideosPage
+from tests.ui.test_base_page_ui import TestBasePageUI
 from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
 
@@ -23,7 +24,7 @@ def videos_page(logged_in_browser):
     yield video_pages
     logger.debug("videos_page fixture: finished")
 
-class TestVideoPageUI:
+class TestVideoPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.video
@@ -42,21 +43,14 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
-        logger.info("Starting test_video_page_nav_elements")
-        all_browsers_passed = True
-            
-        for index, vp in enumerate(videos_page):
-            logger.info(f"Testing video page nav elements on browser {index + 1}: {vp.driver.name}")
-            all_elements = vp.verify_all_nav_elements_present()
-            if all_elements:
-                logger.info(f"Verification Successful :: All Navigation elements found on Videos Page for {vp.driver.name}")
-            else:
-                logger.error(f"Verification failed :: Some elements missing from Videos Page for {vp.driver.name}")
-                all_browsers_passed = False
-        logger.info("Finished test_video_page_nav_elements")
-        assert all_browsers_passed, "One or more browsers failed the navigation elements check"      
+        """_summary_
+
+        Args:
+            videos_page (_type_): _description_
+        """
+        return super().test_page_nav_elements(videos_page)
         
     @pytest.mark.UI
     @pytest.mark.video
