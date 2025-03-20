@@ -38,6 +38,7 @@ def map_markers_page(logged_in_browser):
 class TestMapMarkersPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
+    @pytest.mark.map_markers
     @pytest.mark.debug
     def test_map_markers_page_title(self, map_markers_page):
         """_summary_
@@ -51,7 +52,8 @@ class TestMapMarkersPageUI(TestBasePageUI):
             check.equal(title, True, "Title does not match")
             logger.info("Verificaiton Successful :: Map Markers Page Title found")
 
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.map_markers 
     @pytest.mark.debug
     def test_map_markers_page_nav_elements(self, map_markers_page):
         """_summary_
@@ -60,3 +62,31 @@ class TestMapMarkersPageUI(TestBasePageUI):
             map_markers_page (_type_): _description_
         """
         return super().test_page_nav_elements(map_markers_page)
+
+    @pytest.mark.UI
+    @pytest.mark.map_markers
+    @pytest.mark.debug
+    def test_page_admin_elements(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        return super().test_page_admin_elements(map_markers_page)
+    
+    @pytest.mark.UI
+    @pytest.mark.map_markers
+    @pytest.mark.debug
+    def test_page_definition_elements(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        return super().test_page_definition_elements(map_markers_page)
