@@ -90,7 +90,8 @@ class BasePage:
         Args:
             list (_type_): _description_
         """
-        self.logger.info("Verifying all expected navigation elements are present on page")
+        page_class = self.__class__.__name__
+        self.logger.info(f"Verifying all expected navigation elements are present on page: {page_class}")
         # Define elements with reable names
         nav_elements = {
             "Header Logo": self.CommonLocators.HEADER_LOGO,
@@ -127,57 +128,99 @@ class BasePage:
             self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
         return all_elements_present, missing_elements
     
-    def verify_all_admin_links_present(self) -> bool:
-        self.logger.info("Verifying that all expected naivigation elements are present in: Admin Dropdown")
+    def verify_all_admin_links_present(self, elements_to_check=None) -> Tuple[bool, list]:
+        """_summary_
+
+        Args:
+            elements_to_check (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            NoSuchElementException: _description_
+
+        Returns:
+            Tuple[bool, list]: _description_
+        """
+        page_class = self.__class__.__name__
+        self.logger.info(f"Verifying that all expected navigation elements are present in: Admin Dropdown on {page_class}")
+        # Define elements with reable names
+        admin_elements = {
+            "Installations Link": self.NavigationLocators.INSTALLATIONS_LINK,
+            "Devices Link": self.NavigationLocators.DEVICES_LINK,
+            "Users Link": self.NavigationLocators.USERS_LINK,
+            "Organizations Link": self.NavigationLocators.ORGANIZATIONS_LINK,
+        }
+        # if specific elements are passed, use those instead
+        if elements_to_check:
+            admin_elements = {key: value for key, value in admin_elements.items() if key in elements_to_check}
+            
         all_elements_present = True
+        missing_elements = []
         self.interactor.element_click(self.NavigationLocators.ADMIN_BUTTON)
     
-        for page_element in [self.NavigationLocators.INSTALLATIONS_LINK,
-                        self.NavigationLocators.DEVICES_LINK,
-                        self.NavigationLocators.USERS_LINK,
-                        self.NavigationLocators.ORGANIZATIONS_LINK,
-        ]:
+        for element_name, element_locator in admin_elements.items():
             try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"{page_element} was located successfully.")
+                if self.locator.is_element_present(element_locator):
+                    self.logger.info(f"{element_name} was located successfully.")
                 else:
-                    raise NoSuchElementException(f"Element {page_element} Not Found")
+                    raise NoSuchElementException(f"Element {element_name} Not Found")
                 # self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-                self.logger.error(f"Could not find {page_element} on page.")
+                self.screenshot.take_screenshot(self.driver, f"{element_name}_Not_Found")
+                self.logger.error(f"Could not find {element_name} on page.")
                 all_elements_present = False
+                missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while finding elements: {str(e)}")
                 all_elements_present = False
-        return all_elements_present
-
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
     
-    def verify_all_definition_links_present(self) -> bool:
-        self.logger.info("Verifying that all expected naivigation elements are present in: Definintions Dropdown")
+    def verify_all_definition_links_present(self, elements_to_check=None) -> Tuple[bool, list]:
+        """_summary_
+
+        Args:
+            elements_to_check (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            NoSuchElementException: _description_
+
+        Returns:
+            Tuple[bool, list]: _description_
+        """
+        page_class = self.__class__.__name__
+        self.logger.info(f"Verifying that all expected navigation elements are present in: Definintions Dropdown page: {page_class}")
+        # Define elements with reable names
+        definition_elements = {
+            "Countries Link": self.NavigationLocators.COUNTRIES_LINK,
+            "IUCN Status Link": self.NavigationLocators.IUCNSTATUS_LINK,
+            "Population Trend Link": self.NavigationLocators.POP_TREND_LINK,
+            "Tags Link": self.NavigationLocators.TAGS_LINK,
+        }
+        # if specific elements are passed, use those instead
+        if elements_to_check:
+            definition_elements = {key: value for key, value in definition_elements.items() if key in elements_to_check}
+        
         all_elements_present = True
+        missing_elements = []
         self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
     
-        for page_element in [self.NavigationLocators.COUNTRIES_LINK,
-                        self.NavigationLocators.IUCNSTATUS_LINK,
-                        self.NavigationLocators.POP_TREND_LINK,
-                        self.NavigationLocators.SPECIES_LINK,
-                        self.NavigationLocators.TAGS_LINK,
-        ]:
+        for element_name, element_locator in definition_elements.items():
             try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"{page_element} was located successfully.")
+                if self.locator.is_element_present(element_locator):
+                    self.logger.info(f"{element_name} was located successfully.")
                 else:
-                    raise NoSuchElementException(f"Element {page_element} Not Found")
+                    raise NoSuchElementException(f"Element {element_name} Not Found")
                 # self.interactor.element_click(self.NavigationLocators.DEFINITIONS_BUTTON)
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-                self.logger.error(f"Could not find {page_element} on page.")
+                self.screenshot.take_screenshot(self.driver, f"{element_name}_Not_Found")
+                self.logger.error(f"Could not find {element_name} on page.")
                 all_elements_present = False
+                missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while finding elements: {str(e)}")
                 all_elements_present = False
-        return all_elements_present
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
 
     # Basic methods
     def find_logo(self):
