@@ -153,3 +153,23 @@ class SpeciesPage(BasePage):
                 self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
                 all_elements_present = False
         return all_elements_present
+    
+    
+    
+    def get_page_locator(page_number):
+        return f"//ul//a[@aria-label='Page {page_number}']"
+            
+    def check_current_page(page_number):
+        return f"//ul//a[@aria-label='Page {page_number} is your current page']"
+    
+    def move_next_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.NEXT_PAGE)
+    
+    def move_prev_page_arrow(self):
+        self.interactor.element_click(self.PaginationElements.PREVIOUS_PAGE)
+        
+    def move_next_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELIPSIS)
+    
+    def move_prev_page_jump(self):
+        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELIPSIS)
