@@ -39,7 +39,7 @@ class VideosPage(BasePage):
         FILTER_PUBLISHED_FIELD = "//div[text()='Published']/button"
         SEARCH_BUTTON = "//button[text()='Search']"
         CANCEL_BUTTON = "//div//button[2]"
-        ADD_BUTTON = "//a[@href='/video/add']"
+        ADD_VIDEO_LINK = "//a[@href='/video/add']"
         
     class VideoTableElements:
         VIDEO_TABLE_BODY = "//table//tbody"
@@ -90,7 +90,7 @@ class VideosPage(BasePage):
         for page_element in [self.VideoElements.FILTER_NAME_FIELD,
                         self.VideoElements.SEARCH_BUTTON,
                         self.VideoElements.CANCEL_BUTTON,
-                        self.VideoElements.ADD_BUTTON,
+                        self.VideoElements.ADD_VIDEO_LINK,
         ]:
             try:
                 if self.locator.is_element_present(page_element):
