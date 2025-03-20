@@ -28,7 +28,7 @@ class TestVideoPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.video
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_video_page_title(self, videos_page):
         """_summary_
 
@@ -54,35 +54,25 @@ class TestVideoPageUI(TestBasePageUI):
         
     @pytest.mark.UI
     @pytest.mark.video
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_video_page_admin_elements(self, videos_page):
         """_summary_
 
         Args:
             login_page (_type_): _description_
         """
-        for vp in videos_page:
-            logger.debug("Starting test_videos_page_admin_elements")
-            all_elements = vp.verify_all_admin_links_present()
-            check.is_true(all_elements, "Admin elements missing from Admin dropdown menu on Videos Page")
-            logger.info("Verification Successful :: All Admin elements found in Admin dropdown menu Videos Page")  
-            logger.debug("Finished test_video_page_admin_elements")
+        return super().test_page_admin_elements(videos_page)
 
     @pytest.mark.UI
     @pytest.mark.video
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_video_page_definition_elements(self, videos_page):
         """_summary_
 
         Args:
             login_page (_type_): _description_
         """
-        for vp in videos_page:
-            logger.debug("Starting test_videos_page_definition_elements")
-            all_elements = vp.verify_all_definition_links_present()
-            check.is_true(all_elements, "Definition elements missing from Definitions dropdown menu on Videos Page")
-            logger.info("Verification Successful :: All Definition elements found in Definitions dropdown menu Videos Page")
-            logger.debug("Finished test_videos_page_definition_elements")
+        return super().test_page_definition_elements(videos_page)
     
     @pytest.mark.UI
     @pytest.mark.video
