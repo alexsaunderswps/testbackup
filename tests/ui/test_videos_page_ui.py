@@ -42,7 +42,7 @@ class TestVideoPageUI:
     
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         logger.info("Starting test_video_page_nav_elements")
         all_browsers_passed = True

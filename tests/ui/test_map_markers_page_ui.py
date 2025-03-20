@@ -2,6 +2,7 @@
 import pytest
 from pytest_check import check
 from page_objects.dashboard.map_markers_page import MapMarkersPage
+from page_objects.common.base_page import BasePage
 from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
 
@@ -14,10 +15,21 @@ def map_markers_page(logged_in_browser):
     map_markers_pages = []
     for login_page in logged_in_browser:
         driver = login_page.driver
+        base_page = BasePage(driver)
         logger.info("=" * 80)
         logger.info(f"Navigating to Map Markers page on {driver.name}")
         logger.info("=" * 80)
-        map_markers_pages.append(MapMarkersPage(driver))
+        
+        # Navigate to Map Markers page
+        base_page.go_map_markers_page()
+        # Verify that we're on the Map Markers page
+        map_markers_page = MapMarkersPage(driver)
+        if map_markers_page.verify_page_title_present():
+            logger.info("Successfully navigated to Map Markers page")
+            map_markers_pages.append(map_markers_page)
+        else:
+            logger.error(f"Failed to navigate to Map Markers page on {driver.name}")
+        
     logger.info(f"map_markers_page fixture: yielding {len(map_markers_pages)} map markers page(s)")
     yield map_markers_pages
     logger.debug("map_markers_page fixture: finished")
