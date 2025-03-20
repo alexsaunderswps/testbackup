@@ -49,3 +49,21 @@ class TestMapMarkersPageUI:
             title = mp.verify_page_title_present()
             check.equal(title, True, "Title does not match")
             logger.info("Verificaiton Successful :: Map Markers Page Title found")
+
+    @pytest.mark.UI 
+    @pytest.mark.debug
+    def test_map_markers_page_nav_elements(self, map_markers_page):
+        """_summary_
+        """
+        logger.info("Starting test_map_markers_page_nav_elements")
+        all_browsers_passed = True
+        for index, mp in enumerate(map_markers_page):
+            logger.info(f"Testing map marker page nav elements on browser {index+1}: {mp.driver.name}")
+            all_elements = mp.verify_all_nav_elements_present()
+            if all_elements:
+                logger.info(f"Verification Successful :: All Navigation elements found on Map Markers Page for {mp.driver.name}")
+            else:
+                logger.error(f"Verification failed :: Some elements missing from Map Markers Page for {mp.driver.name}")
+                all_browsers_passed = False
+        logger.info("Finished test_map_markers_page_nav_elements")
+        assert all_browsers_passed, "One or more browsers failed the navigation elements check"

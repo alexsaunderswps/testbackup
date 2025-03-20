@@ -139,17 +139,5 @@ class MapMarkersPage(BasePage):
                 all_elements_present = False
         return all_elements_present
     
-    def verify_all_nav_elements_present(self) -> bool:
-        """_summary_
-        
-        Returns:
-            _type_: _description_
-        """
-        self.logger.info("Checking if all Navigation elements are present")
-        try:
-            self.wait.until(EC.presence_of_element_located((By.XPATH, self.MapMarkersTableElemenets.MAP_MARKERS_TABLE_BODY)))
-            return True
-        except TimeoutException:
-            self.logger.error("One or more Navigation elements not found")
-            return False
+
             
