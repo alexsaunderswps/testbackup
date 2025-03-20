@@ -8,34 +8,19 @@ from utilities.utils import logger
 # Initialize Screenshot
 screenshot = ScreenshotManager()
 
-@pytest.fixture
-def base_page(logged_in_browser):
-    logger.debug("Starting base_page fixture")
-    base_pages = []
-    for login_page in logged_in_browser:
-        driver = login_page.driver
-        base_page = BasePage(driver)
-        logger.info("=" * 80)
-        logger.info(f"Navigating to Base page on {driver.name}")
-        logger.info("=" * 80)
-        base_pages.append(base_page)
-    logger.info(f"base_page fixture: yielding {len(base_pages)} base page(s)")
-    yield base_pages
-    logger.debug("base_page fixture: finished")
-
 class TestBasePageUI:
 
     @pytest.mark.UI 
     @pytest.mark.debug
-    def test_page_nav_elements(self, page_element):
+    def test_page_nav_elements(self, base_page):
         """_summary_
 
         Args:
             page_element (_type_): _description_
         """
-        logger.debug(f"Starting test_base_page_nav_elements for {page_element[0].__class__.__name__}")
+        logger.debug(f"Starting test_base_page_nav_elements for {base_page[0].__class__.__name__}")
         all_browsers_passed = True
-        for index, bp in enumerate(page_element):
+        for index, bp in enumerate(base_page):
             logger.info(f"Testing nav elements on brwoser {index + 1}: {bp.driver.name}")
             success, missing = bp.verify_all_nav_elements_present()
 
