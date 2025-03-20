@@ -37,7 +37,8 @@ def species_page(logged_in_browser):
     
 class TestSpeciesPageUI(TestBasePageUI):
         
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.species 
     @pytest.mark.debug
     def test_species_page_title(self, species_page):
         """_summary_
@@ -52,6 +53,7 @@ class TestSpeciesPageUI(TestBasePageUI):
             logger.info("Verificaiton Successful :: Species Page Title found")
 
     @pytest.mark.UI 
+    @pytest.mark.species
     @pytest.mark.debug
     def test_species_page_nav_elements(self, species_page):
         """_summary_
@@ -60,3 +62,26 @@ class TestSpeciesPageUI(TestBasePageUI):
             species_page (_type_): _description_
         """
         return super().test_page_nav_elements(species_page)
+    
+    @pytest.mark.UI
+    @pytest.mark.species
+    @pytest.mark.debug
+    def test_species_page_admin_elements(self, species_page):
+        """_summary_
+
+        Args:
+            species_page (_type_): _description_
+        """
+        return super().test_page_admin_elements(species_page)
+    
+    @pytest.mark.UI
+    @pytest.mark.species
+    @pytest.mark.debug
+    def test_species_page_definition_elements(self, species_page):
+        """_summary_
+
+        Args:
+            species_page (_type_): _description_
+        """
+        return super().test_page_definition_elements(species_page)
+    
