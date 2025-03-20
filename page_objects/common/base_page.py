@@ -7,6 +7,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from typing import Tuple
 from utilities.utils import logger
 
 class BasePage:
@@ -51,43 +52,80 @@ class BasePage:
         IUCNSTATUS_LINK = "//a[@href='/iucnStatus']"
         POP_TREND_LINK = "//a[@href='/populationTrend']"
         TAGS_LINK = "//a[text()='Tags']"
-    
-    # Check for common Navigation elements across pages
-    def verify_all_nav_elements_present(self) -> bool:
+        
+    # Check for page title (as h1) on each page
+    def verify_page_title_present(self, page_title) -> bool:
         """_summary_
+
+        Raises:
+            NoSuchElementException: _description_
+            NoSuchElementException: _description_
+            NoSuchElementException: _description_
 
         Returns:
             bool: _description_
         """
-        self.logger.info("Verifying all expected navigation elements are present on: Countries page")
+        self.logger.info(f"Checking if {page_title} Page Title is present")
+        try:
+            if self.locator.is_element_present(page_title):
+                logger.info(f"{page_title} Page Title was located successfully")
+                return True
+            else:
+                raise NoSuchElementException(f"{page_title} Page Title not found")
+        except NoSuchElementException:
+            self.screenshot.take_screenshot(self.driver, f"{page_title}_Page_Title_Not_Found")
+            self.logger.error(f"Could not find {page_title} Page title on page")
+            return False
+        except Exception as e:
+            self.logger.error(f"Unexpected error while trying to locate {page_title} Page Title: {str(e)}")
+            return False
+
+    
+    # Check for common Navigation elements across pages
+
+
+    def verify_all_nav_elements_present(self, elements_to_check=None) -> Tuple[bool, list]:
+        """_summary_
+
+        Args:
+            list (_type_): _description_
+        """
+        self.logger.info("Verifying all expected navigation elements are present on page")
+        # Define elements with reable names
+        nav_elements = {
+            "Header Logo": self.CommonLocators.HEADER_LOGO,
+            "Logout Button": self.CommonLocators.LOGOUT_BUTTON,
+            "Videos Link": self.NavigationLocators.VIDEOS_LINK,
+            "Video Catalogues Link": self.NavigationLocators.VIDEO_CATALOGUES_LINK,
+            "Map Markers Link": self.NavigationLocators.MAP_MARKERS_LINK,
+            "Species Link": self.NavigationLocators.SPECIES_LINK,
+            "Admin Button": self.NavigationLocators.ADMIN_BUTTON,
+            "Definitions Button": self.NavigationLocators.DEFINITIONS_BUTTON,
+        }
+        # if specific elements are passed, use those instead
+        if elements_to_check:
+            nav_elements = {key: value for key, value in nav_elements.items() if key in elements_to_check}
+            
         all_elements_present = True
         missing_elements = []
-        for page_element in [self.CommonLocators.HEADER_LOGO,
-                        self.CommonLocators.LOGOUT_BUTTON,
-                        self.NavigationLocators.VIDEOS_LINK,
-                        self.NavigationLocators.VIDEO_CATALOGUES_LINK,
-                        self.NavigationLocators.MAP_MARKERS_LINK,
-                        self.NavigationLocators.SPECIES_LINK,
-                        self.NavigationLocators.ADMIN_BUTTON,
-                        self.NavigationLocators.DEFINITIONS_BUTTON,
-        ]:
+        for element_name, element_locator in nav_elements.items():
             try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"Element {page_element} was located successfully")
+                if self.locator.is_element_present(element_locator):
+                    self.logger.info(f"Element {element_name} was located successfully")
                 else:
-                    raise NoSuchElementException(f"Element {page_element} not found")
+                    raise NoSuchElementException(f"Element {element_name} not found")
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"{page_element}_Not_Found")
-                self.logger.error(f"Could not find {page_element} on page")
+                self.screenshot.take_screenshot(self.driver, f"{element_name}_Not_Found")
+                self.logger.error(f"Could not find {element_name} on page")
                 all_elements_present = False
-                missing_elements.append(page_element)
+                missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while finding elements: {str(e)}")
                 all_elements_present = False
-                missing_elements.append(page_element)
+                missing_elements.append(element_name)
         if not all_elements_present:
             self.logger.error(f"Missing elements: {', '.join(missing_elements)}")
-        return all_elements_present
+        return all_elements_present, missing_elements
     
     def verify_all_admin_links_present(self) -> bool:
         self.logger.info("Verifying that all expected naivigation elements are present in: Admin Dropdown")
@@ -302,6 +340,21 @@ class BasePage:
         Click the Map Markers link to navigate to the Map Markers page.
         """
         self.interactor.element_click(self.NavigationLocators.MAP_MARKERS_LINK)
+        
+    def find_species_link(self):
+        """
+        Check if the Species link is present in the Definitions dropdown.
+
+        Returns:
+            bool: True if the Species link is present, False otherwise.
+        """
+        return self.locator.is_element_present(self.NavigationLocators.SPECIES_LINK)
+
+    def go_species_page(self):
+        """
+        Click the Species link in the Definitions dropdown to navigate to the Species page.
+        """
+        self.interactor.element_click(self.NavigationLocators.SPECIES_LINK)
     
     # Handle Admin as it is a dropdown list
     
@@ -445,21 +498,6 @@ class BasePage:
         Click the Population Trend link in the Definitions dropdown to navigate to the Population Trend page.
         """
         self.interactor.element_click(self.NavigationLocators.POP_TREND_LINK)
-    
-    def find_species_link(self):
-        """
-        Check if the Species link is present in the Definitions dropdown.
-
-        Returns:
-            bool: True if the Species link is present, False otherwise.
-        """
-        return self.locator.is_element_present(self.NavigationLocators.SPECIES_LINK)
-
-    def go_species_page(self):
-        """
-        Click the Species link in the Definitions dropdown to navigate to the Species page.
-        """
-        self.interactor.element_click(self.NavigationLocators.SPECIES_LINK)
     
     def find_tags_link(self):
         """
