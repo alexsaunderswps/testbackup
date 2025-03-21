@@ -52,8 +52,8 @@ class DevicesPage(BasePage):
         DEVICE_TABLE_BODY = "//table//tbody"
         DEVICE_TABLE_ROWS = "//table//tbody/tr"
         DEVICE_NAME_HEADER = "//table//th[text()='Name']"
-        DEVICE_SERIAL_HEADER = "//table//th[text()='Serial Number']"
-        DEVICE_INSTALLTION_HEADER = "//table//th[text()='Installation']"
+        DEVICE_SERIAL_HEADER = "//table//th[text()='Serial Number ']"
+        DEVICE_INSTALLATION_HEADER = "//table//th[text()='Installation']"
         DEVICE_ORGANIZATION_HEADER = "//table//th[text()='Organization']"
         
     # Check Page Element presence
@@ -106,12 +106,12 @@ class DevicesPage(BasePage):
             "Table Rows": self.DeviceTableElements.DEVICE_TABLE_ROWS,
             "Device Name": self.DeviceTableElements.DEVICE_NAME_HEADER,
             "Device Serial": self.DeviceTableElements.DEVICE_SERIAL_HEADER,
-            "Device Installation": self.DeviceTableElements.DEVICE_INSTALLTION_HEADER,
+            "Device Installation": self.DeviceTableElements.DEVICE_INSTALLATION_HEADER,
             "Device Organization": self.DeviceTableElements.DEVICE_ORGANIZATION_HEADER,
         }
         for element_name, table_element in table_elements.items():
             try:
-                if self.locator.is_element_presnet(table_element):
+                if self.locator.is_element_present(table_element):
                     self.logger.info(f"Table element found: {element_name}")
                 else:
                     raise NoSuchElementException(f"Table Element not found: {element_name}")
