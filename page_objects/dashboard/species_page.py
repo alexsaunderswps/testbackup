@@ -95,6 +95,45 @@ class SpeciesPage(BasePage):
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
     
+    def verify_all_species_table_elements_present(self) -> Tuple[bool,list]:
+        """_summary_
+
+        Returns:
+            Tuple[bool,list]: _description_
+        """
+        self.logger.info("Check if all Species Table elements are present")
+        all_elements_present = True
+        missing_elements = []
+        # Define elements with readable names
+        table_elements = {
+            "Table Body": self.SpeciesTableElements.SPECIES_TABLE_BODY,
+            "Table Rows": self.SpeciesTableElements.SPECIES_TABLE_ROWS,
+            "Species Name": self.SpeciesTableElements.SPECIES_NAME_HEADER,
+            "Colloquial Name": self.SpeciesTableElements.SPECIES_COLLOQUIAL_HEADER,
+            "Scientific Name": self.SpeciesTableElements.SPECIES_SCIENTIFIC_HEADER,
+            "Description": self.SpeciesTableElements.SPECIES_DESCRIPTION_HEADER,
+            "IUCN Status": self.SpeciesTableElements.SPECIES_IUCN_HEADER,
+            "Population Trend": self.SpeciesTableElements.SPECIES_POPULATION_HEADER,
+            "Species Category": self.SpeciesTableElements.SPECIES_CATEGORY_HEADER,
+        }
+        for element_name, table_element in table_elements.items():
+            try:
+                if self.locator.is_element_present(table_element):
+                    self.logger.info(f"Table element found: {element_name}")
+                else:
+                    raise NoSuchElementException(f"Table element not found: {element_name}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {element_name}")
+                self.logger.error(f"Element not found: {element_name}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+            except Exception as e:
+                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
+
+    
     def get_page_locator(page_number):
         return f"//ul//a[@aria-label='Page {page_number}']"
             
