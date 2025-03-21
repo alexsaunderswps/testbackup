@@ -1,5 +1,6 @@
 #base_page.py
-from utilities.config import DEFAULT_TIMEOUT, SCREENSHOT_DIR
+import re
+from utilities.config import DEFAULT_TIMEOUT, SCREENSHOT_DIR, PAGE_SIZE
 from utilities.element_interactor import ElementInteractor
 from utilities.element_locator import ElementLocator
 from utilities.screenshot_manager import ScreenshotManager
@@ -52,6 +53,15 @@ class BasePage:
         IUCNSTATUS_LINK = "//a[@href='/iucnStatus']"
         POP_TREND_LINK = "//a[@href='/populationTrend']"
         TAGS_LINK = "//a[text()='Tags']"
+        
+    class PaginationElements:
+        PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
+        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
+        NEXT_PAGE= "//ul//a[@aria-label='Next page']"
+        CURRENT_PAGE = "//ul//a[@aria-current='page']"
+        FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
+        BW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump backward']"
+        SHOWING_COUNT = "//span[contains(text(),'Showing')]"
         
     # Check for page title (as h1) on each page
     def verify_page_title_present(self, page_title) -> bool:
@@ -219,6 +229,89 @@ class BasePage:
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
+
+    # Check for pagination elements as needed with conditional checks based on record size
+    def verify_pagination_elements_present(self) -> Tuple[bool, list]:
+        """
+        Verifies pagination elements based on page size and current record count.
+    
+        Returns:
+            Tuple[bool, list]: A tuple containing a boolean (all expected elements present)
+                        and a list of missing expected elements
+        """
+        self.logger.info("Checking if the correct Pagination elements are present on Species Page")
+        all_elements_present = True
+        missing_elements = []
+        # Get the page size from utilities.config
+        page_size = PAGE_SIZE
+        
+        # Extract information from the showing count
+        current_start = 1
+        total_records = 0
+        
+        try:
+            if self.locator.is_element_present(self.PaginationElements.SHOWING_COUNT):
+                showing_element = self.locator.get_element(self.PaginationElements.SHOWING_COUNT)
+                showing_text = showing_element.text
+                
+                # Parse "Showing 1 to 25 of 171"
+                match = re.search(r'Showing\s+(\d+)\s+to\s+(\d+)\s+of\s+(\d+)', showing_text)
+                if match:
+                    current_start = int(match.group(1))
+                    current_end = int(match.group(2))
+                    total_records = int(match.group(3))
+                    self.logger.info(f"Showing {current_start} to {current_end} of {total_records}")
+                else:
+                    self.logger.warning(f"Could not parse showing text: {showing_text}")
+            else:
+                self.logger.warning("Showing count element not found")
+        except Exception as e:
+            self.logger.error(f"Error getting pagination info: {str(e)}")
+            
+        # Determine which pagination elements should be present based on extracted information
+        is_first_page = (current_start == 1)
+        has_multiple_pages = (total_records > page_size)
+        is_last_page = (total_records <= current_start + page_size - 1)
+
+        # Define elements with readable names
+        pagination_element_locators = {
+            "Previous Page": self.PaginationElements.PREVIOUS_PAGE,
+            "Next Page": self.PaginationElements.NEXT_PAGE,
+            "Current Page": self.PaginationElements.CURRENT_PAGE,
+            "Foward Elipsis": self.PaginationElements.FW_BREAK_ELIPSIS,
+            "Backward Elipsis": self.PaginationElements.BW_BREAK_ELIPSIS,
+            "Showing Count": self.PaginationElements.SHOWING_COUNT
+        }
+        
+        # Define expected state of each element
+        should_be_present = {
+            "Previous Page": True,
+            "Next Page": has_multiple_pages and not is_last_page,
+            "Current Page": True,
+            "Foward Elipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
+            "Backward Elipsis": current_start > (page_size * 2), # Need to be at least on page 3
+            "Showing Count": True
+        }
+        
+        for element_name, element_locator in pagination_element_locators.items():
+            element_should_be_present = should_be_present[element_name]
+            expected_state = "present" if element_should_be_present else "absent"
+        
+            try:
+                is_present = self.locator.is_element_present(element_locator)
+                if is_present == element_should_be_present:
+                    self.logger.info(f"Element {element_name} correctly {expected_state}")
+                else:
+                    self.logger.error(f"Element {element_name} should be {expected_state} but is {'present' if is_present else 'absent'}")
+                    all_elements_present = False
+                    missing_elements.append(element_name)
+                    self.screenshot.take_screenshot(self.driver, f"{element_name}_unexpected_state")
+            except Exception as e:
+                self.logger.error(f"Error checking pagination element {element_name}: {str(e)}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
+    
 
     # Basic methods
     def find_logo(self):
