@@ -131,8 +131,8 @@ class SpeciesPage(BasePage):
                 else:
                     raise NoSuchElementException(f"Element not found: {element_name}")
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {element_name}")
-                self.logger.error(f"Element not found: {element_name}")
+                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing_{element_name}")
+                self.logger.error(f"Element not found: {element_name} in species table")
                 all_elements_present = False
                 missing_elements.append(element_name)
             except Exception as e:
