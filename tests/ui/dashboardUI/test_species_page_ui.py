@@ -115,7 +115,7 @@ class TestSpeciesPageUI(TestBasePageUI):
         """
         for sp in species_page:
             all_elements, missing_elements = sp.verify_all_species_table_elements_present()
-            check.is_true(all_elements, f"Missing table elements: {', '.join(missing_elements)}")
+            check.is_true(all_elements, f"Missing species table elements: {', '.join(missing_elements)}")
             logger.info("Verifcation Successful :: All Table Elements found on Species Page")
             
     @pytest.mark.UI 
