@@ -82,8 +82,6 @@ class BasePage:
 
     
     # Check for common Navigation elements across pages
-
-
     def verify_all_nav_elements_present(self, elements_to_check=None) -> Tuple[bool, list]:
         """_summary_
 
