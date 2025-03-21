@@ -1,12 +1,14 @@
 # species_page.py
 import os
+import re
 from dotenv import load_dotenv
+from typing import Tuple
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
+from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT, PAGE_SIZE
 from utilities.utils import logger
 from utilities.element_interactor import ElementInteractor
 from utilities.element_locator import ElementLocator
@@ -50,10 +52,10 @@ class SpeciesPage(BasePage):
         """
         SPECIES_TABLE_BODY = "//table//tbody"
         SPECIES_TABLE_ROWS = "//table//tbody/tr"
-        SPECIES_NAME_HEADER = "//table//div[text()='Name']"
-        SPECIES_COLLOQUIAL_HEADER = "//table//div[text()='Colloquial Name']"
-        SPECIES_SCIENTIFIC_HEADER = "//table//th[text()='Scientific Name']"
-        SPECIES_DESCRIPTION_HEADER = "//table//th[text()='Description']"
+        SPECIES_NAME_HEADER = "//table//th[text()='Name']"
+        SPECIES_COLLOQUIAL_HEADER = "//table//th[text()='Colloquial Name']"
+        SPECIES_SCIENTIFIC_HEADER = "//table//div[text()='Scientific Name']"
+        SPECIES_DESCRIPTION_HEADER = "//table//div[text()='Description']"
         SPECIES_IUCN_HEADER = "//table//th[text()='IUCN Status']"
         SPECIES_POPULATION_HEADER = "//table//th[text()='Population Trend']"
         SPECIES_CATEGORY_HEADER = "//table//th[text()='Species Category']"
@@ -71,7 +73,7 @@ class SpeciesPage(BasePage):
     def verify_page_title_present(self):
         return super().verify_page_title_present(self.SpeciesPageElements.SPECIES_PAGE_TITLE)
     
-    def verify_all_species_search_elements_present(self) -> bool:
+    def verify_all_species_search_elements_present(self) -> Tuple[bool, list]:
         """_summary_
         
         Returns:
@@ -79,24 +81,29 @@ class SpeciesPage(BasePage):
         """
         self.logger.info("Verifying that all expected species search elements are present in: Species Page")
         all_elements_present = True
-        
-        for search_element in [self.SpeciesSearchElements.SEARCH_TEXT,
-                        self.SpeciesSearchElements.SEARCH_BUTTON,
-                        self.SpeciesSearchElements.ADD_SPECIES_LINK,
-        ]:
+        missing_elements = []
+        # Define elements with readable names
+        search_elements = {
+            "Search Text Box": self.SpeciesSearchElements.SEARCH_TEXT,
+            "Search Button": self.SpeciesSearchElements.SEARCH_BUTTON,
+            "Add Species Button": self.SpeciesSearchElements.ADD_SPECIES_LINK,
+        }
+        for element_name, search_element in search_elements.items():
             try:
                 if self.locator.is_element_present(search_element):
-                    self.logger.info(f"Element found: {search_element}")
+                    self.logger.info(f"Element found: {element_name}")
                 else:
-                    raise NoSuchElementException(f"Element not found: {search_element}")
+                    raise NoSuchElementException(f"Element not found: {element_name}")
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {search_element}")
-                self.logger.error(f"Element not found: {search_element}")
+                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {element_name}")
+                self.logger.error(f"Element not found: {element_name}")
                 all_elements_present = False
+                missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
                 all_elements_present = False
-        return all_elements_present
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
     
     def verify_all_species_table_elements_present(self) -> bool:
         """_summary_
@@ -106,59 +113,114 @@ class SpeciesPage(BasePage):
         """
         self.logger.info("Checking if all Species Table elements are present")
         all_elements_present = True
-        
-        for page_element in [self.SpeciesTableElements.SPECIES_NAME_HEADER,
-                                self.SpeciesTableElements.SPECIES_COLLOQUIAL_HEADER,
-                                self.SpeciesTableElements.SPECIES_SCIENTIFIC_HEADER,
-                                self.SpeciesTableElements.SPECIES_DESCRIPTION_HEADER,
-                                self.SpeciesTableElements.SPECIES_IUCN_HEADER,
-                                self.SpeciesTableElements.SPECIES_POPULATION_HEADER,
-                                self.SpeciesTableElements.SPECIES_CATEGORY_HEADER
-        ]:
+        missing_elements = []
+        # Define elements with readable names
+        table_elements = {
+            "Name Header": self.SpeciesTableElements.SPECIES_NAME_HEADER,
+            "Colloquial Header": self.SpeciesTableElements.SPECIES_COLLOQUIAL_HEADER,
+            "Scientific Header": self.SpeciesTableElements.SPECIES_SCIENTIFIC_HEADER,
+            "Description Header": self.SpeciesTableElements.SPECIES_DESCRIPTION_HEADER,
+            "IUCN Header": self.SpeciesTableElements.SPECIES_IUCN_HEADER,
+            "Population Header": self.SpeciesTableElements.SPECIES_POPULATION_HEADER,
+            "Catagory Header": self.SpeciesTableElements.SPECIES_CATEGORY_HEADER
+        }
+        for element_name, table_element in table_elements.items():
             try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"Element found: {page_element}")
+                if self.locator.is_element_present(table_element):
+                    self.logger.info(f"Element found: {element_name}")
                 else:
-                    raise NoSuchElementException(f"Element not found: {page_element}")
+                    raise NoSuchElementException(f"Element not found: {element_name}")
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {page_element}")
-                self.logger.error(f"Element not found: {page_element}")
+                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {element_name}")
+                self.logger.error(f"Element not found: {element_name}")
                 all_elements_present = False
+                missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
                 all_elements_present = False
-        return all_elements_present
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
     
-    def verify_all_pagination_elements_present(self) -> bool:
-        """_summary_
-        
-        Returns:
-            _type_: _description_
+    def verify_pagination_elements_present(self) -> Tuple[bool, list]:
         """
-        self.logger.info("Checking if all Pagination elements are present")
+        Verifies pagination elements based on page size and current record count.
+    
+        Returns:
+            Tuple[bool, list]: A tuple containing a boolean (all expected elements present)
+                        and a list of missing expected elements
+        """
+        self.logger.info("Checking if the correct Pagination elements are present on Species Page")
         all_elements_present = True
+        missing_elements = []
+        # Get the page size from utilities.config
+        page_size = PAGE_SIZE
         
-        for page_element in [self.PaginationElements.PREVIOUS_PAGE,
-                                self.PaginationElements.NEXT_PAGE,
-                                self.PaginationElements.CURRENT_PAGE,
-                                self.PaginationElements.FW_BREAK_ELIPSIS,
-                                self.PaginationElements.SHOWING_COUNT
-        ]:
-            try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"Element found: {page_element}")
+        # Extract information from the showing count
+        current_start = 1
+        total_records = 0
+        
+        try:
+            if self.locator.is_element_present(self.PaginationElements.SHOWING_COUNT):
+                showing_element = self.locator.get_element(self.PaginationElements.SHOWING_COUNT)
+                showing_text = showing_element.text
+                
+                # Parse "Showing 1 to 25 of 171"
+                match = re.search(r'Showing\s+(\d+)\s+to\s+(\d+)\s+of\s+(\d+)', showing_text)
+                if match:
+                    current_start = int(match.group(1))
+                    current_end = int(match.group(2))
+                    total_records = int(match.group(3))
+                    self.logger.info(f"Showing {current_start} to {current_end} of {total_records}")
                 else:
-                    raise NoSuchElementException(f"Element not found: {page_element}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"pagination_elements_missing: {page_element}")
-                self.logger.error(f"Element not found: {page_element}")
-                all_elements_present = False
+                    self.logger.warning(f"Could not parse showing text: {showing_text}")
+            else:
+                self.logger.warning("Showing count element not found")
+        except Exception as e:
+            self.logger.error(f"Error getting pagination info: {str(e)}")
+            
+        # Determine which pagination elements should be present based on extracted information
+        is_first_page = (current_start == 1)
+        has_multiple_pages = (total_records > page_size)
+        is_last_page = (total_records <= current_start + page_size - 1)
+
+        # Define elements with readable names
+        pagination_element_locators = {
+            "Previous Page": self.PaginationElements.PREVIOUS_PAGE,
+            "Next Page": self.PaginationElements.NEXT_PAGE,
+            "Current Page": self.PaginationElements.CURRENT_PAGE,
+            "Foward Elipsis": self.PaginationElements.FW_BREAK_ELIPSIS,
+            "Backward Elipsis": self.PaginationElements.BW_BREAK_ELIPSIS,
+            "Showing Count": self.PaginationElements.SHOWING_COUNT
+        }
+        
+        # Define expected state of each element
+        should_be_present = {
+            "Previous Page": True,
+            "Next Page": has_multiple_pages and not is_last_page,
+            "Current Page": True,
+            "Foward Elipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
+            "Backward Elipsis": current_start > (page_size * 2), # Need to be at least on page 3
+            "Showing Count": True
+        }
+        
+        for element_name, element_locator in pagination_element_locators.items():
+            element_should_be_present = should_be_present[element_name]
+            expected_state = "present" if element_should_be_present else "absent"
+        
+            try:
+                is_present = self.locator.is_element_present(element_locator)
+                if is_present == element_should_be_present:
+                    self.logger.info(f"Element {element_name} correctly {expected_state}")
+                else:
+                    self.logger.error(f"Element {element_name} should be {expected_state} but is {'present' if is_present else 'absent'}")
+                    all_elements_present = False
+                    missing_elements.append(element_name)
+                    self.screenshot.take_screenshot(self.driver, f"{element_name}_unexpected_state")
             except Exception as e:
-                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
+                self.logger.error(f"Error checking pagination element {element_name}: {str(e)}")
                 all_elements_present = False
-        return all_elements_present
-    
-    
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
     
     def get_page_locator(page_number):
         return f"//ul//a[@aria-label='Page {page_number}']"
