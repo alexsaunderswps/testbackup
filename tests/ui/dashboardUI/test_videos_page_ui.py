@@ -103,10 +103,7 @@ class TestVideoPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        for vp in videos_page:
-            all_elements, missing_elements = vp.verify_video_pagination_elements_present()
-            check.is_true(all_elements, f"Missing pagination elements: {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: All Pagination elements found on Videos Page")    
+        return super().test_page_pagination_elements(videos_page)
 
     @pytest.mark.UI
     @pytest.mark.video
