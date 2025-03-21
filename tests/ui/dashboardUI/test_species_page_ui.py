@@ -105,6 +105,7 @@ class TestSpeciesPageUI(TestBasePageUI):
             
     @pytest.mark.UI 
     @pytest.mark.species
+    @pytest.mark.table
     @pytest.mark.debug
     def test_species_table_elements(self, species_page):
         """_summary_
