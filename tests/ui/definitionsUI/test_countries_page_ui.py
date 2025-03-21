@@ -46,7 +46,7 @@ class TestCountriesPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_countries_page_title(self, countries_page):
         """_summary_
 
@@ -61,7 +61,7 @@ class TestCountriesPageUI(TestBasePageUI):
             
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug
+    #@pytest.mark.debug
     def test_countries_page_nav_elements(self, countries_page):
         """_summary_
 
@@ -72,7 +72,7 @@ class TestCountriesPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug 
+    #@pytest.mark.debug 
     def test_countries_page_admin_elements(self, countries_page):
         """_summary_
 
@@ -83,7 +83,7 @@ class TestCountriesPageUI(TestBasePageUI):
         
     @pytest.mark.UI
     @pytest.mark.countries
-    @pytest.mark.debug 
+    #@pytest.mark.debug 
     def test_countries_page_definition_elements(self, countries_page):
         """_summary_
 
