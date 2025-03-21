@@ -37,6 +37,10 @@ class SpeciesPage(BasePage):
         """_summary_
         """
         SPECIES_PAGE_TITLE = "//h1[text()='Species']"
+        
+    class SpeciesSearchElements:
+        """_summary_
+        """
         SEARCH_TEXT = '//input[@placeholder="Filter by name"]'
         SEARCH_BUTTON = "//button[text()='Search']"
         ADD_SPECIES_LINK = "//a[@href='/species/add']"
@@ -73,21 +77,21 @@ class SpeciesPage(BasePage):
         Returns:
             _type_: _description_
         """
-        self.logger.info("Verifying that all expected video search elements are present in: Species Page")
+        self.logger.info("Verifying that all expected species search elements are present in: Species Page")
         all_elements_present = True
         
-        for page_element in [self.SpeciesPageElements.SEARCH_TEXT,
-                        self.SpeciesPageElements.SEARCH_BUTTON,
-                        self.SpeciesPageElements.ADD_SPECIES_LINK,
+        for search_element in [self.SpeciesSearchElements.SEARCH_TEXT,
+                        self.SpeciesSearchElements.SEARCH_BUTTON,
+                        self.SpeciesSearchElements.ADD_SPECIES_LINK,
         ]:
             try:
-                if self.locator.is_element_present(page_element):
-                    self.logger.info(f"Element found: {page_element}")
+                if self.locator.is_element_present(search_element):
+                    self.logger.info(f"Element found: {search_element}")
                 else:
-                    raise NoSuchElementException(f"Element not found: {page_element}")
+                    raise NoSuchElementException(f"Element not found: {search_element}")
             except NoSuchElementException:
                 self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {page_element}")
-                self.logger.error(f"Element not found: {page_element}")
+                self.logger.error(f"Element not found: {search_element}")
                 all_elements_present = False
             except Exception as e:
                 self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
