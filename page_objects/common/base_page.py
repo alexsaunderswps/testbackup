@@ -95,7 +95,7 @@ class BasePage:
         # Define elements with reable names
         nav_elements = {
             "Header Logo": self.CommonLocators.HEADER_LOGO,
-            "Logout Button": self.CommonLocators.LOGOUT_BUTTON,
+            # "Logout Button": self.CommonLocators.LOGOUT_BUTTON,
             "Videos Link": self.NavigationLocators.VIDEOS_LINK,
             "Video Catalogues Link": self.NavigationLocators.VIDEO_CATALOGUES_LINK,
             "Map Markers Link": self.NavigationLocators.MAP_MARKERS_LINK,
