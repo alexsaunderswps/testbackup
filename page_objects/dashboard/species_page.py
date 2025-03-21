@@ -1,6 +1,5 @@
 # species_page.py
 import os
-import re
 from dotenv import load_dotenv
 from typing import Tuple
 from page_objects.common.base_page import BasePage
@@ -59,15 +58,6 @@ class SpeciesPage(BasePage):
         SPECIES_IUCN_HEADER = "//table//th[text()='IUCN Status']"
         SPECIES_POPULATION_HEADER = "//table//th[text()='Population Trend']"
         SPECIES_CATEGORY_HEADER = "//table//th[text()='Species Category']"
-        
-    class PaginationElements:
-        PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
-        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
-        NEXT_PAGE= "//ul//a[@aria-label='Next page']"
-        CURRENT_PAGE = "//ul//a[@aria-current='page']"
-        FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
-        BW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump backward']"
-        SHOWING_COUNT = "//span[contains(text(),'Showing')]"
             
     # Check Page Element presence
     def verify_page_title_present(self):

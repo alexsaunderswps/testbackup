@@ -1,6 +1,5 @@
 # videos_page.py
 import os
-import re
 from typing import Tuple
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
