@@ -90,7 +90,7 @@ class SpeciesPage(BasePage):
                 else:
                     raise NoSuchElementException(f"Element not found: {search_element}")
             except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {page_element}")
+                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {search_element}")
                 self.logger.error(f"Element not found: {search_element}")
                 all_elements_present = False
             except Exception as e:
