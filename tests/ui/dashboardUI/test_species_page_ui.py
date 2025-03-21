@@ -88,7 +88,8 @@ class TestSpeciesPageUI(TestBasePageUI):
         """
         return super().test_page_definition_elements(species_page)
     
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.search 
     @pytest.mark.species
     @pytest.mark.debug
     def test_species_seach_elements(self, species_page):
