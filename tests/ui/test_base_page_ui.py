@@ -10,7 +10,8 @@ screenshot = ScreenshotManager()
 
 class TestBasePageUI:
 
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.base 
     @pytest.mark.debug
     def test_page_nav_elements(self, base_page):
         """_summary_
@@ -32,7 +33,8 @@ class TestBasePageUI:
         logger.info("test_page_nav_elements: finished")
         assert all_browsers_passed, "One or more browsers failed to find all nav elements"
         
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.base  
     @pytest.mark.debug
     def test_page_admin_elements(self, base_page):
         """_summary_
@@ -54,7 +56,8 @@ class TestBasePageUI:
         logger.info("test_page_admin_elements: finished")
         assert all_browsers_passed, "One or more browsers failed to find all admin elements"
         
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.base  
     @pytest.mark.debug
     def test_page_definition_elements(self, base_page):
         """_summary_
