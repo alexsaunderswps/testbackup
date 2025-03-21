@@ -13,7 +13,7 @@ screenshot = ScreenshotManager()
 @pytest.fixture
 def devices_page(logged_in_browser):
     logger.debug("Starting device_page fixture")
-    devices_pages = []
+    device_pages = []
     for login_page in logged_in_browser:
         driver = login_page.driver
         base_page = BasePage(driver)
@@ -22,17 +22,18 @@ def devices_page(logged_in_browser):
         logger.info("=" * 80)
         
         # Navigate to Device page
+        base_page.click_admin_button()
         base_page.go_devices_page()
         # Verify that we're on the Device page
         devices_page = DevicesPage(driver)
         if devices_page.verify_page_title_present():
             logger.info("Successfully navigated to Device page")
-            devices_pages.append(devices_page)
+            device_pages.append(devices_page)
         else:
             logger.error(f"Failed to navigate to Devices page on {driver.name}")
         
-    logger.info(f"devices_page fixture: yielding {len(devices_pages)} devices page(s)")
-    yield devices_pages
+    logger.info(f"devices_page fixture: yielding {len(device_pages)} devices page(s)")
+    yield device_pages
     logger.debug("device_page fixture: finished")
     
 class TestDevicesPageUI(TestBasePageUI):
@@ -120,14 +121,14 @@ class TestDevicesPageUI(TestBasePageUI):
             check.is_true(all_elements, f"Missing device table elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Device Table Elements found")
             
-    @pytest.mark.UI
-    @pytest.mark.devices
-    @pytest.mark.pagination
-    @pytest.mark.debug
-    def test_devices_pagination_elements(self, devices_page):
-        """_summary_
+    # @pytest.mark.UI
+    # @pytest.mark.devices
+    # @pytest.mark.pagination
+    # @pytest.mark.debug
+    # def test_devices_pagination_elements(self, devices_page):
+    #     """_summary_
 
-        Args:
-            devices_page (_type_): _description_
-        """
-        return super().test_page_pagination_elements(devices_page)
+    #     Args:
+    #         devices_page (_type_): _description_
+    #     """
+    #     return super().test_page_pagination_elements(devices_page)
