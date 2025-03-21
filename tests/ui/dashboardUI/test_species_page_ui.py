@@ -127,7 +127,4 @@ class TestSpeciesPageUI(TestBasePageUI):
         Args:
             species_page (_type_): _description_
         """
-        for sp in species_page:
-            all_elements, missing_elements = sp.verify_pagination_elements_present()
-            check.is_true(all_elements, f"Missing pagination elements: {', '.join(missing_elements)}")
-            logger.info("Verifcation Successful :: All Pagination Elements found on Species Page")
+        return super().test_page_pagination_elements(species_page)
