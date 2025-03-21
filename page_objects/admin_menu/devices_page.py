@@ -108,5 +108,29 @@ class DevicesPage(BasePage):
         """
         self.logger.info("Check if all Device Table elements are present")
         all_elements_present = True
-        
-        
+        missing_elements = []
+        # Define elements with readable names
+        table_elements = {
+            "Table Body": self.DeviceTableElements.DEVICE_TABLE_BODY,
+            "Table Rows": self.DeviceTableElements.DEVICE_TABLE_ROWS,
+            "Device Name": self.DeviceTableElements.DEVICE_NAME_HEADER,
+            "Device Serial": self.DeviceTableElements.DEVICE_SERIAL_HEADER,
+            "Device Installation": self.DeviceTableElements.DEVICE_INSTALLTION_HEADER,
+            "Device Organization": self.DeviceTableElements.DEVICE_ORGANIZATION_HEADER,
+        }
+        for element_name, table_element in table_elements.items():
+            try:
+                if self.locator.is_element_presnet(table_element):
+                    self.logger.info(f"Table element found: {element_name}")
+                else:
+                    raise NoSuchElementException(f"Table Element not found: {element_name}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"device_table_elements_not_found: {element_name}")
+                self.logger.error(f"Table Element not found: {element_name}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+            except Exception as e:
+                self.logger.error(f"Unexpected error while trying to find table element: {str(e)}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
