@@ -55,15 +55,6 @@ class DevicesPage(BasePage):
         DEVICE_SERIAL_HEADER = "//table//th[text()='Serial Number']"
         DEVICE_INSTALLTION_HEADER = "//table//th[text()='Installation']"
         DEVICE_ORGANIZATION_HEADER = "//table//th[text()='Organization']"
-
-    class PaginationElements:
-        PREVIOUS_PAGE = "//ul//a[@aria-label='Previous page']"
-        PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
-        NEXT_PAGE = "//ul//a[@aria-lable='Next page']"
-        CURRENT_PAGE = "//ul//a[@aria-current='page']"
-        FW_BREAK_ELIPSIS = "//ul//a[@aria-label='Jump forward']"
-        BW_BREAK_ELIPSPS = "//ul//a[@aria-label='Jump backward']"
-        SHOWING_COUNT = "//span[contains(text(), 'Showing')]"
         
     # Check Page Element presence
     def verify_page_title_present(self):
@@ -100,7 +91,7 @@ class DevicesPage(BasePage):
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
     
-    def verify_all_device_table_elements_present(self) -> bool:
+    def verify_all_device_table_elements_present(self) -> Tuple[bool, list]:
         """_summary_
 
         Returns:
