@@ -16,13 +16,16 @@ FILE_UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 LOGOUT_BUTTON = "//section//button[text()='LOG OUT']"
 LOGIN_BUTTON = "//section//button[text()='LOG IN']"
 
+# Page Sizes
+PAGE_SIZE = 25
+
 # Timeouts
 DEFAULT_TIMEOUT = 10
 EXTENDED_TIMEOUT = 30
 
 # Log Levels
 LOG_LEVEL_FILE = logging.DEBUG
-LOG_LEVEL_CONSOLE = logging.INFO
+LOG_LEVEL_CONSOLE = logging.WARNING # Changed from INFO to WARNING
 LOG_LEVEL_OVERALL = min(LOG_LEVEL_FILE, LOG_LEVEL_CONSOLE)
 
 # Other constants
