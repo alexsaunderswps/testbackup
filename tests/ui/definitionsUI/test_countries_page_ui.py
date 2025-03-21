@@ -112,7 +112,7 @@ class TestCountriesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.countries
     @pytest.mark.table
-    #@pytest.mark.debug
+    @pytest.mark.debug
     def test_country_name_retreval(self, countries_page):
         """_summary_
 
