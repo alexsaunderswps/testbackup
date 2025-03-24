@@ -39,7 +39,6 @@ class TestMapMarkersPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
     @pytest.mark.map_markers
-    #@pytest.mark.debug
     def test_map_markers_page_title(self, map_markers_page):
         """_summary_
 
@@ -55,7 +54,6 @@ class TestMapMarkersPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.map_markers 
     @pytest.mark.navigation
-    #@pytest.mark.debug
     def test_map_markers_page_nav_elements(self, map_markers_page):
         """_summary_
 
@@ -67,7 +65,6 @@ class TestMapMarkersPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.map_markers
     @pytest.mark.navigation
-    #@pytest.mark.debug
     def test_page_admin_elements(self, map_markers_page):
         """_summary_
 
@@ -82,7 +79,6 @@ class TestMapMarkersPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.map_markers
     @pytest.mark.navigation
-    #@pytest.mark.debug
     def test_page_definition_elements(self, map_markers_page):
         """_summary_
 

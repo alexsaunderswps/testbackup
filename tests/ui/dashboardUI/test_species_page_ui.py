@@ -67,7 +67,6 @@ class TestSpeciesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.species
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_species_page_admin_elements(self, species_page):
         """_summary_
 
@@ -79,7 +78,6 @@ class TestSpeciesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.species
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_species_page_definition_elements(self, species_page):
         """_summary_
 
@@ -91,7 +89,6 @@ class TestSpeciesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.search 
     @pytest.mark.species
-    @pytest.mark.debug
     def test_species_seach_elements(self, species_page):
         """_summary_
 
@@ -106,7 +103,6 @@ class TestSpeciesPageUI(TestBasePageUI):
     @pytest.mark.UI 
     @pytest.mark.species
     @pytest.mark.table
-    @pytest.mark.debug
     def test_species_table_elements(self, species_page):
         """_summary_
 
@@ -121,7 +117,6 @@ class TestSpeciesPageUI(TestBasePageUI):
     @pytest.mark.UI 
     @pytest.mark.pagination
     @pytest.mark.species
-    @pytest.mark.debug
     def test_species_pagination_elements(self, species_page):
         """_summary_
 

@@ -28,7 +28,6 @@ class TestVideoPageUI(TestBasePageUI):
     
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.debug
     def test_video_page_title(self, videos_page):
         """_summary_
 
@@ -44,7 +43,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_video_page_nav_elements(self, videos_page):
         """_summary_
 
@@ -56,7 +54,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_video_page_admin_elements(self, videos_page):
         """_summary_
 
@@ -68,7 +65,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_video_page_definition_elements(self, videos_page):
         """_summary_
 
@@ -80,7 +76,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.search
     @pytest.mark.video
-    #@pytest.mark.debug
     def test_video_page_search_elements(self, videos_page):
         """_summary_
 
@@ -96,7 +91,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.pagination
     @pytest.mark.video
-    #@pytest.mark.debug
     def test_video_pagination_elements(self, videos_page):
         """_summary_
 
@@ -108,7 +102,6 @@ class TestVideoPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.table 
-    #@pytest.mark.debug
     def test_video_table_elements(self, videos_page):
         """_summary_
 
