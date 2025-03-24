@@ -12,7 +12,7 @@ class TestBasePageUI:
 
     @pytest.mark.UI
     @pytest.mark.base 
-    #@pytest.mark.debug
+    @pytest.mark.navigation
     def test_page_nav_elements(self, base_page):
         """_summary_
 
@@ -35,7 +35,7 @@ class TestBasePageUI:
         
     @pytest.mark.UI
     @pytest.mark.base  
-    #@pytest.mark.debug
+    @pytest.mark.navigation
     def test_page_admin_elements(self, base_page):
         """_summary_
 
@@ -58,7 +58,7 @@ class TestBasePageUI:
         
     @pytest.mark.UI
     @pytest.mark.base  
-    #@pytest.mark.debug
+    @pytest.mark.navigation
     def test_page_definition_elements(self, base_page):
         """_summary_
 
@@ -81,7 +81,7 @@ class TestBasePageUI:
         
     @pytest.mark.UI 
     @pytest.mark.base
-    @pytest.mark.debug
+    @pytest.mark.pagination
     def test_page_pagination_elements(self,base_page):
         """_summary_
 
