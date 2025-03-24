@@ -116,8 +116,7 @@ class TestDevicesPageUI(TestBasePageUI):
             check.is_true(all_elements, f"Missing device table elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Device Table Elements found")
     
-    # Currently Devices page impliments pagination differently that all other pages.
-    # This test will be implemented when the pagination is updated to match the rest of the pages
+    
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.pagination
