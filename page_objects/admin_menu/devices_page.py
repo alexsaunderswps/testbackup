@@ -42,7 +42,7 @@ class DevicesPage(BasePage):
     class DeviceSearchElements:
         """_summary_
         """
-        SEARCH_TEXT = '//input[@placeholder="Filter by name"]'
+        SEARCH_TEXT = "//input[@placeholder='Filter by name']"
         SEARCH_BUTTON = "//button[text()='Search']"
         ADD_DEVICE_LINK = "//a[@href='/device/add']"
         
@@ -112,9 +112,9 @@ class DevicesPage(BasePage):
         for element_name, table_element in table_elements.items():
             try:
                 if self.locator.is_element_present(table_element):
-                    self.logger.info(f"Table element found: {element_name}")
+                    self.logger.info(f"Table element found: {element_name} on Devices page")
                 else:
-                    raise NoSuchElementException(f"Table Element not found: {element_name}")
+                    raise NoSuchElementException(f"Table Element not found: {element_name} on Devices page")
             except NoSuchElementException:
                 self.screenshot.take_screenshot(self.driver, f"device_table_elements_not_found: {element_name}")
                 self.logger.error(f"Table Element not found: {element_name}")
