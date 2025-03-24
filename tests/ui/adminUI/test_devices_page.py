@@ -12,7 +12,7 @@ screenshot = ScreenshotManager()
 
 @pytest.fixture
 def devices_page(logged_in_browser):
-    logger.debug("Starting device_page fixture")
+    logger.debug("Starting devices_page fixture")
     device_pages = []
     for login_page in logged_in_browser:
         driver = login_page.driver
@@ -40,7 +40,6 @@ class TestDevicesPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
     @pytest.mark.devices
-    @pytest.mark.debug
     def test_devices_page_title(self, devices_page):
         """_summary_
 
@@ -56,7 +55,6 @@ class TestDevicesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_devices_page_nav_elements(self, devices_page):
         """_summary_
 
@@ -68,7 +66,6 @@ class TestDevicesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_devices_page_admin_elements(self, devices_page):
         """_summary_
 
@@ -80,7 +77,6 @@ class TestDevicesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_devices_page_definition_elements(self, devices_page):
         """_summary_
 
@@ -109,7 +105,6 @@ class TestDevicesPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.table
-    @pytest.mark.debug
     def test_devices_table_elements(self, devices_page):
         """_summary_
 
@@ -120,15 +115,18 @@ class TestDevicesPageUI(TestBasePageUI):
             all_elements, missing_elements = dp.verify_all_device_table_elements_present()
             check.is_true(all_elements, f"Missing device table elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Device Table Elements found")
-            
-    # @pytest.mark.UI
-    # @pytest.mark.devices
-    # @pytest.mark.pagination
-    # @pytest.mark.debug
-    # def test_devices_pagination_elements(self, devices_page):
-    #     """_summary_
+    
+    # Currently Devices page impliments pagination differently that all other pages.
+    # This test will be implemented when the pagination is updated to match the rest of the pages
+    @pytest.mark.UI
+    @pytest.mark.devices
+    @pytest.mark.pagination
+    def test_devices_pagination_elements(self, devices_page):
+        """_summary_
 
-    #     Args:
-    #         devices_page (_type_): _description_
-    #     """
-    #     return super().test_page_pagination_elements(devices_page)
+        Args:
+            devices_page (_type_): _description_
+        """
+        return super().test_page_pagination_elements(devices_page)
+    
+    
