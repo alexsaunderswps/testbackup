@@ -44,7 +44,7 @@ class InstallationsPage(BasePage):
         """
         SEARCH_TEXT = "//input[@placeholder='Filter by name']"
         SEARCH_BUTTON = "//button[text()='Search']"
-        ADD_INSTALLATION_LINK = "//a[@href='installation/add']"
+        ADD_INSTALLATION_LINK = "//a[@href='/installation/add']"
         
     class InstallationTableElements:
         """_summary_
