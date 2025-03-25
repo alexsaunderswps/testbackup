@@ -84,7 +84,7 @@ class InstallationsPage(BasePage):
         for element_name, element_locator in search_elements.items():
             try:
                 if self.locator.is_element_present(element_locator):
-                    self.logger.info(f"Element found: {element_name}")
+                    self.logger.info(f"Search element found: {element_name}")
                 else:
                     raise NoSuchElementException(f"Search Element not found on Installations page: {element_name}")
             except NoSuchElementException:
@@ -129,7 +129,7 @@ class InstallationsPage(BasePage):
                 all_elements_present = False
                 missing_elements.append(element_name)
             except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find table element: {str(e)}")
+                self.logger.error(f"Unexpected error while trying to find table element: {str(e)} on Installations page")
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
