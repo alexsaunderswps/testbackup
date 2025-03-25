@@ -51,7 +51,7 @@ class OrganizationsPage(BasePage):
         """
         ORGANIZATION_TABLE_BODY = "//table//tbody"
         ORGANIZATION_TABLE_ROWS = "//table//tbody/tr"
-        ORGANIZATION_NAME_HEADER = "//table//th[text()='Name ']"
+        ORGANIZATION_NAME_HEADER = "//table/thead/tr/th[text()='Name ']"
         
     # Check Page Element presence
     def verify_page_title_present(self):

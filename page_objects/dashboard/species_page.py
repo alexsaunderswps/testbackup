@@ -51,13 +51,13 @@ class SpeciesPage(BasePage):
         """
         SPECIES_TABLE_BODY = "//table//tbody"
         SPECIES_TABLE_ROWS = "//table//tbody/tr"
-        SPECIES_NAME_HEADER = "//table//th[text()='Name']"
-        SPECIES_COLLOQUIAL_HEADER = "//table//th[text()='Colloquial Name']"
-        SPECIES_SCIENTIFIC_HEADER = "//table//div[text()='Scientific Name']"
-        SPECIES_DESCRIPTION_HEADER = "//table//div[text()='Description']"
-        SPECIES_IUCN_HEADER = "//table//th[text()='IUCN Status']"
-        SPECIES_POPULATION_HEADER = "//table//th[text()='Population Trend']"
-        SPECIES_CATEGORY_HEADER = "//table//th[text()='Species Category']"
+        SPECIES_NAME_HEADER = "//table/thead/tr/th[text()='Name']"
+        SPECIES_COLLOQUIAL_HEADER = "//table/thead/tr/th[text()='Colloquial Name']"
+        SPECIES_SCIENTIFIC_HEADER = "//table/thead/tr/th/div[text()='Scientific Name']"
+        SPECIES_DESCRIPTION_HEADER = "//table/thead/tr/th/div[text()='Description']"
+        SPECIES_IUCN_HEADER = "//table/thead/tr/th[text()='IUCN Status']"
+        SPECIES_POPULATION_HEADER = "//table/thead/tr/th[text()='Population Trend']"
+        SPECIES_CATEGORY_HEADER = "//table/thead/tr/th[text()='Species Category']"
             
     # Check Page Element presence
     def verify_page_title_present(self):

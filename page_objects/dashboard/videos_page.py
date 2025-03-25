@@ -44,11 +44,11 @@ class VideosPage(BasePage):
         
     class VideoTableElements:
         VIDEO_TABLE_BODY = "//table//tbody"
-        THUMBNAIL_HEADER = "//table//th[text()='Thumbnail']"
-        NAME_HEADER = "//table//div[text()='Name']"
-        ORGANIZATION_HEADER = "//table//div[text()='Organization']"
-        DESCRIPTION_HEADER = "//table//th[text()='Description']"
-        COUNTRY_HEADER = "//table//th[text()='Country']"
+        THUMBNAIL_HEADER = "//table/thead/tr/th[text()='Thumbnail']"
+        NAME_HEADER = "//table/thead/tr/div[text()='Name']"
+        ORGANIZATION_HEADER = "//table/thead/tr/div[text()='Organization']"
+        DESCRIPTION_HEADER = "//table/thead/tr/th[text()='Description']"
+        COUNTRY_HEADER = "//table/thead/tr/th[text()='Country']"
         VIDEO_TABLE_ROW = "//table//tbody/tr"
     
     class SortingElements:

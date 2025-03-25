@@ -51,11 +51,11 @@ class InstallationsPage(BasePage):
         """
         INSTALLATION_TABLE_BODY = "//table//tbody"
         INSTALLATION_TABLE_ROWS = "//table//tbody/tr"
-        INSTALLATION_NAME_HEADER = "//table//th[text()='Name']"
-        INSTALLATION_START_LATLONG = "//table//th[text()='Global Start LatLong ']"
-        INSTALLATION_STARTUP_VIDEO = "//table//th[text()='Startup Video']"
-        INSTALLATION_VIDEO_CATALOGUE = "//table//th[text()='Video Catalogue']"
-        INSTALLATION_ORGANIZATION_HEADER = "//table//th[text()='Organization']"
+        INSTALLATION_NAME_HEADER = "//table/thead/tr/th[text()='Name']"
+        INSTALLATION_START_LATLONG = "//table/thead/tr/th[text()='Global Start LatLong ']"
+        INSTALLATION_STARTUP_VIDEO = "//table/thead/tr/th[text()='Startup Video']"
+        INSTALLATION_VIDEO_CATALOGUE = "//table/thead/tr/th[text()='Video Catalogue']"
+        INSTALLATION_ORGANIZATION_HEADER = "//table/thead/tr/th[text()='Organization']"
         
     # Check Page Element presence
     def verify_page_title_present(self):

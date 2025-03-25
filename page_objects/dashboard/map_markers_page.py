@@ -47,12 +47,12 @@ class MapMarkersPage(BasePage):
     class MapMarkersTableElemenets:
         MAP_MARKERS_TABLE_BODY = "//table//tbody"
         MAP_MARKERS_TABLE_ROWS = "//table//tbody/tr"
-        MAP_MARKERS_ICON_HEADER = "//table//div[text()='Icon']"
-        MAP_MARKER_NAME_HEADER = "//table//div[text()='Name']"
-        MAP_MARKER_DESCRIPTION_HEADER = "//table//div[text()='Description']"
-        MAP_MARKER_ORGANIZATION_HEADER = "//table//th[text()='Organization']"
-        MAP_MARKER_VIDEOS_HEADER = "//table//th[text()='Videos']"
-        MAP_MARKER_LOCATIONS_HEADER = "//table//th[text()='Location']"
+        MAP_MARKERS_ICON_HEADER = "//table/thead/tr/th/div[text()='Icon']"
+        MAP_MARKER_NAME_HEADER = "//table/thead/tr/th/div[text()='Name']"
+        MAP_MARKER_DESCRIPTION_HEADER = "//table/thead/tr/th/div[text()='Description']"
+        MAP_MARKER_ORGANIZATION_HEADER = "//table/thead/tr/th[text()='Organization']"
+        MAP_MARKER_VIDEOS_HEADER = "//table/thead/tr/th[text()='Videos']"
+        MAP_MARKER_LOCATIONS_HEADER = "//table/thead/tr/th[text()='Location']"
         # MAP_MARKERS_TABLE_HEADER = 
         # MAP_MARKERS_TABLE_FOOTER = 
         
