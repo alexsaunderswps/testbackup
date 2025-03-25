@@ -37,7 +37,7 @@ class UsersPage(BasePage):
     class UsersPageElements:
         """_summary_
         """
-        USERS_PAGE_TITLE = "//hi[text()='Users']"
+        USERS_PAGE_TITLE = "//h1[text()='Users']"
         
     class UsersActionElements:
         """_summary_
