@@ -71,7 +71,7 @@ class TestOrganizationsPageUI(TestBasePageUI):
         Args:
             organizations_page (_type_): _description_
         """
-        return super().text_page_admin_elements(organizations_page)
+        return super().test_page_admin_elements(organizations_page)
     
     @pytest.mark.UI 
     @pytest.mark.navigation
