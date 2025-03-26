@@ -44,14 +44,14 @@ class IUCNStatusPage(BasePage):
         
     # Check IUCN Status Page Title presence
     
-    def verify_IUCN_page_title_present(self):
+    def verify_iucn_page_title_present(self):
         """_summary_
         """
         return super().verify_page_title_present(self.IUCNStatusPageElements.IUCN_STATUS_PAGE_TITLE)
     
     # Check IUCN Status Table presence
     
-    def verify_IUCN_page_table_elements_present(self):
+    def verify_iucn_page_table_elements_present(self):
         """_summary_
         """
         self.logger.info("Checking IUCN Status Table Elements")
