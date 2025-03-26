@@ -89,3 +89,45 @@ class TestMapMarkersPageUI(TestBasePageUI):
             _type_: _description_
         """
         return super().test_page_definition_elements(map_markers_page)
+    
+    @pytest.mark.UI
+    @pytest.mark.map_markers
+    @pytest.mark.table
+    def test_map_marker_action_elements(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+        """
+        for mp in map_markers_page:
+            all_elements_present, missing_elements = mp.verify_all_map_marker_action_elements_present()
+            check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Map Markers Page")
+            logger.info("Verification Successful :: All Map Marker Action elements found")
+    
+    @pytest.mark.UI
+    @pytest.mark.map_markers
+    @pytest.mark.table
+    def test_map_marker_core_table_elements(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+        """
+        for mp in map_markers_page:
+            all_elements_present, missing_elements = mp.verify_all_core_map_marker_table_elements_present()
+            check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Map Markers Core Table")
+            logger.info("Verification Successful :: All Map Marker Core Table elements found")
+            
+    @pytest.mark.UI
+    @pytest.mark.map_markers
+    @pytest.mark.table
+    def test_map_marker_custom_table_elements(self, map_markers_page):
+        """_summary_
+
+        Args:
+            map_markers_page (_type_): _description_
+        """
+        for mp in map_markers_page:
+            all_elements_present, missing_elements = mp.verify_all_custom_map_marker_table_elements_present()
+            check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Map Markers Custom Table")
+            logger.info("Verification Successful :: All Custom Map Marker Table elements found")
