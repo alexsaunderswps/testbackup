@@ -72,9 +72,9 @@ class CountriesPage(BasePage):
         missing_elements = []
         # Define elements with readable names
         table_elements = {
-        "Table Search": self.CountryTableElemenets.COUNTRIES_TABLE_SEARCH,
-        "Table Body": self.CountryTableElemenets.COUNTRIES_TABLE_BODY,
-        "Table Rows": self.CountryTableElemenets.COUNTRIES_TABLE_ROWS
+        "Countries Table Search": self.CountryTableElemenets.COUNTRIES_TABLE_SEARCH,
+        "Countries Table Body": self.CountryTableElemenets.COUNTRIES_TABLE_BODY,
+        "Countries Table Rows": self.CountryTableElemenets.COUNTRIES_TABLE_ROWS
         }
         for element_name, table_locator in table_elements.items():
             try:

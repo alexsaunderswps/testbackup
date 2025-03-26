@@ -59,8 +59,8 @@ class IUCNStatusPage(BasePage):
         missing_elements = []
         #Define elements with readable names
         table_elements = {
-            "Table Body": self.IUCNStatusTableElemenets.IUCN_STATUS_TABLE_BODY,
-            "Table Rows": self.IUCNStatusTableElemenets.IUCN_STUTUS_TABLE_ROWS
+            "IUCN Table Body": self.IUCNStatusTableElemenets.IUCN_STATUS_TABLE_BODY,
+            "IUCN Table Rows": self.IUCNStatusTableElemenets.IUCN_STUTUS_TABLE_ROWS
         }
         for element_name, table_locator in table_elements.items():
             try:
