@@ -83,21 +83,9 @@ class TestVideoPageUI(TestBasePageUI):
             login_page (_type_): _description_
         """
         for vp in videos_page:
-            
             all_elements, missing_elements = vp.verify_all_video_search_elements_present()
             check.is_true(all_elements, f"Search elements missing from Videos Page: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Navigation elements found on Videos Page")
-        
-    @pytest.mark.UI
-    @pytest.mark.pagination
-    @pytest.mark.video
-    def test_video_pagination_elements(self, videos_page):
-        """_summary_
-
-        Args:
-            login_page (_type_): _description_
-        """
-        return super().test_page_pagination_elements(videos_page)
 
     @pytest.mark.UI
     @pytest.mark.video
@@ -133,6 +121,18 @@ class TestVideoPageUI(TestBasePageUI):
     def test_video_name_retreval(self, videos_page):
         for vp in videos_page:
             vp.get_video_name_values()
+            
+            
+    @pytest.mark.UI
+    @pytest.mark.pagination
+    @pytest.mark.video
+    def test_video_pagination_elements(self, videos_page):
+        """_summary_
+
+        Args:
+            login_page (_type_): _description_
+        """
+        return super().test_page_pagination_elements(videos_page)
 
 # TODO - check videos_page.py for Todo items before writing tests here
 
