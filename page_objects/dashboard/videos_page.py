@@ -45,8 +45,8 @@ class VideosPage(BasePage):
     class VideoTableElements:
         VIDEO_TABLE_BODY = "//table//tbody"
         THUMBNAIL_HEADER = "//table/thead/tr/th[text()='Thumbnail']"
-        NAME_HEADER = "//table/thead/tr/div[text()='Name']"
-        ORGANIZATION_HEADER = "//table/thead/tr/div[text()='Organization']"
+        NAME_HEADER = "//table/thead/tr/th/div[text()='Name']"
+        ORGANIZATION_HEADER = "//table/thead/tr/th/div[text()='Organization']"
         DESCRIPTION_HEADER = "//table/thead/tr/th[text()='Description']"
         COUNTRY_HEADER = "//table/thead/tr/th[text()='Country']"
         VIDEO_TABLE_ROW = "//table//tbody/tr"
@@ -99,7 +99,14 @@ class VideosPage(BasePage):
     # Check Table Elements
     
     def verify_all_video_table_elements_present(self) -> Tuple[bool, list]:
+        """_summary_
 
+        Raises:
+            NoSuchElementException: _description_
+
+        Returns:
+            Tuple[bool, list]: _description_
+        """
         self.logger.info("Verifying that all expected pagination elements are present in: Videos Table")
         all_elements_present = True
         missing_elements = []
@@ -116,9 +123,9 @@ class VideosPage(BasePage):
         for element_name, table_locator in table_elements.items():
             try:        
                 if self.locator.is_element_present(table_locator):
-                    self.logger.info(f"{element_name} was located successfully.")
+                    self.logger.info(f"{element_name} was located successfully in Videos table.")
                 else:
-                    raise NoSuchElementException(f"Element {element_name} was Not Found")
+                    raise NoSuchElementException(f"Element {element_name} was nout found in Videos table")
             except NoSuchElementException:
                 self.screenshot.take_screenshot(self.driver, f"video_table_{element_name}_Not_Found")
                 self.logger.error(f"Could not find {element_name} in video table.")
