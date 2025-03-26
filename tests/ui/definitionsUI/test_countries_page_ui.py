@@ -32,7 +32,7 @@ def countries_page(logged_in_browser):
         base_page.go_countries_page()
         # Verify that we're on the Countries page
         countries_page = CountriesPage(driver)
-        if countries_page.verify_page_title_present():
+        if countries_page.verify_countries_page_title_present():
             logger.info("Successfully navigated to Countries page")
             country_pages.append(countries_page)
         else:
@@ -54,7 +54,7 @@ class TestCountriesPageUI(TestBasePageUI):
         """
         logger.debug("Starting test_countries_page_title")
         for cp in countries_page:
-            title = cp.verify_page_title_present()
+            title = cp.verify_countries_page_title_present()
             check.is_true(title, "Title does not match")
             logger.info("Verification Successful :: Countries Page Title found")
             
@@ -90,6 +90,20 @@ class TestCountriesPageUI(TestBasePageUI):
             countries_page (_type_): _description_
         """
         return super().test_page_definition_elements(countries_page)
+    
+    @pytest.mark.UI 
+    @pytest.mark.countries
+    @pytest.mark.table
+    def test_countries_table_elements(self, countries_page):
+        """_summary_
+
+        Args:
+            countries_page (_type_): _description_
+        """
+        for cp in countries_page:
+            all_elements_present, missing_elements = cp.verify_all_countries_table_elements_present()
+            check.is_true(all_elements_present, f"Table elements missing from Countries Page: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Countries Table elements found")
     
     @pytest.mark.UI
     @pytest.mark.countries
