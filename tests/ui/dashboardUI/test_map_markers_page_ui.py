@@ -65,7 +65,7 @@ class TestMapMarkersPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.map_markers
     @pytest.mark.navigation
-    def test_page_admin_elements(self, map_markers_page):
+    def test_map_marker_page_admin_elements(self, map_markers_page):
         """_summary_
 
         Args:
@@ -79,7 +79,7 @@ class TestMapMarkersPageUI(TestBasePageUI):
     @pytest.mark.UI
     @pytest.mark.map_markers
     @pytest.mark.navigation
-    def test_page_definition_elements(self, map_markers_page):
+    def test_map_marker_page_definition_elements(self, map_markers_page):
         """_summary_
 
         Args:
