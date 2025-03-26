@@ -19,6 +19,36 @@
             "methods": ["GET", "POST", "PUT", "DELETE"],
             "requires_auth": true
         },
+        "/Species": {
+            "threshold": 2,
+            "description": "Species management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Installations": {
+            "threshold": 2,
+            "description": "Installations management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Devices": {
+            "threshold": 2,
+            "description": "Devices management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Users": {
+            "threshold": 2,
+            "description": "Users management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
+        "/Organizations": {
+            "threshold": 2,
+            "description": "Organization management endpoint",
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "requires_auth": true
+        },
         "/Countries": {
             "threshold": 2,
             "description": "Countries management endpoint",
@@ -37,39 +67,9 @@
             "methods": ["GET", "POST", "PUT", "DELETE"],
             "requires_auth": true
         },
-        "/Species": {
-            "threshold": 2,
-            "description": "Species management endpoint",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "requires_auth": true
-        },
-        "/Site": {
-            "threshold": 2,
-            "description": "Site management endpoint",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "requires_auth": true
-        },
-        "/SpeciesCategory": {
-            "threshold": 2,
-            "description": "Species category management endpoint",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "requires_auth": true
-        },
         "/Tag": {
             "threshold": 2,
             "description": "Tag management endpoint",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "requires_auth": true
-        },
-        "/Users": {
-            "threshold": 2,
-            "description": "Users management endpoint",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "requires_auth": true
-        },
-        "/Organization": {
-            "threshold": 2,
-            "description": "Organization management endpoint",
             "methods": ["GET", "POST", "PUT", "DELETE"],
             "requires_auth": true
         }
