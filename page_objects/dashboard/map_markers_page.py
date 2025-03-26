@@ -57,10 +57,12 @@ class MapMarkersPage(BasePage):
         # MAP_MARKERS_TABLE_HEADER = 
         # MAP_MARKERS_TABLE_FOOTER = 
         
-    # Check Page Element presence
+    # Check Title Element presence
     
     def verify_page_title_present(self):
         return super().verify_page_title_present(self.MapMarkersPageElements.MAP_MARKERS_PAGE_TITLE)
+    
+    # Check Action Elements
     
     def verify_all_map_marker_action_elements_present(self) -> Tuple[bool, list]:
         """_summary_
@@ -93,6 +95,8 @@ class MapMarkersPage(BasePage):
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
+    
+    # Check Table Elements
 
     def verify_all_core_map_marker_table_elements_present(self) -> Tuple[bool, list]:
         """_summary_

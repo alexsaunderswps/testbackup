@@ -55,12 +55,21 @@ class VideosPage(BasePage):
         NAME_SORT = "//table//div[text()='Name']//button//i"
         ## PUBLISHED_SORT = "//table//div[text()='Published']//button//i"
 
-    # Check Element presence
+    # Check Title Element presence
     def verify_page_title_present(self):
         return super().verify_page_title_present(self.VideoElements.VIDEO_PAGE_TITLE)
     
+    # Check Search Elements
+    
     def verify_all_video_search_elements_present(self) -> Tuple[bool, list]:
+        """_summary_
 
+        Raises:
+            NoSuchElementException: _description_
+
+        Returns:
+            Tuple[bool, list]: _description_
+        """
         self.logger.info("Verifying that all expected video search elements are present in: Video Page")
         all_elements_present = True
         missing_elements = []
@@ -86,6 +95,8 @@ class VideosPage(BasePage):
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
+    
+    # Check Table Elements
     
     def verify_all_video_table_elements_present(self) -> Tuple[bool, list]:
 
@@ -118,8 +129,6 @@ class VideosPage(BasePage):
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
-    
-# Check Table Body contents
 
     def count_table_rows(self) -> int:
         
