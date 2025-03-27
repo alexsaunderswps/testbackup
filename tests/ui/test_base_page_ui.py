@@ -10,10 +10,7 @@ screenshot = ScreenshotManager()
 
 class TestBasePageUI:
 
-    @pytest.mark.UI
-    @pytest.mark.base 
-    @pytest.mark.navigation
-    def test_page_nav_elements(self, base_page):
+    def _verify_page_nav_elements(self, base_page):
         """_summary_
 
         Args:
@@ -31,12 +28,9 @@ class TestBasePageUI:
                 logger.error(f"Verification Failed :: Missing Nav Elements: {', '.join(missing)} for {bp.driver.name}")
                 all_browsers_passed = False
         logger.info("test_page_nav_elements: finished")
-        assert all_browsers_passed, "One or more browsers failed to find all nav elements"
+        return all_browsers_passed, "One or more browsers failed to find all nav elements"
         
-    @pytest.mark.UI
-    @pytest.mark.base  
-    @pytest.mark.navigation
-    def test_page_admin_elements(self, base_page):
+    def _verify_page_admin_elements(self, base_page):
         """_summary_
 
         Args:
@@ -54,12 +48,9 @@ class TestBasePageUI:
                 logger.error(f"Verification Failed :: Missing Admin Elements: {', '.join(missing)} for {bp.driver.name}")
                 all_browsers_passed = False
         logger.info("test_page_admin_elements: finished")
-        assert all_browsers_passed, "One or more browsers failed to find all admin elements"
-        
-    @pytest.mark.UI
-    @pytest.mark.base  
-    @pytest.mark.navigation
-    def test_page_definition_elements(self, base_page):
+        return all_browsers_passed, "One or more browsers failed to find all admin elements"
+
+    def _verify_page_definition_elements(self, base_page):
         """_summary_
 
         Args:
@@ -77,12 +68,9 @@ class TestBasePageUI:
                 logger.error(f"Verification Failed :: Missing Admin Elements: {', '.join(missing)} for {bp.driver.name}")
                 all_browsers_passed = False
         logger.info("test_page_admin_elements: finished")
-        assert all_browsers_passed, "One or more browsers failed to find all admin elements"
+        return all_browsers_passed, "One or more browsers failed to find all admin elements"
         
-    @pytest.mark.UI 
-    @pytest.mark.base
-    @pytest.mark.pagination
-    def test_page_pagination_elements(self,base_page):
+    def _verify_page_pagination_elements(self,base_page):
         """_summary_
 
         Args:
@@ -100,4 +88,40 @@ class TestBasePageUI:
                 logger.error(f"Verification Failed :: Missing Pagination Elements: {', '.join(missing)} for {bp.driver.name}")
                 all_browsers_passed = False
         logger.info("test_page_pagination_elements: finished")
-        assert all_browsers_passed, "One or more browsers failed to find all pagination elements"
+        return all_browsers_passed, "One or more browsers failed to find all pagination elements"
+    
+    @pytest.mark.base 
+    def test_base_page_nav_elements(self, base_page):
+        """_summary_
+
+        Args:
+            base_page (_type_): _description_
+        """
+        assert self._verify_page_nav_elements(base_page), "One or more browser failed to find all elements"
+        
+    @pytest.mark.base  
+    def test_base_page_admin_elements(self, base_page):
+        """_summary_
+
+        Args:
+            base_page (_type_): _description_
+        """
+        assert self._verify_page_admin_elements(base_page), "One or more browser failed to find all elements"
+        
+    @pytest.mark.base  
+    def test_base_page_definition_elements(self, base_page):
+        """_summary_
+
+        Args:
+            base_page (_type_): _description_
+        """
+        assert self._verify_page_definition_elements(base_page), "One or more browser failed to find all elements"
+        
+    @pytest.mark.base  
+    def test_base_page_pagination_elements(self, base_page):
+        """_summary_
+
+        Args:
+            base_page (_type_): _description_
+        """
+        assert self._verify_page_pagination_elements(base_page), "One or more browser failed to find all elements"

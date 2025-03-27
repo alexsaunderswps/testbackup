@@ -67,7 +67,7 @@ class TestCountriesPageUI(TestBasePageUI):
         Args:
             countries_page (_type_): _description_
         """
-        return super().test_page_nav_elements(countries_page)
+        assert self._verify_page_nav_elements(countries_page)
     
     @pytest.mark.UI
     @pytest.mark.countries
@@ -78,7 +78,7 @@ class TestCountriesPageUI(TestBasePageUI):
         Args:
             countries_page (_type_): _description_
         """
-        super().test_page_admin_elements(countries_page)
+        assert self._verify_page_admin_elements(countries_page)
         
     @pytest.mark.UI
     @pytest.mark.countries
@@ -89,7 +89,7 @@ class TestCountriesPageUI(TestBasePageUI):
         Args:
             countries_page (_type_): _description_
         """
-        return super().test_page_definition_elements(countries_page)
+        assert self._verify_page_definition_elements(countries_page)
     
     @pytest.mark.UI 
     @pytest.mark.countries

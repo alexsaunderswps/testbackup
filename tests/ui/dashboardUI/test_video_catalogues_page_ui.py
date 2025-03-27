@@ -59,7 +59,7 @@ class TestVideoCataloguesPageUI(TestBasePageUI):
         Args:
             video_catalogue_page (_type_): _description_
         """
-        return super().test_page_nav_elements(video_catalogue_page)
+        assert self._verify_page_nav_elements(video_catalogue_page)
     
     @pytest.mark.UI
     @pytest.mark.catalogue
@@ -70,7 +70,7 @@ class TestVideoCataloguesPageUI(TestBasePageUI):
         Args:
             video_catalogue_page (_type_): _description_
         """
-        return super().test_page_admin_elements(video_catalogue_page)
+        assert self._verify_page_admin_elements(video_catalogue_page)
 
     @pytest.mark.UI
     @pytest.mark.catalogue
@@ -81,7 +81,7 @@ class TestVideoCataloguesPageUI(TestBasePageUI):
         Args:
             video_catalogue_page (_type_): _description_
         """
-        return super().test_page_definition_elements(video_catalogue_page)
+        assert self._verify_page_definition_elements(video_catalogue_page)
     
     @pytest.mark.UI
     @pytest.mark.catalogue
@@ -93,7 +93,7 @@ class TestVideoCataloguesPageUI(TestBasePageUI):
             video_catalogue_page (_type_): _description_
         """
         for vcp in video_catalogue_page:
-            all_elements_present, missing_elements = vcp.verify_all_catalgoue_search_elements_present()
+            all_elements_present, missing_elements = vcp.verify_all_catalogue_search_elements_present()
             check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Video Catalogues page")
             logger.info("Verification Successful :: All Video Catalogue search elements found")
             

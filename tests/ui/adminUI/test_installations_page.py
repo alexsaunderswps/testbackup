@@ -61,7 +61,7 @@ class TestInstallationsPageUI(TestBasePageUI):
         Args:
             installations_page (_type_): _description_
         """
-        return super().test_page_nav_elements(installations_page)
+        assert self._verify_page_nav_elements(installations_page)
     
     @pytest.mark.UI
     @pytest.mark.installations
@@ -72,7 +72,7 @@ class TestInstallationsPageUI(TestBasePageUI):
         Args:
             installations_page (_type_): _description_
         """
-        return super().test_page_admin_elements(installations_page)
+        assert self._verify_page_admin_elements(installations_page)
     
     
     @pytest.mark.UI
@@ -84,7 +84,7 @@ class TestInstallationsPageUI(TestBasePageUI):
         Args:
             installations_page (_type_): _description_
         """
-        return super().test_page_definition_elements(installations_page)
+        assert self._verify_page_definition_elements(installations_page)
     
     @pytest.mark.UI
     @pytest.mark.installations
@@ -123,4 +123,4 @@ class TestInstallationsPageUI(TestBasePageUI):
         Args:
             installations_page (_type_): _description_
         """
-        return super().test_page_pagination_elements(installations_page)
+        assert self._verify_page_pagination_elements(installations_page)

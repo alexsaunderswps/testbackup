@@ -66,7 +66,7 @@ class TestIUCNStatusPageUI(TestBasePageUI):
         Args:
             iucnstatus_page (_type_): _description_
         """
-        return super().test_page_nav_elements(iucnstatus_page)
+        assert self._verify_page_nav_elements(iucnstatus_page)
     
     @pytest.mark.UI 
     @pytest.mark.iucn_status
@@ -77,7 +77,7 @@ class TestIUCNStatusPageUI(TestBasePageUI):
         Args:
             iucnstatus_page (_type_): _description_
         """
-        return super().test_page_admin_elements(iucnstatus_page)
+        assert self._verify_page_admin_elements(iucnstatus_page)
     
     @pytest.mark.UI
     @pytest.mark.iucn_status
@@ -88,7 +88,7 @@ class TestIUCNStatusPageUI(TestBasePageUI):
         Args:
             iucnstatus_page (_type_): _description_
         """
-        return super().test_page_definition_elements(iucnstatus_page)
+        assert self._verify_page_definition_elements(iucnstatus_page)
     
     @pytest.mark.UI 
     @pytest.mark.iucn_status

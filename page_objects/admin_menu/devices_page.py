@@ -82,7 +82,7 @@ class DevicesPage(BasePage):
         
         return self.verify_page_elements_present(search_elements, "Device Search Elements")
     
-    def verify_all_device_table_elements_present(self) -> Tuple[bool, list]:
+    def verify_all_device_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected device table elements are present.
         

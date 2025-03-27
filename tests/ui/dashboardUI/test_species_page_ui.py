@@ -62,7 +62,7 @@ class TestSpeciesPageUI(TestBasePageUI):
         Args:
             species_page (_type_): _description_
         """
-        return super().test_page_nav_elements(species_page)
+        assert self._verify_page_nav_elements(species_page)
     
     @pytest.mark.UI
     @pytest.mark.species
@@ -73,7 +73,7 @@ class TestSpeciesPageUI(TestBasePageUI):
         Args:
             species_page (_type_): _description_
         """
-        return super().test_page_admin_elements(species_page)
+        assert self._verify_page_admin_elements(species_page)
     
     @pytest.mark.UI
     @pytest.mark.species
@@ -84,7 +84,7 @@ class TestSpeciesPageUI(TestBasePageUI):
         Args:
             species_page (_type_): _description_
         """
-        return super().test_page_definition_elements(species_page)
+        assert self._verify_page_definition_elements(species_page)
     
     @pytest.mark.UI
     @pytest.mark.search 
@@ -123,4 +123,4 @@ class TestSpeciesPageUI(TestBasePageUI):
         Args:
             species_page (_type_): _description_
         """
-        return super().test_page_pagination_elements(species_page)
+        assert self._verify_page_pagination_elements(species_page)

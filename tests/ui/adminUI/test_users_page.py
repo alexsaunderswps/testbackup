@@ -61,7 +61,7 @@ class TestUsersPageUI(TestBasePageUI):
         Args:
             users_page (_type_): _description_
         """
-        return super().test_page_nav_elements(users_page)
+        assert self._verify_page_nav_elements(users_page)
     
     @pytest.mark.UI
     @pytest.mark.users
@@ -72,7 +72,7 @@ class TestUsersPageUI(TestBasePageUI):
         Args:
             users_page (_type_): _description_
         """
-        return super().test_page_admin_elements(users_page)
+        assert self._verify_page_admin_elements(users_page)
     
     @pytest.mark.UI
     @pytest.mark.users
@@ -83,11 +83,11 @@ class TestUsersPageUI(TestBasePageUI):
         Args:
             users_page (_type_): _description_
         """
-        return super().test_page_definition_elements(users_page)
+        assert self._verify_page_definition_elements(users_page)
     
     @pytest.mark.UI
     @pytest.mark.users
-    @pytest.mark.navigation
+    @pytest.mark.table
     def test_users_page_search_elements(self, users_page):
         """_summary_
 
@@ -102,7 +102,7 @@ class TestUsersPageUI(TestBasePageUI):
             
     @pytest.mark.UI
     @pytest.mark.users
-    @pytest.mark.navigation
+    @pytest.mark.table
     def test_users_page_table_elements(self, users_page):
         """_summary_
 

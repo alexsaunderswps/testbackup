@@ -1,7 +1,7 @@
 # installations_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -66,47 +66,36 @@ class InstallationsPage(BasePage):
         """
         return super().verify_page_title_present(self.InstallationPageElements.INSTALLATIONS_PAGE_TITLE)
     
-    def verify_all_installations_search_elements_present(self) -> Tuple[bool,list]:
-        """_summary_
-
+    def verify_all_installations_search_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected installation search elements are present.
+        
         Returns:
-            Tuple[bool,list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected installation search elements are present")
-        all_elements_present = True
-        missing_elements = []
+        
         # Define elements with readable names
         search_elements = {
             "Search Text Box": self.InstallationSearchElements.SEARCH_TEXT,
             "Search Button": self.InstallationSearchElements.SEARCH_BUTTON,
             "Add Installation Button": self.InstallationSearchElements.ADD_INSTALLATION_LINK,
         }
-        for element_name, element_locator in search_elements.items():
-            try:
-                if self.locator.is_element_present(element_locator):
-                    self.logger.info(f"Search element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Search Element not found on Installations page: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Search element - {element_name}_Not_Found")
-                self.logger.error(f"Search element not found: {element_name} on Installations page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find search element: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(search_elements, "Installation Search Elements")
     
     def verify_all_installation_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+        """
+        Verify that all expected installation table elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Check if all Installation Table elements are present")
-        all_elements_present = True
-        missing_elements = []
+    
         # Define elements with readable names
         table_elements = {
             "Table Body": self.InstallationTableElements.INSTALLATION_TABLE_BODY,
@@ -117,19 +106,4 @@ class InstallationsPage(BasePage):
             "Video Catalogue": self.InstallationTableElements.INSTALLATION_VIDEO_CATALOGUE,
             "Installation Organization": self.InstallationTableElements.INSTALLATION_ORGANIZATION_HEADER,
         }
-        for element_name, table_element in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_element):
-                    self.logger.info(f"Table element found: {element_name} on Installations page")
-                else:
-                    raise NoSuchElementException(f"Table Element not found: {element_name} on Installations page")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"installation_table_elements_not_found: {element_name}")
-                self.logger.error(f"Table Element not found: {element_name}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find table element: {str(e)} on Installations page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Installation Table Elements")

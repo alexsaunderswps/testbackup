@@ -65,7 +65,7 @@ class TestPopulationTrendPageUI(TestBasePageUI):
         Args:
             population_trend_page (_type_): _description_
         """
-        return super().test_page_nav_elements(population_trend_page)
+        assert self._verify_page_nav_elements(population_trend_page)
     
     @pytest.mark.UI
     @pytest.mark.navigation
@@ -76,7 +76,7 @@ class TestPopulationTrendPageUI(TestBasePageUI):
         Args:
             population_trend_page (_type_): _description_
         """
-        return super().test_page_admin_elements(population_trend_page)
+        assert self._verify_page_admin_elements(population_trend_page)
     
     @pytest.mark.UI 
     @pytest.mark.navigation
@@ -87,4 +87,4 @@ class TestPopulationTrendPageUI(TestBasePageUI):
         Args:
             population_trend_page (_type_): _description_
         """
-        return super().test_page_definition_elements(population_trend_page)
+        assert self._verify_page_definition_elements(population_trend_page)

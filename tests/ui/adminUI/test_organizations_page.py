@@ -60,7 +60,7 @@ class TestOrganizationsPageUI(TestBasePageUI):
         Args:
             organizations_page (_type_): _description_
         """
-        return super().test_page_nav_elements(organizations_page)
+        assert self._verify_page_nav_elements(organizations_page)
     
     @pytest.mark.UI 
     @pytest.mark.navigation
@@ -71,7 +71,7 @@ class TestOrganizationsPageUI(TestBasePageUI):
         Args:
             organizations_page (_type_): _description_
         """
-        return super().test_page_admin_elements(organizations_page)
+        assert self._verify_page_admin_elements(organizations_page)
     
     @pytest.mark.UI 
     @pytest.mark.navigation
@@ -82,7 +82,7 @@ class TestOrganizationsPageUI(TestBasePageUI):
         Args:
             organizations_page (_type_): _description_
         """
-        return super().test_page_definition_elements(organizations_page)
+        assert self._verify_page_definition_elements(organizations_page)
     
     @pytest.mark.UI 
     @pytest.mark.organizations

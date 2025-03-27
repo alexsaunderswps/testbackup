@@ -1,5 +1,6 @@
 # iucn_status_page.py
 import os
+from typing import Tuple, List
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
@@ -51,30 +52,14 @@ class IUCNStatusPage(BasePage):
     
     # Check IUCN Status Table presence
     
-    def verify_iucn_page_table_elements_present(self):
+    def verify_iucn_page_table_elements_present(self) -> Tuple[bool, List[str]]:
         """_summary_
         """
         self.logger.info("Checking IUCN Status Table Elements")
-        all_elements_present = True
-        missing_elements = []
+
         #Define elements with readable names
         table_elements = {
             "IUCN Table Body": self.IUCNStatusTableElemenets.IUCN_STATUS_TABLE_BODY,
             "IUCN Table Rows": self.IUCNStatusTableElemenets.IUCN_STUTUS_TABLE_ROWS
         }
-        for element_name, table_locator in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_locator):
-                    self.logger.info(f"{element_name} found in IUCN Status table")
-                else:
-                    raise NoSuchElementException(f"{element_name} not found in IUCN Status table")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"iucn_table_{element_name}_missing")
-                self.logger.error(f"Could not find {element_name} in IUCN Status table")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"An error occurred while checking {element_name} in IUCN Status table: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "IUCN Table Elements")

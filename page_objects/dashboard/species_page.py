@@ -1,7 +1,7 @@
 # species_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -63,47 +63,36 @@ class SpeciesPage(BasePage):
     def verify_page_title_present(self):
         return super().verify_page_title_present(self.SpeciesPageElements.SPECIES_PAGE_TITLE)
     
-    def verify_all_species_search_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
+    def verify_all_species_search_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected species search elements are present.
         
         Returns:
-            _type_: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected species search elements are present in: Species Page")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         search_elements = {
             "Search Text Box": self.SpeciesSearchElements.SEARCH_TEXT,
             "Search Button": self.SpeciesSearchElements.SEARCH_BUTTON,
             "Add Species Button": self.SpeciesSearchElements.ADD_SPECIES_LINK,
         }
-        for element_name, search_element in search_elements.items():
-            try:
-                if self.locator.is_element_present(search_element):
-                    self.logger.info(f"Element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Element not found: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_search_elements_missing: {element_name}")
-                self.logger.error(f"Element not found: {element_name}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(search_elements, "Species Search Elements")
     
     def verify_all_species_table_elements_present(self) -> Tuple[bool,list]:
-        """_summary_
-
+        """
+        Verify that all expected species table elements are present.
+        
         Returns:
-            Tuple[bool,list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Check if all Species Table elements are present")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         table_elements = {
             "Table Body": self.SpeciesTableElements.SPECIES_TABLE_BODY,
@@ -116,22 +105,7 @@ class SpeciesPage(BasePage):
             "Population Trend": self.SpeciesTableElements.SPECIES_POPULATION_HEADER,
             "Species Category": self.SpeciesTableElements.SPECIES_CATEGORY_HEADER,
         }
-        for element_name, table_element in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_element):
-                    self.logger.info(f"Table element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Table element not found: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"species_table_elements_missing: {element_name}")
-                self.logger.error(f"Element not found: {element_name}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to locate element: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Species Table Elements")
 
     
     def get_page_locator(page_number):
@@ -147,7 +121,7 @@ class SpeciesPage(BasePage):
         self.interactor.element_click(self.PaginationElements.PREVIOUS_PAGE)
         
     def move_next_page_jump(self):
-        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELIPSIS)
+        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELLIPSIS)
     
     def move_prev_page_jump(self):
-        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELIPSIS)
+        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELLIPSIS)

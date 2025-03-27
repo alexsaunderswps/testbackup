@@ -1,7 +1,7 @@
 # users_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -59,45 +59,33 @@ class UsersPage(BasePage):
         """
         return super().verify_page_title_present(self.UsersPageElements.USERS_PAGE_TITLE)
     
-    def verify_add_user_link_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+    def verify_add_user_link_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected user add elements are present.
+        
         Returns:
-        Tuple[bool,list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected Users search elements are present")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         action_elements = {
             "Add Installation Button": self.UsersActionElements.ADD_USER_LINK,
         }
-        for element_name, element_locator in action_elements.items():
-            try:
-                if self.locator.is_element_present(element_locator):
-                    self.logger.info(f"Search element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Search Element not found on Users page: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Action element - {element_name}_Not_Found")
-                self.logger.error(f"Action element not found: {element_name} on Users page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find action element: {str(e)} on Users page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(action_elements, "Users Add Button")
     
-    def verify_all_users_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+    def verify_all_users_table_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected user table elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying all expected Users table elements are present")
-        all_elements_present = True
-        missing_elements = []
         # Define elements with readable names
         table_elements = {
             "Table Body": self.UsersTableElements.USERS_TABLE_BODY,
@@ -106,19 +94,4 @@ class UsersPage(BasePage):
             "Username Header": self.UsersTableElements.USERS_USERNAME_HEADER,
             "Roles Header": self.UsersTableElements.USERS_ROLES_HEADER
         }
-        for element_name, element_locator in table_elements.items():
-            try:
-                if self.locator.is_element_present(element_locator):
-                    self.logger.info(f"Table element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Table Element not found on Users page: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Table element - {element_name}_Not_Found")
-                self.logger.error(f"Table element not found: {element_name} on Users page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find table element: {str(e)} on Users page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Users Table Elements")

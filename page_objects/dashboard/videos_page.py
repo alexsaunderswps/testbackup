@@ -1,6 +1,6 @@
 # videos_page.py
 import os
-from typing import Tuple
+from typing import Tuple, List
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
@@ -61,55 +61,38 @@ class VideosPage(BasePage):
     
     # Check Search Elements
     
-    def verify_all_video_search_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
-        Raises:
-            NoSuchElementException: _description_
-
+    def verify_all_video_search_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected video search elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected video search elements are present in: Video Page")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         search_elements = {
             "Search Button": self.VideoSearchElements.SEARCH_BUTTON,
             "Clear Search Button": self.VideoSearchElements.CANCEL_BUTTON,
             "Add Video Button": self.VideoSearchElements.ADD_VIDEO_LINK,
         }
-        for element_name, search_locator in search_elements.items():
-            try:
-                if self.locator.is_element_present(search_locator):
-                    self.logger.info(f"{element_name} was located successfully.")
-                else:
-                    raise NoSuchElementException(f"Search element {element_name} Not Found on Videos Page")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Video_search_{element_name}_Not_Found")
-                self.logger.error(f"Could not find {element_name} on page.")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while finding elements: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(search_elements, "Video Search Elements")
     
     # Check Table Elements
     
-    def verify_all_video_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
-        Raises:
-            NoSuchElementException: _description_
-
+    def verify_all_video_table_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected video table elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected pagination elements are present in: Videos Table")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         table_elements = {
             "Thumbnail Header": self.VideoTableElements.THUMBNAIL_HEADER,
@@ -120,22 +103,7 @@ class VideosPage(BasePage):
             "Sorting Arrows": self.SortingElements.NAME_SORT,
                         ## self.SortingElements.PUBLISHED_SORT
         }
-        for element_name, table_locator in table_elements.items():
-            try:        
-                if self.locator.is_element_present(table_locator):
-                    self.logger.info(f"{element_name} was located successfully in Videos table.")
-                else:
-                    raise NoSuchElementException(f"Element {element_name} was nout found in Videos table")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"video_table_{element_name}_Not_Found")
-                self.logger.error(f"Could not find {element_name} in video table.")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while finding element in video table: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Video Table Elements")
 
     def count_table_rows(self) -> int:
         

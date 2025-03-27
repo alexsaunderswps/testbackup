@@ -1,7 +1,7 @@
 # countries_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -61,37 +61,24 @@ class CountriesPage(BasePage):
     
     # Check Countries Table contents
     
-    def verify_all_countries_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+    def verify_all_countries_table_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected countries table elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying all elements on the Countries Table")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         table_elements = {
         "Countries Table Search": self.CountryTableElemenets.COUNTRIES_TABLE_SEARCH,
         "Countries Table Body": self.CountryTableElemenets.COUNTRIES_TABLE_BODY,
         "Countries Table Rows": self.CountryTableElemenets.COUNTRIES_TABLE_ROWS
         }
-        for element_name, table_locator in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_locator):
-                    self.logger.info(f"{element_name} found in Countries Table")
-                else:
-                    raise NoSuchElementException(f"Unable to find {element_name} in Countries Table")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"countries_table_{element_name}_missing")
-                self.logger.error(f"Could not find {element_name} in Countries Table")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"An error occurred while checking {element_name} in Countries Table: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Countries Table Elements")
             
     def count_table_rows(self) -> int:
         """_summary_

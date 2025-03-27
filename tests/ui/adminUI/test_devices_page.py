@@ -61,7 +61,7 @@ class TestDevicesPageUI(TestBasePageUI):
         Args:
             devices_page (_type_): _description_
         """
-        return super().test_page_nav_elements(devices_page)
+        assert self._verify_page_nav_elements(devices_page), "One or more browser failed to find all elements"
     
     @pytest.mark.UI
     @pytest.mark.devices
@@ -72,7 +72,7 @@ class TestDevicesPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        return super().test_page_admin_elements(devices_page)
+        assert self._verify_page_admin_elements(devices_page), "One or more browser failed to find all elements"
     
     @pytest.mark.UI
     @pytest.mark.devices
@@ -83,7 +83,7 @@ class TestDevicesPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        return super().test_page_definition_elements(devices_page)
+        assert self._verify_page_definition_elements(devices_page), "One or more browser failed to find all elements"
     
     @pytest.mark.UI
     @pytest.mark.devices
@@ -126,6 +126,6 @@ class TestDevicesPageUI(TestBasePageUI):
         Args:
             devices_page (_type_): _description_
         """
-        return super().test_page_pagination_elements(devices_page)
+        assert self._verify_page_pagination_elements(devices_page),"One or more browser failed to find all elements"
     
     

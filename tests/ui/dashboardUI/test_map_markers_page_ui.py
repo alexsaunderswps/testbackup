@@ -60,7 +60,7 @@ class TestMapMarkersPageUI(TestBasePageUI):
         Args:
             map_markers_page (_type_): _description_
         """
-        return super().test_page_nav_elements(map_markers_page)
+        assert self._verify_page_nav_elements(map_markers_page)
 
     @pytest.mark.UI
     @pytest.mark.map_markers
@@ -74,7 +74,7 @@ class TestMapMarkersPageUI(TestBasePageUI):
         Returns:
             _type_: _description_
         """
-        return super().test_page_admin_elements(map_markers_page)
+        assert self._verify_page_admin_elements(map_markers_page)
     
     @pytest.mark.UI
     @pytest.mark.map_markers
@@ -88,7 +88,7 @@ class TestMapMarkersPageUI(TestBasePageUI):
         Returns:
             _type_: _description_
         """
-        return super().test_page_definition_elements(map_markers_page)
+        assert self._verify_page_definition_elements(map_markers_page)
     
     @pytest.mark.UI
     @pytest.mark.map_markers

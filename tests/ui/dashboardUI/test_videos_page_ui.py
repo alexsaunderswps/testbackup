@@ -49,7 +49,7 @@ class TestVideoPageUI(TestBasePageUI):
         Args:
             videos_page (_type_): _description_
         """
-        return super().test_page_nav_elements(videos_page)
+        assert self._verify_page_nav_elements(videos_page)
         
     @pytest.mark.UI
     @pytest.mark.video
@@ -60,7 +60,7 @@ class TestVideoPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        return super().test_page_admin_elements(videos_page)
+        assert self._verify_page_admin_elements(videos_page)
 
     @pytest.mark.UI
     @pytest.mark.video
@@ -71,7 +71,7 @@ class TestVideoPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        return super().test_page_definition_elements(videos_page)
+        assert self._verify_page_definition_elements(videos_page)
     
     @pytest.mark.UI
     @pytest.mark.search
@@ -132,7 +132,7 @@ class TestVideoPageUI(TestBasePageUI):
         Args:
             login_page (_type_): _description_
         """
-        return super().test_page_pagination_elements(videos_page)
+        assert self._verify_page_pagination_elements(videos_page)
 
 # TODO - check videos_page.py for Todo items before writing tests here
 

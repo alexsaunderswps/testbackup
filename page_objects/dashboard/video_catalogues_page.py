@@ -1,7 +1,7 @@
 # video_catalogues_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -71,49 +71,38 @@ class VideoCataloguesPage(BasePage):
     
     # Check Search Elements
     
-    def verify_all_catalgoue_search_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+    def verify_all_catalogue_search_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected video catalogue search elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all expected video catalogue search elements are present in: Video Catalogues Page")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         search_elements ={
             "Search Text": self.VideoCataloguesSearchElements.SEARCH_TEXT,
             "Search Button": self.VideoCataloguesSearchElements.SEARCH_BUTTON,
             "Add Video Catalogue Link": self.VideoCataloguesSearchElements.ADD_VIDEO_CATALOGUE_LINK
         }
-        for element_name, search_locator in search_elements.items():
-            try:
-                if self.locator.is_element_present(search_locator):
-                    self.logger.info(f"Search element found: {element_name} on Video Catalogues Page")
-                else:
-                    raise NoSuchElementException(f"Search element not found: {element_name} on Video Catalogues Page")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Video_Catalogue_Search_{element_name}_Not_Found")
-                self.logger.error(f"Search element not found: {element_name} on Video Catalogues Page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to locate search element: {str(e)} on Video Catalogues Page")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            return all_elements_present, missing_elements
+        return self.verify_page_elements_present(search_elements, "Video Catalogue Search Elements")
         
     # Check Table Elements
     
-    def verify_all_catalogue_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+    def verify_all_catalogue_table_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected video catalogue table elements are present.
+        
         Returns:
-            Tuple[bool, list]: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Checking if all Video Catalogue table elements are present")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         table_elements ={
             "Name Header": self.VideoCataloguesTableElements.CATALOGUE_NAME_HEADER,
@@ -123,19 +112,4 @@ class VideoCataloguesPage(BasePage):
             "Last Edited Date Header": self.VideoCataloguesTableElements.CATALOGUE_LAST_EDITED_DATE_HEADER,
             "Name Sorting Button": self.VideoCataloguesSortingElements.NAME_SORT
         }
-        for element_name, table_locator in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_locator):
-                    self.logger.info(f"Element found: {element_name} in Video Catalogues Table")
-                else:
-                    raise NoSuchElementException(f"Element not found: {element_name} in Video Catalogues Table")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"Video_Catalogue_Table_Element_Not_Found_{element_name}")
-                self.logger.error(f"Element not found: {element_name} in Video Catalogues table")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to locate element: {str(e)} in Video Catalogues Table")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Video Catalogue Table Elements")
