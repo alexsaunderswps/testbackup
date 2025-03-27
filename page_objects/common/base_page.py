@@ -1,5 +1,6 @@
 #base_page.py
 import re
+from typing import List, Dict as DICT
 from utilities.config import DEFAULT_TIMEOUT, SCREENSHOT_DIR, PAGE_SIZE
 from utilities.element_interactor import ElementInteractor
 from utilities.element_locator import ElementLocator
@@ -226,6 +227,42 @@ class BasePage:
                 missing_elements.append(element_name)
             except Exception as e:
                 self.logger.error(f"Unexpected error while finding elements: {str(e)}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+        return all_elements_present, missing_elements
+    
+    # Common checks for page elements
+    def verify_page_elements_present(self, elements_dict: DICT[str, str], context: str = "") -> Tuple[bool, List[str]]:
+        """
+        Verify that multiple elements exist on the page
+
+        Args:
+            elements_dict: Dictionary mapping element names to locators
+            context: Optional conext string for logging (e.g., "Serch", "Table")
+
+        Returns:
+            Tuple containing:
+            - bool: True if all elements are present, False otherwise
+            - List[str]: List of missing elementsd names (empty if all found)
+        """
+        all_elements_present = True
+        missing_elements = []
+        context_str = f" in {context}" if context else ""
+        self.logger.info(f"Verifying {len(elements_dict)} elements {context_str}")
+        
+        for element_name, element_locator in elements_dict.items():
+            try:
+                if self.locator.is_element_present(element_locator):
+                    self.logger.info(f"Element found: {element_name}{context_str}")
+                else:
+                    raise NoSuchElementException(f"Element {element_name} not found{context_str}")
+            except NoSuchElementException:
+                self.screenshot.take_screenshot(self.driver, f"{context}_{element_name}_missing".replace(" ", "_"))
+                self.logger.error(f"Element not found: {element_name}{context_str}")
+                all_elements_present = False
+                missing_elements.append(element_name)
+            except Exception as e:
+                self.logger.error(f"Unexpected error while finding {element_name}{context_str}: {str(e)}")
                 all_elements_present = False
                 missing_elements.append(element_name)
         return all_elements_present, missing_elements
