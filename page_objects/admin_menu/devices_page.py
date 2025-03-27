@@ -1,7 +1,7 @@
 # devices_page.py
 import os
 from dotenv import load_dotenv
-from typing import Tuple
+from typing import Tuple, List
 from page_objects.common.base_page import BasePage
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -62,44 +62,37 @@ class DevicesPage(BasePage):
         """
         return super().verify_page_title_present(self.DevicePageElements.DEVICES_PAGE_TITLE)
     
-    def verify_all_devices_search_elements_present(self) -> Tuple[bool,list]:
-        """_summary_
+    def verify_all_devices_search_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected device search elements are present.
+        
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Verifying that all exepcted device search elements are present")
-        all_elements_present = True
-        missing_elements = []
+
         # Define elements with readable names
         search_elements = {
             "Search Text Box": self.DeviceSearchElements.SEARCH_TEXT,
             "Search Button": self.DeviceSearchElements.SEARCH_BUTTON,
             "Add Device Button": self.DeviceSearchElements.ADD_DEVICE_LINK,
         }
-        for element_name, element_locator in search_elements.items():
-            try:
-                if self.locator.is_element_present(element_locator):
-                    self.logger.info(f"Element found: {element_name}")
-                else:
-                    raise NoSuchElementException(f"Search Element not found: {element_name}")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"device_search_elements_not_found: {element_name}")
-                self.logger.error(f"Search Element not found: {element_name}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find search element: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        
+        return self.verify_page_elements_present(search_elements, "Device Search Elements")
     
     def verify_all_device_table_elements_present(self) -> Tuple[bool, list]:
-        """_summary_
-
+        """
+        Verify that all expected device table elements are present.
+        
         Returns:
-            bool: _description_
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Check if all Device Table elements are present")
-        all_elements_present = True
-        missing_elements = []
+        
         # Define elements with readable names
         table_elements = {
             "Table Body": self.DeviceTableElements.DEVICE_TABLE_BODY,
@@ -109,19 +102,4 @@ class DevicesPage(BasePage):
             "Device Installation": self.DeviceTableElements.DEVICE_INSTALLATION_HEADER,
             "Device Organization": self.DeviceTableElements.DEVICE_ORGANIZATION_HEADER,
         }
-        for element_name, table_element in table_elements.items():
-            try:
-                if self.locator.is_element_present(table_element):
-                    self.logger.info(f"Table element found: {element_name} on Devices page")
-                else:
-                    raise NoSuchElementException(f"Table Element not found: {element_name} on Devices page")
-            except NoSuchElementException:
-                self.screenshot.take_screenshot(self.driver, f"device_table_elements_not_found: {element_name}")
-                self.logger.error(f"Table Element not found: {element_name}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-            except Exception as e:
-                self.logger.error(f"Unexpected error while trying to find table element: {str(e)}")
-                all_elements_present = False
-                missing_elements.append(element_name)
-        return all_elements_present, missing_elements
+        return self.verify_page_elements_present(table_elements, "Device Table Elements")
