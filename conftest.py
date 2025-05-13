@@ -82,6 +82,10 @@ def get_browser_instance(playwright, browser_name: str, headless: bool) -> Brows
     """
     logger.info(f"Launching {browser_name} browser in {'headless' if headless else 'non-headless'} mode.")
     
+    # Convert headless to boolean
+    if isinstance(headless, str):
+        headless = headless.lower() == "true"
+    
     if browser_name.lower() == "chromium":
         return playwright.chromium.launch(headless=headless)
     elif browser_name.lower() == "firefox":
