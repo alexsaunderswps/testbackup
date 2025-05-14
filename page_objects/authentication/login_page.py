@@ -10,7 +10,7 @@ class LoginPage(BasePage):
     """
     Page object for the login page using Playwright.
     """
-    def __init__(self,page):
+    def __init__(self, page):
         super().__init__(page)
         self.page = page
         self.logger = logger
