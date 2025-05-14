@@ -1,32 +1,65 @@
 # login_page.py (Playwright version)
 import os
 from dotenv import load_dotenv
+from page_objects.common.base_page import BasePage
 from utilities.utils import logger
 
 load_dotenv()
 
-class LoginPage:
+class LoginPage(BasePage):
     """
     Page object for the login page using Playwright.
     """
     def __init__(self,page):
+        super().__init__(page)
         self.page = page
         self.logger = logger
         
-    # Element locators - Using playwright's role-based selectors.
-    EMAIL_INPUT = lambda self: self.page.get_by_role("textbox", name="Email")
-    PASSWORD_INPUT = lambda self: self.page.get_by_role("textbox", name="Password")
-    LOGIN_BUTTON = lambda self: self.page.get_by_role("button", name="Log In")
-    LOGOUT_BUTTON = lambda self: self.page.get_by_role("button", name="LOG OUT")
+    # Element locators - Using method-based approach for consistency across pages
+    def get_email_input(self):
+        """ Get the email input field element. """
+        return self.page.get_by_role("textbox", name="Email")
     
-    # Error message selectors
-    ERROR_BLANK_INPUT = lambda self: self.page.locator("div.alert-danger:has-text('UserName'):has-text('Password')")
-    ERROR_NO_PASS = lambda self: self.page.locator("div.alert-danger:has-text('Password')")
-    ERROR_NO_USER = lambda self: self.page.locator("div.alert-danger:has-text('UserName')")
-    ERROR_INVALID = lambda self: self.page.locator("div.alert-danger:has-text('Failed')")
-    ERROR_PASS_TOO_SHORT = lambda self: self.page.locator("div.alert-danger:has-text('Password'):has-text('4')")
-    ERROR_PASS_TOO_LONG = lambda self: self.page.locator("div.alert-danger:has-text('Password'):has-text('20')")
-    ERROR_USER_TOO_SHORT = lambda self: self.page.locator("div.alert-danger:has-text('UserName'):has-text('4')")
+    def get_password_input(self):
+        """ Get the password input field element. """
+        return self.page.get_by_role("textbox", name="Password")
+    
+    def get_login_button(self):
+        """ Get the login button element. """
+        return self.page.get_by_role("button", name="Log In")
+    
+    def get_logout_button(self):
+        """ Get the logout button element. """
+        return self.page.get_by_role("button", name="LOG OUT")
+    
+    # Error message locators
+    def get_error_blank_input(self):
+        """ Get the error message for blank input fields. """
+        return self.page.locator("div.alert-danger:has-text('UserName'):has-text('Password')")
+    
+    def get_error_no_pass(self):
+        """ Get the error message for missing password. """
+        return self.page.locator("div.alert-danger:has-text('Password')")
+    
+    def get_error_no_user(self):
+        """ Get the error message for missing username. """
+        return self.page.locator("div.alert-danger:has-text('UserName')")
+    
+    def get_error_invalid(self):
+        """ Get the error message for invalid credentials. """
+        return self.page.locator("div.alert-danger:has-text('Failed')")
+    
+    def get_error_pass_too_short(self):
+        """ Get the error message for password too short. """
+        return self.page.locator("div.alert-danger:has-text('Password'):has-text('4')")
+    
+    def get_error_pass_too_long(self):
+        """ Get the error message for password too long. """
+        return self.page.locator("div.alert-danger:has-text('Password'):has-text('20')")
+    
+    def get_error_user_too_short(self):
+        """ Get the error message for username too short. """
+        return self.page.locator("div.alert-danger:has-text('UserName'):has-text('4')")
 
     # Action methods
     def navigate_to_login(self, login_url):
@@ -48,7 +81,7 @@ class LoginPage:
             username (str): The email address to enter.
         """
         self.logger.info(f"Entering username: {username}")
-        self.EMAIL_INPUT().fill(username)
+        self.get_email_input.fill(username)
         
     def enter_password(self, password):
         """
@@ -58,14 +91,14 @@ class LoginPage:
             password (str): The password to enter.
         """
         self.logger.info(f"Entering password: {password}")
-        self.PASSWORD_INPUT().fill(password)
+        self.get_password_input().fill(password)
     
     def click_login_button(self):
         """
         Click the login button.
         """
         self.logger.info("Clicking login button.")
-        self.LOGIN_BUTTON().click()
+        self.get_login_button().click()
         
     def login(self, username="", password=""):
         """
@@ -90,12 +123,12 @@ class LoginPage:
         """
         self.logger.info("Verifying login success.")
         try:
-            self.LOGOUT_BUTTON().wait_for(state="visible")
+            self.get_logout_button().wait_for(state="visible")
             self.logger.info("Login successful - logout button is visible.")
             return True
         except Exception as e:
             self.logger.error(f"Login failed - logout button is not visible. Error: {e}")
-            self.page.screenshot(path="login_failure.png")
+            self.take_screenshot("login_failure")
             return False
         
     def verify_both_missing(self):
@@ -107,12 +140,12 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when both username and password fields are missing.")
         try:
-            self.ERROR_BLANK_INPUT().wait_for(state="visible")
-            self.page.screenshot(path="No_Creds.png")
+            self.get_error_blank_input().wait_for(state="visible")
+            self.take_screenshot("No_Creds")
             self.logger.info("Correct error message shown for both Username and Password missing.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_No_Creds.png")
+            self.take_screenshot("Error_No_Creds")
             self.logger.error(f"Error checking 'both missing' error message: {str(e)}")
             return False
         
@@ -125,12 +158,12 @@ class LoginPage:
         """
         logger.info("Verifying the error message for invalid credentials.")
         try:
-            self.ERROR_INVALID().wait_for(state='visible')
-            self.page.screenshot(path="Invalid_Creds.png")
+            self.get_error_invalid().wait_for(state='visible')
+            self.take_screenshot("Invalid_Creds")
             self.logger.info("Correct error message shown for invalid credentials.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_Invalid_Creds.png")
+            self.take_screenshot("Error_Invalid_Creds")
             self.logger.error(f"Error checking 'invalid credentials' error message: {str(e)}")
             return False
         
@@ -143,12 +176,12 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when username field is missing.")
         try:
-            self.ERROR_NO_USER().wait_for(state='visible')
-            self.page.screenshot(path="No_User.png")
+            self.get_error_no_user().wait_for(state='visible')
+            self.take_screenshot("No_User")
             self.logger.info("Correct error message shown for missing username.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_No_User.png")
+            self.take_screenshot("Error_No_User")
             self.logger.error(f"Error checking 'username missing' error message: {str(e)}")
             return False
         
@@ -160,12 +193,12 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when password field is missing.")
         try:
-            self.ERROR_NO_PASS().wait_for(state='visible')
-            self.page.screenshot(path="No_Pass.png")
+            self.get_error_no_pass().wait_for(state='visible')
+            self.take_screenshot("No_Pass")
             self.logger.info("Correct error message shown for missing password.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_No_Pass.png")
+            self.take_screenshot("Error_No_Pass")
             self.logger.error(f"Error checking 'password missing' error message: {str(e)}")
             return False
     
@@ -177,12 +210,12 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when username is too short.")
         try:
-            self.ERROR_USER_TOO_SHORT().wait_for(state='visible')
-            self.page.screenshot(path="User_Too_Short.png")
+            self.get_error_user_too_short().wait_for(state='visible')
+            self.take_screenshot("User_Too_Short")
             self.logger.info("Correct error message shown for username too short.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_User_Too_Short.png")
+            self.take_screenshot("Error_User_Too_Short")
             self.logger.error(f"Error checking 'username too short' error message: {str(e)}")
             return False
         
@@ -194,12 +227,12 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when password is too short.")
         try:
-            self.ERROR_PASS_TOO_SHORT().wait_for(state='visible')
-            self.page.screenshot(path="Pass_Too_Short.png")
+            self.get_error_pass_too_short().wait_for(state='visible')
+            self.take_screenshot("Pass_Too_Short")
             self.logger.info("Correct error message shown for password too short.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_Pass_Too_Short.png")
+            self.take_screenshot("Error_Pass_Too_Short")
             self.logger.error(f"Error checking 'password too short' error message: {str(e)}")
             return False
         
@@ -211,11 +244,11 @@ class LoginPage:
         """
         self.logger.info("Verifying the error message when password is too long.")
         try:
-            self.ERROR_PASS_TOO_LONG().wait_for(state='visible')
-            self.page.screenshot(path="Pass_Too_Long.png")
+            self.get_error_pass_too_long().wait_for(state='visible')
+            self.take_screenshot("Pass_Too_Long")
             self.logger.info("Correct error message shown for password too long.")
             return True
         except Exception as e:
-            self.page.screenshot(path="Error_Pass_Too_Long.png")
+            self.take_screenshot("Error_Pass_Too_Long")
             self.logger.error(f"Error checking 'password too long' error message: {str(e)}")
             return False
