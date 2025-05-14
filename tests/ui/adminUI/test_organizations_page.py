@@ -2,65 +2,77 @@
 import pytest
 from pytest_check import check
 from page_objects.admin_menu.organizations_page import OrganizationsPage
-from page_objects.common.base_page import BasePage
-from tests.ui.test_base_page_ui import TestBasePageUI
-from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import logger
 
-# Initialize Screenshot
-screenshot = ScreenshotManager()
-
 @pytest.fixture
-def organizations_page(logged_in_browser):
-    logger.debug("Starting organizations_page fixture")
+def organizations_page(logged_in_page):
+    """
+    Fixture that provides the Organizations page for each test
+
+    Args:
+        logged_in_page: A fixture providing a logged-in browser instance from conftest.py
+
+    Yields:
+        List[OrganizationsPage]: A list of OrganizationsPage objects for each logged-in browser instance
+    """
+    logger.info("Starting organizations_page fixture")
     organization_pages = []
-    for organization_page in logged_in_browser:
-        driver = organization_page.driver
-        base_page = BasePage(driver)
+    
+    for page in logged_in_page:
         logger.info("=" * 80)
-        logger.info(f"Navigating to Organizations page on {driver.name}")
+        logger.info(f"Navigating to Organizations page on {page.browser.browser_type.name}")
         logger.info("=" * 80)
         
         # Navigate to Organizations page
-        base_page.click_admin_button()
-        base_page.go_organizations_page()
+        page.get_by_role("button", name="Admin").click()
+        page.get_by_role("link", name="Organizations").click()
+        
+        # Create the page object
+        org_page = OrganizationsPage(page)
+        
         # Verify that we're on the Organizations page
-        organizations_page = OrganizationsPage(driver)
-        if organizations_page.verify_page_title_present():
+        if org_page.verify_page_title():
             logger.info("Successfully navigated to the Orgnizations Page")
-            organization_pages.append(organizations_page)
+            organization_pages.append(org_page)
         else:
-            logger.error(f"Failed to navigate to the Organizations page on {driver.name}")
+            logger.error(f"Failed to navigate to the Organizations page on {page.browser.browser_type.name}")
+            
     logger.info(f"organizations_page fixture: yielding {len(organization_pages)} organizations page(s)")
     yield organization_pages
     logger.debug("organizations_page fixture: finished")
+        
     
 class TestOrganizationsPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
     @pytest.mark.organizations
     def test_organizations_page_title(self, organizations_page):
-        """_summary_
-
+        """
+        Test that the Organizations page title is present.
+        
         Args:
-            organizations_page (_type_): _description_
+            organizations_page: The OrganizationsPage fixture
         """
         logger.debug("Starting test_organizations_page_title")
         for op in organizations_page:
             title = op.verify_page_title_present()
-            check.equal(title, True, "Organizations title does not match")
-            logger.info("Verifcation Successful :: Organizations Page Title found")
+            check.is_true(title, "Organizations title does not match")
+            logger.info("Verification Successful :: Organizations Page Title found")
     
     @pytest.mark.UI 
-    @pytest.mark.navigation
     @pytest.mark.organizations
+    @pytest.mark.navigation
     def test_organizations_page_nav_elements(self, organizations_page):
-        """_summary_
-
-        Args:
-            organizations_page (_type_): _description_
         """
-        assert self._verify_page_nav_elements(organizations_page)
+        Test that all navigation elements are present on the Organizations page.
+        
+        Args:
+            organizations_page: The OrganizationsPage fixture
+        """
+        for op in organizations_page:
+            all_elements, missing_elements = op.verify_all_nav_elements_present()
+            check.is_true(all_elements, f"Missing navigation elements: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All navigation elements found")
     
     @pytest.mark.UI 
     @pytest.mark.navigation
@@ -88,24 +100,26 @@ class TestOrganizationsPageUI(TestBasePageUI):
     @pytest.mark.organizations
     @pytest.mark.search
     def test_organizations_search_elements(self, organizations_page):
-        """_summary_
-
+        """
+        Test that all search elements are present on the Organizations page.
+        
         Args:
-            organizations_page (_type_): _description_
+            organizations_page: The OrganizationsPage fixture
         """
         for op in organizations_page:
-            all_elements, missing_elements = op.verify_all_organization_search_elements_present()
+            all_elements, missing_elements = op.verify_all_organization_page_elements_present()
             check.is_true(all_elements, f"Missing organizations search elements {', '.join(missing_elements)}")
-            logger.info("Verifcation Successful :: All Organization Search Elements found")
+            logger.info("Verification Successful :: All Organization Search Elements found")
             
     @pytest.mark.UI 
     @pytest.mark.organizations
     @pytest.mark.table
     def test_organization_table_elements(self, organizations_page):
-        """_summary_
-
+        """
+        Test that all table elements are present on the Organizations page.
+        
         Args:
-            organizations_page (_type_): _description_
+            organizations_page: The OrganizationsPage fixture
         """
         for op in organizations_page:
             all_elements, missing_elements = op.verify_all_organization_table_elements_present()
