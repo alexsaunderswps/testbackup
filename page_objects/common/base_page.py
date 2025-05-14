@@ -122,25 +122,26 @@ class BasePage:
     
         
     # Check for page title (as h1) on each page
-    def verify_page_title_present(self, page_title_text: str) -> bool:
+    def verify_page_title(self, expected_title: str, tag="h1") -> bool:
         """
-        Verify that the specified page title is present
+        Verify that the page has the epected title in an h1 tag.
 
         Args:
-        page_title_text (str): The text of the title to verify
+        expected_title (str): The expected title text.
+        tag (str): The HTML tag to search for (default is "h1").
 
         Returns:
-            bool: True if title is present, False otherwise
+            bool: True if correct title is present as h1, False otherwise
         """
-        self.logger.info(f"Checking if {page_title_text} page title is present")
+        self.logger.info(f"Checking if {expected_title} in {tag} is present")
         try:
-            heading = self.page.get_by_role("heading", name=page_title_text)
+            heading = self.page.locator(f"{tag}:has-text('{expected_title}')")
             heading.wait_for(state="visible")
-            self.logger.info(f"Page title '{page_title_text}' is present")
+            self.logger.info(f"Page title '{expected_title}' as {tag} is present")
             return True
         except Exception as e:
-            self.logger.error(f"Page title '{page_title_text}' is not present: {str(e)}")
-            self.take_screenshot(f"{page_title_text}_Page_Title_Not_Present")
+            self.logger.error(f"Page title '{expected_title}' is not present: {str(e)}")
+            self.take_screenshot(f"{expected_title}_Page_Title_Not_Present")
             return False
 
     
