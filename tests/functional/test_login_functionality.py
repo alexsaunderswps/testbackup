@@ -65,53 +65,27 @@ class TestLoginPageFunctionality:
     @pytest.mark.login
     @pytest.mark.functionality
     @pytest.mark.invalid_credentials
-    def test_login_failure(self, login_page):
+    @pytest.mark.parametrize("username, password, verification_method, expected_message",[
+        ("", "", "verify_both_missing", "Login should fail with empty credentials"),
+        (fake.user_name(), fake.password(), "verify_invalid_credentials", "Login should fail with invalid credentials"),
+        ("", fake.password(), "verify_username_missing", "Login should fail with missing username"),
+        (fake.user_name(), "", "verify_password_missing", "Login should fail with missing password"),
+        (fake.user_name()[:3], fake.password(), "verify_username_too_short", "Login should fail with short username"),
+        (fake.user_name(), fake.password()[:3], "verify_password_too_short", "Login should fail with short password"),
+        (fake.user_name(), fake.password(length=21), "verify_password_too_long", "Login should fail with long password")
+    ])
+    def test_login_failure(self, login_page, username, password, verification_method, expected_message):
         """
         Test login failure functionality.
         
         This test verifies that a user cannot log in with invalid credentials.
         """
         for lp in login_page:
-            # Test empty credentials
-            lp.login("", "")
-            login_fails = lp.verify_both_missing()
-            assert login_fails, "Login should fail with empty credentials"
-            logger.info("Verification Successful :: Login Failed with empty credentials")
-        
-            # Test invalid credentials
-            lp.login(fake.user_name(), fake.password())
-            login_fails = lp.verify_invalid_credentials()
-            assert login_fails, "Login should fail with invalid credentials"
-            logger.info("Verification Successful :: Login Failed with invalid credentials") 
-            
-            # Testing missing username
-            lp.login("", fake.password())
-            login_fails = lp.verify_username_missing()
-            assert login_fails, "Login should fail with missing username"
-            logger.info("Verification Successful :: Login Failed with missing username")
-            
-            # Test missing password
-            lp.login(fake.user_name(), "")
-            login_fails = lp.verify_password_missing()
-            assert login_fails, "Login should fail with missing password"
-            logger.info("Verification Successful :: Login Failed with missing password")    
-            
-            # Test short username
-            lp.login(fake.user_name()[:3], fake.password())
-            login_fails = lp.verify_username_too_short()
-            assert login_fails, "Login should fail with short username"
-            logger.info("Verification Successful :: Login Failed with short username")
-            
-            # Test short password
-            lp.login(fake.user_name(), fake.password()[:3])
-            login_fails = lp.verify_password_too_short()
-            assert login_fails, "Login should fail with short password" 
-            logger.info("Verification Successful :: Login Failed with short password")
-            
-            # Test long password
-            lp.login(fake.user_name(), fake.password(length=21))
-            login_fails = lp.verify_password_too_long()
-            assert login_fails, "Login should fail with long password"
-            logger.info("Verification Successful :: Login Failed with long password")
-            
-        
+            # Test various login failure scenarios
+            for lp in login_page:
+                lp.login(username, password)
+                verifcation_func = getattr(lp, verification_method)
+                login_fails = verifcation_func()
+                assert login_fails, expected_message
+                logger.info(f"Verification Successful :: {expected_message}")
+    
