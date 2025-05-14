@@ -11,21 +11,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from typing import Tuple
 from utilities.utils import logger
+from datetime import datetime
+from utilities.config import SCREENSHOT_DIR
+import os
 
 class BasePage:
     """Base class for all page objects"""
-    def __init__(self, driver):
+    def __init__(self, page):
         """
         Initialize BasePage
 
         Args:
             driver (WebDriver): The Selenium WebDriver instance
         """
-        self.driver = driver
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator(driver)
-        self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager()
+        self.page = page
         self.logger = logger
         
     class CommonLocators:
@@ -721,3 +720,14 @@ class BasePage:
         Click the Tags link in the Definitions dropdown to navigate to the Tags page.
         """
         self.interactor.element_click(self.NavigationLocators.TAGS_LINK)
+        
+            
+    def take_screenshot(self, name):
+        """Take a screenshot with a consistent naming pattern."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        browser_name = self.page.browser.browser_type.name
+        filename = f"{browser_name}_{name}_{timestamp}.png"
+        path = os.path.join(SCREENSHOT_DIR, filename)
+        self.page.screenshot(path=path)
+        self.logger.info(f"Screenshot saved: {filename}")
+        return filename
