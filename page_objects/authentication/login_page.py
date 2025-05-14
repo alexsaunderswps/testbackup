@@ -81,7 +81,7 @@ class LoginPage(BasePage):
             username (str): The email address to enter.
         """
         self.logger.info(f"Entering username: {username}")
-        self.get_email_input.fill(username)
+        self.get_email_input().fill(username)
         
     def enter_password(self, password):
         """
