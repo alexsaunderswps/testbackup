@@ -1,4 +1,4 @@
-# confest.py (playwright)
+# conftest.py (Playwright version)
 
 import os
 import pytest
@@ -170,7 +170,7 @@ def logged_in_page(browser_context_and_page, request):
         page.goto(QA_LOGIN_URL)
         
         # Login process
-        page.get_by_role("textbox", name="Email").fill(username)
+        page.get_by_role("textbox", name="Username").fill(username)
         page.get_by_role("textbox", name="Password").fill(password)
         page.get_by_role("button", name="Log In").click()
         
@@ -181,5 +181,4 @@ def logged_in_page(browser_context_and_page, request):
         
     logger.debug(f"logged_in_page fixture: yielding {len(logged_in_pages)} logged-in page(s).")
     yield logged_in_pages
-    logger.debug("logged_in_page fixture: finshed.")
-    
+    logger.debug("logged_in_page fixture: finished.")
