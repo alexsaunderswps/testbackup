@@ -16,10 +16,10 @@ class LoginPage(BasePage):
         self.logger = logger
         
     # Element locators - Using method-based approach for consistency across pages
-    def get_email_input(self):
-        """ Get the email input field element. """
-        return self.page.get_by_role("textbox", name="Email")
-    
+    def get_username_input(self):
+        """ Get the username input field element. """
+        return self.page.get_by_role("textbox", name="Username")
+
     def get_password_input(self):
         """ Get the password input field element. """
         return self.page.get_by_role("textbox", name="Password")
@@ -81,8 +81,8 @@ class LoginPage(BasePage):
             username (str): The email address to enter.
         """
         self.logger.info(f"Entering username: {username}")
-        self.get_email_input().fill(username)
-        
+        self.get_username_input().fill(username)
+
     def enter_password(self, password):
         """
         Enter the password in the password input field.
