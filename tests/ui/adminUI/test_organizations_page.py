@@ -1,8 +1,9 @@
-#test_organizations_page.py
+#test_organizations_page.py (Playwright version)
 import pytest
 from pytest_check import check
 from page_objects.admin_menu.organizations_page import OrganizationsPage
-from utilities.utils import logger
+from tests.ui.test_base_page_ui import TestBasePageUI
+from utilities.utils import get_browser_name, logger
 
 @pytest.fixture
 def organizations_page(logged_in_page):
@@ -20,7 +21,7 @@ def organizations_page(logged_in_page):
     
     for page in logged_in_page:
         logger.info("=" * 80)
-        logger.info(f"Navigating to Organizations page on {page.browser.browser_type.name}")
+        logger.info(f"Navigating to Organizations page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
         # Navigate to Organizations page
@@ -35,7 +36,7 @@ def organizations_page(logged_in_page):
             logger.info("Successfully navigated to the Orgnizations Page")
             organization_pages.append(org_page)
         else:
-            logger.error(f"Failed to navigate to the Organizations page on {page.browser.browser_type.name}")
+            logger.error(f"Failed to navigate to the Organizations page on {get_browser_name(page)}")
             
     logger.info(f"organizations_page fixture: yielding {len(organization_pages)} organizations page(s)")
     yield organization_pages
@@ -55,7 +56,7 @@ class TestOrganizationsPageUI(TestBasePageUI):
         """
         logger.debug("Starting test_organizations_page_title")
         for op in organizations_page:
-            title = op.verify_page_title_present()
+            title = op.verify_page_title()
             check.is_true(title, "Organizations title does not match")
             logger.info("Verification Successful :: Organizations Page Title found")
     
@@ -98,18 +99,18 @@ class TestOrganizationsPageUI(TestBasePageUI):
     
     @pytest.mark.UI 
     @pytest.mark.organizations
-    @pytest.mark.search
-    def test_organizations_search_elements(self, organizations_page):
+    @pytest.mark.page
+    def test_organizations_page_elements(self, organizations_page):
         """
-        Test that all search elements are present on the Organizations page.
+        Test that all page elements are present on the Organizations page.
         
         Args:
             organizations_page: The OrganizationsPage fixture
         """
         for op in organizations_page:
             all_elements, missing_elements = op.verify_all_organization_page_elements_present()
-            check.is_true(all_elements, f"Missing organizations search elements {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: All Organization Search Elements found")
+            check.is_true(all_elements, f"Missing organizations page elements {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Organization page Elements found")
             
     @pytest.mark.UI 
     @pytest.mark.organizations
