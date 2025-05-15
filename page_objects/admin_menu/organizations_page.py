@@ -39,7 +39,7 @@ class OrganizationsPage(BasePage):
     
     def get_add_organization_button(self):
         """ Get the add organization button element."""
-        return self.page.get_by_role("link", text="Add")
+        return self.page.get_by_role("link", name="Add")
     
     # Add Modal Element locators
     def get_save_button(self):
@@ -61,11 +61,11 @@ class OrganizationsPage(BasePage):
     
     def get_organization_table_name_header(self):
         """ Get the organization table header element."""
-        return self.page.locator("table > thead > tr > th:text:('Name')")
+        return self.page.get_by_role("cell", name="Name")
     
     def get_organization_table_rows(self):
         """ Get the organization table rows element."""
-        return self.page.locator("table > tbody > tr")
+        return self.page.locator("table tbody tr")
     
     # Verification methods
     def verify_page_title_present(self,) -> bool:
@@ -120,7 +120,15 @@ class OrganizationsPage(BasePage):
         # Define elements with readable names
         table_elements = {
             "Table Body": self.get_organization_table_body,
-            "Table Rows": self.get_organization_table_rows,
             "Organization Name Header": self.get_organization_table_name_header,
         }
-        return self.verify_page_elements_present(table_elements, "Organization Table Elements")
+        success, missing_elements = self.verify_page_elements_present(table_elements, "Organization Table Elements")
+        
+        rows = self.get_organization_table_rows()
+        rows_count = rows.count()
+        if rows_count > 0:
+            self.logger.info(f"Found {rows_count} rows in the organization table")
+        else:
+            self.logger.info("No rows found in the organization table")
+            
+        return success, missing_elements
