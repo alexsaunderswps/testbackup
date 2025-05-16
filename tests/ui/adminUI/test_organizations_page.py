@@ -79,25 +79,33 @@ class TestOrganizationsPageUI(TestBasePageUI):
     @pytest.mark.navigation
     @pytest.mark.organizations
     def test_organizations_page_admin_elements(self, organizations_page):
-        """_summary_
+        """
+        Test that all admin elements are present in the Admin dropdown on the Organizations page.
 
         Args:
-            organizations_page (_type_): _description_
+            organizations_page: The OrganizationsPage fixture
         """
-        assert self._verify_page_admin_elements(organizations_page)
+        for op in organizations_page:
+            all_elements, missing_elements = op.verify_all_admin_links_present()
+            check.is_true(all_elements, f"Missing admin elements: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All admin elements found")
     
     @pytest.mark.UI 
     @pytest.mark.navigation
     @pytest.mark.organizations
     def test_organizations_page_definition_elements(self, organizations_page):
-        """_summary_
-
-        Args:
-            organizations_page (_type_): _description_
         """
-        assert self._verify_page_definition_elements(organizations_page)
-    
-    @pytest.mark.UI 
+        Test that all definition elements are present in the Definitions dropdown on the Users page.
+        
+        Args:
+            organizations_page: The OrganizationsPage fixture
+        """
+        for op in organizations_page:
+            all_elements, missing_elements = op.verify_all_definition_links_present()
+            check.is_true(all_elements, f"Missing definition elements: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All definition elements found")
+
+    @pytest.mark.UI
     @pytest.mark.organizations
     @pytest.mark.page
     def test_organizations_page_elements(self, organizations_page):
