@@ -2,7 +2,6 @@
 import pytest
 from pytest_check import check
 from page_objects.admin_menu.organizations_page import OrganizationsPage
-from tests.ui.test_base_page_ui import TestBasePageUI
 from utilities.utils import get_browser_name, logger
 
 @pytest.fixture
@@ -43,7 +42,7 @@ def organizations_page(logged_in_page):
     logger.debug("organizations_page fixture: finished")
         
     
-class TestOrganizationsPageUI(TestBasePageUI):
+class TestOrganizationsPageUI:
     
     @pytest.mark.UI 
     @pytest.mark.organizations
@@ -63,45 +62,48 @@ class TestOrganizationsPageUI(TestBasePageUI):
     @pytest.mark.UI 
     @pytest.mark.organizations
     @pytest.mark.navigation
-    def test_organizations_page_nav_elements(self, organizations_page):
+    def test_organizations_page_nav_elements(self, organizations_page, verify_ui_elements):
         """
         Test that all navigation elements are present on the Organizations page.
         
         Args:
             organizations_page: The OrganizationsPage fixture
+            verify_ui_elements: The UI element verification fixture
         """
-        for op in organizations_page:
-            all_elements, missing_elements = op.verify_all_nav_elements_present()
+        results = verify_ui_elements.nav_elements(organizations_page)
+        for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing navigation elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All navigation elements found")
     
     @pytest.mark.UI 
     @pytest.mark.navigation
     @pytest.mark.organizations
-    def test_organizations_page_admin_elements(self, organizations_page):
+    def test_organizations_page_admin_elements(self, organizations_page, verify_ui_elements):
         """
         Test that all admin elements are present in the Admin dropdown on the Organizations page.
 
         Args:
             organizations_page: The OrganizationsPage fixture
+            verify_ui_elements: The UI element verification fixture
         """
-        for op in organizations_page:
-            all_elements, missing_elements = op.verify_all_admin_links_present()
+        results = verify_ui_elements.admin_elements(organizations_page)
+        for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing admin elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All admin elements found")
     
     @pytest.mark.UI 
     @pytest.mark.navigation
     @pytest.mark.organizations
-    def test_organizations_page_definition_elements(self, organizations_page):
+    def test_organizations_page_definition_elements(self, organizations_page, verify_ui_elements):
         """
         Test that all definition elements are present in the Definitions dropdown on the Users page.
         
         Args:
             organizations_page: The OrganizationsPage fixture
+            verify_ui_elements: The UI element verification fixture
         """
-        for op in organizations_page:
-            all_elements, missing_elements = op.verify_all_definition_links_present()
+        results = verify_ui_elements.definition_elements(organizations_page)
+        for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing definition elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All definition elements found")
 
