@@ -99,12 +99,12 @@ class OrganizationsPage(BasePage):
         self.logger.info("Verifying all expected organization page elements are present")
         
         # Define elements with readable names
-        page_elements = {
+        action_elements = {
             "Search Text Box": self.get_search_text_box,
             "Search Button": self.get_search_button,
             "Add Organization Link": self.get_add_organization_button
         }
-        return self.verify_page_elements_present(page_elements, "Organizations page Elements")
+        return self.verify_page_elements_present(action_elements, "Organizations page Elements")
         
     def verify_all_organization_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
