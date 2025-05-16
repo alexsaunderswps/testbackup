@@ -1,5 +1,4 @@
 # conftest.py (Playwright version)
-
 import os
 import pytest
 import time
@@ -7,7 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
 from typing import Dict, List, Tuple, Generator, Any
-from utilities.utils import logger, start_test_capture, end_test_capture, get_logs_for_test
+from utilities.utils import logger, start_test_capture, end_test_capture, get_browser_name
 
 # Load and define enviromnetal variables
 load_dotenv()
@@ -182,3 +181,87 @@ def logged_in_page(browser_context_and_page, request):
     logger.debug(f"logged_in_page fixture: yielding {len(logged_in_pages)} logged-in page(s).")
     yield logged_in_pages
     logger.debug("logged_in_page fixture: finished.")
+
+@pytest.fixture
+def verify_ui_elements():
+    """ 
+    Fixture providing UI element verification functions.
+    
+    This fixture returns a namespace object with various verification methods
+    that can be used to test UI elements across different pages.
+    """
+    def verify_nav_elements(pages):
+        """
+        Verify navigation elements on all provided pages.
+        
+        Args:
+            pages (List[Page]): A list of Playwright Page objects.
+            
+        Returns:
+            List of tuples (page, all_elements_present, missing_elements)
+        """
+        results = []
+        for page in pages:
+            logger.info(f"Verifying navigation elements on {get_browser_name(page)}")
+            all_elements, missing = page.verify_all_nav_elements_present()
+            results.append((page, all_elements, missing))
+        return results
+    
+    def verify_admin_elements(pages):
+        """
+        Verify admin elements on all provided pages.
+        
+        Args:
+            pages (List[Page]): A list of Playwright Page objects.
+            
+        Returns:
+            List of tuples (page, all_elements_present, missing_elements)
+        """
+        results = []
+        for page in pages:
+            logger.info(f"Verifying admin elements on {get_browser_name(page)}")
+            all_elements, missing = page.verify_all_admin_elements_present()
+            results.append((page, all_elements, missing))
+        return results
+    
+    def verify_definition_elements(pages):
+        """
+        Verify definition elements on all provided pages.
+        
+        Args:
+            pages (List[Page]): A list of Playwright Page objects.
+            
+        Returns:
+            List of tuples (page, all_elements_present, missing_elements)
+        """
+        results = []
+        for page in pages:
+            logger.info(f"Verifying definition elements on {get_browser_name(page)}")
+            all_elements, missing = page.verify_all_definition_elements_present()
+            results.append((page, all_elements, missing))
+        return results
+    
+    def verify_pagination_elements(pages):
+        """
+        Verify pagination elements on all provided pages.
+        
+        Args:
+            pages (List[Page]): A list of Playwright Page objects.
+            
+        Returns:
+            List of tuples (page, all_elements_present, missing_elements)
+        """
+        results = []
+        for page in pages:
+            logger.info(f"Verifying pagination elements on {get_browser_name(page)}")
+            all_elements, missing = page.verify_all_pagination_elements_present()
+            results.append((page, all_elements, missing))
+        return results
+    
+    # Return a namespace object with the verification methods
+    return type('UI_Verification', (), {
+        'nav_elements': verify_nav_elements,
+        'admin_elements': verify_admin_elements,
+        'definition_elements': verify_definition_elements,
+        'pagination_elements': verify_pagination_elements
+    })
