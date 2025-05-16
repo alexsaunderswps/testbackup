@@ -178,7 +178,7 @@ class BasePage:
             
         return self._verify_elements_present(nav_element_getters)
     
-    def verify_all_admin_links_present(self, elements_to_check=None) -> Tuple[bool, list]:
+    def verify_all_admin_elements_present(self, elements_to_check=None) -> Tuple[bool, list]:
         """
         Verify that all expected admin navigation elements are present in the Admin dropdown.
 
@@ -210,7 +210,7 @@ class BasePage:
             
         return self._verify_elements_present(admin_element_getters)
     
-    def verify_all_definition_links_present(self, elements_to_check=None) -> Tuple[bool, list]:
+    def verify_all_definition_elements_present(self, elements_to_check=None) -> Tuple[bool, list]:
         """
         Verify that all expected navigation elements are present in the Definitions dropdown.
 
