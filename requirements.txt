@@ -148,6 +148,7 @@ typing_extensions==4.12.2
 tzdata==2025.1
 u==1.0
 urllib3==2.3.0
+uuid==1.30
 virtualenv==20.29.3
 wcwidth==0.2.13
 webdriver-manager==4.0.2
