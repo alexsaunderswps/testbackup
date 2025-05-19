@@ -45,7 +45,7 @@ class UsersPage(BasePage):
     # Users Table Elements
     def get_users_table_body(self):
         """Get the Users table body element/"""
-        return self.page.locator("table > tbody")
+        return self.page.locator("table tbody")
     
     def get_users_table_rows(self):
         """Get the Users table rows element."""
@@ -80,7 +80,7 @@ class UsersPage(BasePage):
     # Check Page Element presence
     def verify_page_title(self):
         """
-        Verify that the page title is present.
+        Verify that the page title is present and is the correct "Users" title.
         
         Returns:
             bool: True if the page title is present, False otherwise.

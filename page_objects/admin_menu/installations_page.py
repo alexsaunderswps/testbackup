@@ -33,7 +33,7 @@ class InstallationsPage(BasePage):
         """ Get the installation search text element."""
         return self.page.get_by_role("textbox", name="Filter by name")
     
-    def get_search_button(self):
+    def get_installation_search_button(self):
         """ Get the search button element."""
         return self.page.get_by_role("button", name="Search")
     
@@ -154,45 +154,63 @@ class InstallationsPage(BasePage):
         """ Get the installations select startup video label element."""
         return self.page.get_by_text("Select Startup Video")
     
-   # Start back here with modal elements
-   # there are some issues regarding select dropdowns because
-   # of the way they are hidden and then appear at some points
-   # so that nth() selectors change depending on what is visible 
+    # Need to plan and finish adding the add installation modal elements
+    # there are some issues regarding select dropdowns because
+    # of the way they are hidden and then appear at some points
+    # so that nth() selectors change depending on what is visible 
     
-    class InstallationPageElements:
-        """Locators for the Installations page elements."""
-        INSTALLATIONS_PAGE_TITLE = "//h1[text()='Installations']"
-        
-    class InstallationSearchElements:
-        """_summary_
-        """
-        SEARCH_TEXT = "//input[@placeholder='Filter by name']"
-        SEARCH_BUTTON = "//button[text()='Search']"
-        ADD_INSTALLATION_LINK = "//a[@href='/installation/add']"
-        
-    class InstallationTableElements:
-        """_summary_
-        """
-        INSTALLATION_TABLE_BODY = "//table//tbody"
-        INSTALLATION_TABLE_ROWS = "//table//tbody/tr"
-        INSTALLATION_NAME_HEADER = "//table/thead/tr/th[text()='Name']"
-        INSTALLATION_START_LATLONG = "//table/thead/tr/th[text()='Global Start LatLong ']"
-        INSTALLATION_STARTUP_VIDEO = "//table/thead/tr/th[text()='Startup Video']"
-        INSTALLATION_VIDEO_CATALOGUE = "//table/thead/tr/th[text()='Video Catalogue']"
-        INSTALLATION_ORGANIZATION_HEADER = "//table/thead/tr/th[text()='Organization']"
+    # Instalation Table Elements
+    def get_installations_table_body(self):
+        """ Get the installations table body element."""
+        return self.page.locator("table tbody")
+    
+    def get_installations_table_rows(self):
+        """ Get the installations table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    def get_installations_name_header(self):
+        """ Get the installations name header element."""
+        return self.page.get_by_role("cell", name="Name", exact=True)
+    
+    def get_installations_start_latlong_header(self):
+        """ Get the installations start latitude and longitude header element."""
+        return self.page.get_by_role("cell", name="Global Start LatLong ", exact=True)
+    
+    def get_installations_startup_video_header(self):
+        """ Get the installations startup video header element."""
+        return self.page.get_by_role("cell", name="Startup Video", exact=True)
+    
+    def get_installations_video_catalogue_header(self):
+        """ Get the installations video catalogue header element."""
+        return self.page.get_by_role("cell", name="Video Catalogue", exact=True)
+    
+    def get_installations_organization_header(self):
+        """ Get the installations organization header element."""
+        return self.page.get_by_role("cell", name="Organization", exact=True)
         
     # Check Page Element presence
     def verify_page_title_present(self):
-        """_summary_
-
+        """ Verify that the page title is present.
+        
         Returns:
-            _type_: _description_
+            bool: True if the page title is present, False otherwise.
         """
-        return super().verify_page_title_present(self.InstallationPageElements.INSTALLATIONS_PAGE_TITLE)
+        self.logger.info("Verifying page title is present")
+        return super().verify_page_title_present("Installations")
     
-    def verify_all_installations_search_elements_present(self) -> Tuple[bool, List[str]]:
+    # Check Page Element presence
+    def verify_page_title(self):
         """
-        Verify that all expected installation search elements are present.
+        Verify that the page title is present and is the correct "Installations" title.
+        
+        Returns:
+            bool: True if the page title is present, False otherwise.
+        """
+        return super().verify_page_title("Installations", tag="h1")
+    
+    def verify_all_installations_action_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected installation action elements are present.
         
         Returns:
             Tuple containing:
@@ -202,14 +220,14 @@ class InstallationsPage(BasePage):
         self.logger.info("Verifying that all expected installation search elements are present")
         
         # Define elements with readable names
-        search_elements = {
-            "Search Text Box": self.InstallationSearchElements.SEARCH_TEXT,
-            "Search Button": self.InstallationSearchElements.SEARCH_BUTTON,
-            "Add Installation Button": self.InstallationSearchElements.ADD_INSTALLATION_LINK,
+        action_elements = {
+            "Search Text Box": self.get_installation_search_text,
+            "Search Button": self.get_installation_search_button,
+            "Add Installation Button": self.get_installation_add_button,
         }
-        return self.verify_page_elements_present(search_elements, "Installation Search Elements")
+        return self.verify_page_elements_present(action_elements, "Installation Action Elements")
     
-    def verify_all_installation_table_elements_present(self) -> Tuple[bool, list]:
+    def verify_all_installation_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected installation table elements are present.
         
@@ -222,12 +240,12 @@ class InstallationsPage(BasePage):
     
         # Define elements with readable names
         table_elements = {
-            "Table Body": self.InstallationTableElements.INSTALLATION_TABLE_BODY,
-            "Table Rows": self.InstallationTableElements.INSTALLATION_TABLE_ROWS,
-            "Installation Name": self.InstallationTableElements.INSTALLATION_NAME_HEADER,
-            "Global Start LatLong": self.InstallationTableElements.INSTALLATION_START_LATLONG,
-            "Startup Video": self.InstallationTableElements.INSTALLATION_STARTUP_VIDEO,
-            "Video Catalogue": self.InstallationTableElements.INSTALLATION_VIDEO_CATALOGUE,
-            "Installation Organization": self.InstallationTableElements.INSTALLATION_ORGANIZATION_HEADER,
+            "Table Body": self.get_installations_table_body,
+            "Table Rows": self.get_installations_table_rows,
+            "Installation Name": self.get_installations_name_header,
+            "Global Start LatLong": self.get_installations_start_latlong_header,
+            "Startup Video": self.get_installations_startup_video_header,
+            "Video Catalogue": self.get_installations_video_catalogue_header,
+            "Installation Organization": self.get_installations_organization_header
         }
         return self.verify_page_elements_present(table_elements, "Installation Table Elements")
