@@ -292,7 +292,7 @@ class BasePage:
         return all_elements_present, missing_elements
 
     # Check for pagination elements
-    def verify_pagination_elements_present(self) -> Tuple[bool, list]:
+    def verify_all_pagination_elements_present(self) -> Tuple[bool, list]:
         """
         Verifies pagination elements based on page size and current record count.
     
