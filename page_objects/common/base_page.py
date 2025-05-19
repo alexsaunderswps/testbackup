@@ -238,7 +238,7 @@ class BasePage:
         
         # if specific elements are passed, use those instead
         if elements_to_check:
-            definition_element_getter = {key: value for key, value in definition_element_getter.items() if key in elements_to_check}
+            definition_element_getters = {key: value for key, value in definition_element_getters.items() if key in elements_to_check}
             
         return self._verify_elements_present(definition_element_getters)
     
