@@ -208,7 +208,7 @@ class InstallationsPage(BasePage):
         """
         return super().verify_page_title("Installations", tag="h1")
     
-    def verify_all_installations_action_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_installation_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected installation action elements are present.
         

@@ -118,7 +118,7 @@ class TestInstallationsPageUI:
         """
         logger.debug("Starting test_installations_action_elements")
         for ip in installations_page:
-            all_elements, missing_elements = ip.verify_action_elements_present()
+            all_elements, missing_elements = ip.verify_all_installation_action_elements_present()
             check.is_true(all_elements, f"Missing installations action elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Installations Action Elements found")
     
