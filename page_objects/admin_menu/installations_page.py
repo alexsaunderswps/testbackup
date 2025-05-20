@@ -187,6 +187,34 @@ class InstallationsPage(BasePage):
     def get_installations_organization_header(self):
         """ Get the installations organization header element."""
         return self.page.get_by_role("cell", name="Organization", exact=True)
+    
+    def get_installations_count_text(self):
+        """ Get the installations count text element."""
+        showing_element = self.get_showing_count()
+        if showing_element.count() > 0:
+            return showing_element.inner_text()
+        return None
+    
+    def get_pagination_counts(self):
+        """
+        Extract the pagination counts from the "Showing X to Y of Z" text.
+
+        Returns:
+            Tuple[int, int, int]: A tuple containing:
+                - start_count (int): The starting index of the current page.
+                - end_count (int): The ending index of the current page.
+                - total_count (int): The total number of items.
+        """
+        return super().get_pagination_counts()
+    
+    def get_installation_by_name(self, name):
+        """ Find an installation in the table by name. """
+        rows = self.get_installations_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
         
     # Check Page Element presence
     def verify_page_title_present(self):
