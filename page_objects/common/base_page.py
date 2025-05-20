@@ -243,9 +243,9 @@ class BasePage:
             return False
 
         if expected_page is None:
-            if action.__name__ == "navigate to next page":
+            if action.__name__ == "navigate_to_next_page":
                 expected_page = initial_page + 1
-            elif action.__name__ == "navigate to previous page":
+            elif action.__name__ == "navigate_to_previous_page":
                 expected_page = initial_page - 1
             else:
                 self.logger.error(f"Cannot determine the expected page for action: {action.__name__}")
@@ -258,7 +258,7 @@ class BasePage:
             return False
         
         # Wait for the page to update
-        self.pag.wait_for_load_state("networkidle")
+        self.page.wait_for_load_state("networkidle")
         
         # Check if the page number has updated
         new_page = self.get_current_page_number()
@@ -448,7 +448,7 @@ class BasePage:
             Tuple[bool, list]: A tuple containing a boolean (all expected elements present)
                         and a list of missing expected elements
         """
-        self.logger.info("Checking if the correct Pagination elements are present on Species Page")
+        self.logger.info("Checking if the correct Pagination elements are present on Page")
         all_elements_correct = True
         issues_found = []
         
