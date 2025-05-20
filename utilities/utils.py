@@ -259,3 +259,10 @@ def get_logs_for_test(test_name):
         _type_: _description_
     """
     return logger.html_logger.get_logs_for_test(test_name)
+
+def get_browser_name(page):
+    """Safely get browser name from a Playwright page object."""
+    try:
+        return page.context.browser.browser_type.name
+    except AttributeError:
+        return "unknown browser"

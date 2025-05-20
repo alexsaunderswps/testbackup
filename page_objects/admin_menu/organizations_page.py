@@ -3,15 +3,7 @@ import os
 from dotenv import load_dotenv
 from typing import Tuple, List
 from page_objects.common.base_page import BasePage
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.utils import logger
-from utilities.element_interactor import ElementInteractor
-from utilities.element_locator import ElementLocator
-from utilities.screenshot_manager import ScreenshotManager
 
 load_dotenv()
 
@@ -20,65 +12,101 @@ load_dotenv()
 BASE_URL = os.getenv("QA_BASE_URL")
 
 class OrganizationsPage(BasePage):
-    """_summary_
-
-    Args:
-        BasePage (_type_): _description_
     """
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.driver = driver
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator(driver)
-        self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager()
+    Page object for the Organizations page.
+    """
+    def __init__(self, page):
+        super().__init__(page)
+        self.page = page
         self.logger = logger
-        
-    class OrganizationsPageElements:
-        """_summary_
-        """
-        ORGANIZATIONS_PAGE_TITLE = "//h1[text()='Organizations']"
-        
-    class OrganizationsSearchElements:
-        """_summary_
-        """
-        SEARCH_TEXT = "//input[@placeholder='Filter by name']"
-        SEARCH_BUTTON = "//button[text()='Search']"
-        ADD_ORGANIZATION_LINK ="//a[@href='/organization/add']"
-        
-    class OrganizationsTableElements:
-        """_summary_
-        """
-        ORGANIZATION_TABLE_BODY = "//table//tbody"
-        ORGANIZATION_TABLE_ROWS = "//table//tbody/tr"
-        ORGANIZATION_NAME_HEADER = "//table/thead/tr/th[text()='Name ']"
-        
-    # Check Page Element presence
-    def verify_page_title_present(self):
-        """_summary_
-        """
-        return super().verify_page_title_present(self.OrganizationsPageElements.ORGANIZATIONS_PAGE_TITLE)
     
-    def verify_all_organization_search_elements_present(self) -> Tuple[bool, list]:
+    # Element locators    
+    def get_page_title(self):
+        """ Get the page title for the Organizations page."""
+        return self.page.get_by_role("heading", name="Organizations")
+    
+    def get_page_title_text(self):
+        """ Get the page title text for the Organizations page."""
+        return self.page.get_by_role("heading", level=1).first().inner_text()
+    
+    def get_search_text_box(self):
+        """ Get the search text box element."""
+        return self.page.get_by_role("textbox", name="Filter by name")
+    
+    def get_search_button(self):
+        """ Get the search button element."""
+        return self.page.get_by_role("button", name="Search")
+    
+    def get_add_organization_button(self):
+        """ Get the add organization button element."""
+        return self.page.get_by_role("link", name="Add")
+    
+    # Add Modal Element locators
+    def get_save_button(self):
+        """ Get the save button element."""
+        return self.page.get_by_role("button", name="Save")
+    
+    def get_cancel_button(self):
+        """ Get the cancel button element."""
+        return self.page.get_by_role("button", name="Cancel")
+    
+    def get_add_organization_textbox(self):
+        """ Get the add organization textbox element."""
+        return self.page.get_by_role("textbox")
+
+    # Organization Table Elements
+    def get_organization_table_body(self):
+        """ Get the organization table body element."""
+        return self.page.locator("table > tbody")
+    
+    def get_organization_table_name_header(self):
+        """ Get the organization table header element."""
+        return self.page.get_by_role("cell", name="Name")
+    
+    def get_organization_table_rows(self):
+        """ Get the organization table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    # Verification methods
+    def verify_page_title_present(self,) -> bool:
+        """ Verify that the page title is present.
+        
+        Returns:
+            bool: True if the page title is present, False otherwise.
         """
-        Verify that all expected organization search elements are present.
+        self.logger.info("Verifying page title is present")
+        return super().verify_page_title_present("Organizations")
+    
+    # Check Page Element presence
+    def verify_page_title(self):
+        """
+        Verify that the page title is present.
+        
+        Returns:
+            bool: True if the page title is present, False otherwise.
+        """
+        return super().verify_page_title("Organizations", tag="h1")
+    
+    def verify_all_organization_page_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected organization page elements are present.
         
         Returns:
             Tuple containing:
                 - bool: True if all elements were found, False otherwise
                 - List[str]: List of missing element names (empty if all found)
         """
-        self.logger.info("Verifying all expected organization search elements are present")
+        self.logger.info("Verifying all expected organization page elements are present")
         
         # Define elements with readable names
-        search_elements = {
-            "Search Text Box": self.OrganizationsSearchElements.SEARCH_TEXT,
-            "Search Button": self.OrganizationsSearchElements.SEARCH_BUTTON,
-            "Add Organization Link": self.OrganizationsSearchElements.ADD_ORGANIZATION_LINK
+        action_elements = {
+            "Search Text Box": self.get_search_text_box,
+            "Search Button": self.get_search_button,
+            "Add Organization Link": self.get_add_organization_button
         }
-        return self.verify_page_elements_present(search_elements, "Organizations Search Elements")
+        return self.verify_page_elements_present(action_elements, "Organizations page Elements")
         
-    def verify_all_organization_table_elements_present(self) -> Tuple[bool, list]:
+    def verify_all_organization_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected organization table elements are present.
         
@@ -91,8 +119,16 @@ class OrganizationsPage(BasePage):
 
         # Define elements with readable names
         table_elements = {
-            "Table Body": self.OrganizationsTableElements.ORGANIZATION_TABLE_BODY,
-            "Table Rows": self.OrganizationsTableElements.ORGANIZATION_TABLE_ROWS,
-            "Organization Name Header": self.OrganizationsTableElements.ORGANIZATION_NAME_HEADER,
+            "Table Body": self.get_organization_table_body,
+            "Organization Name Header": self.get_organization_table_name_header,
         }
-        return self.verify_page_elements_present(table_elements, "Organization Table Elements")
+        success, missing_elements = self.verify_page_elements_present(table_elements, "Organization Table Elements")
+        
+        rows = self.get_organization_table_rows()
+        rows_count = rows.count()
+        if rows_count > 0:
+            self.logger.info(f"Found {rows_count} rows in the organization table")
+        else:
+            self.logger.info("No rows found in the organization table")
+            
+        return success, missing_elements

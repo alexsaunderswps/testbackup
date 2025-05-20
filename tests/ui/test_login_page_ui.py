@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pytest_check import check
 from page_objects.authentication.login_page import LoginPage
 from utilities.screenshot_manager import ScreenshotManager
-from utilities.utils import logger
+from utilities.utils import get_browser_name, logger
 
 
 # Initialize Faker and Screenshot
@@ -35,7 +35,6 @@ def login_page(setup_isolated):
 class TestLoginPageUI:
     
     @pytest.mark.UI 
-    @pytest.mark.login
     def test_login_page_elements(self, login_page):
         """_summary_
 
