@@ -77,7 +77,7 @@ def installations_pagination_test_data(request):
             print(f"Creating installation: {unique_suffix}")
             
             # Use post instead of put (if needed)
-            response = requests.post(installation_endpoint, json=payload, headers=headers)
+            response = requests.put(installation_endpoint, json=payload, headers=headers)
             
             # Since we know our API returns empty responses on success,
             # we'll just use our generated ID if the status code indicates success
