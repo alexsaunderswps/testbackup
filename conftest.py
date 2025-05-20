@@ -4,6 +4,7 @@ import pytest
 import time
 from datetime import datetime
 from dotenv import load_dotenv
+from fixtures.installations import installations_pagination_test_data
 from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
 from typing import Dict, List, Tuple, Generator, Any
 from utilities.utils import logger, start_test_capture, end_test_capture, get_browser_name
