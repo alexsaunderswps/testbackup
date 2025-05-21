@@ -325,13 +325,15 @@ class TestInstallationsPageUI:
         
         # Get an installation name to search for
         test_installation_id = installations_pagination_test_data[0]
+        logger.info(f"Test installation ID: {test_installation_id}")
         installation_name = None
         
         try:
-            response = requests.get(f"{api_base_url}/Installations/{test_installation_id}", headers=headers)
+            response = requests.get(f"{api_base_url}/Installations/{test_installation_id}/details", headers=headers)
             if response.status_code == 200:
                 installation_data = response.json()
                 installation_name = installation_data.get("name")
+                logger.info(f"Installation name: {installation_name}")
         except Exception as e:
             logger.error(f"Failed to get installation name: {str(e)}")
         
@@ -340,58 +342,160 @@ class TestInstallationsPageUI:
             return
         
         for ip in installations_page:
+            # Refresh the page to ensure all installations are loaded
+            ip.page.reload()
+            ip.page.wait_for_load_state("networkidle")
+            
             # 1. Search for the exact name
             search_box = ip.get_installation_search_text()
             search_button = ip.get_installation_search_button()
             
             # Clear any existing text and enter search term
+            logger.info(f"Searching for exact name match: {installation_name}")
             search_box.clear()
             search_box.fill(installation_name)
             search_button.click()
             
             # Wait for results to load
-            ip.page.wait_for_load_state("networkidle")
-            
-            # Check if our installation is in the results
-            results = ip.get_installations_table_rows()
-            found = False
-            for i in range(results.count()):
-                name_cell = results.nth(i).locator("td").first
-                if name_cell.inner_text() == installation_name:
-                    found = True
-                    break
-            
-            check.is_true(found, f"Installation '{installation_name}' not found in search results")
-            
-            # 2. Search for a partial name (first 5 characters)
-            partial_name = installation_name[:5]
+            try:
+                ip.page.wait_for_load_state("networkidle")
+                
+                # Check if our installation is in the results
+                ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
+                ip.page.wait_for_timeout(3000)
+                results_rows = ip.get_installations_table_rows()
+                results_rows_count = results_rows.count()
+                logger.info(f"Found {results_rows_count} results for '{installation_name}'")
+
+                # Only process if we have results
+                if results_rows_count > 0:
+                    found = False
+                    for i in range(results_rows_count):
+                        try:
+                            name_cell = results_rows.nth(i).locator("td").first
+                            name = name_cell.inner_text(timeout=1000)
+                            logger.info(f"First result name: {name}")
+                            
+                            if name == installation_name:
+                                logger.info(f"Found expected installation '{installation_name}' in results")
+                                found = True
+                                break
+                        except Exception as e:
+                            logger.warning(f"Error getting name from row {i}: {str(e)}")
+                            continue
+                    check.is_true(found, f"Expected installation '{installation_name}' not found in results")
+                else:
+                    # If no results are found, this is a failure for the exact match search
+                    check.fail(f"No results found for exact name '{installation_name}'")
+            except Exception as e:
+                logger.error(f"Error waiting for results: {str(e)}")
+                check.fail(f"Error waiting for results: {str(e)}")
+                
+                
+            # 2. Search for a partial name (last 8 characters)
+            partial_name = installation_name[-8:]
             search_box.clear()
+            search_button.click()
+            ip.page.wait_for_load_state("networkidle")
             search_box.fill(partial_name)
+            logger.info(f"Searching for partial name: {partial_name}")
             search_button.click()
             
-            # Wait for results to load
+            # Wait for results to load - use the same robust waiting approach
             ip.page.wait_for_load_state("networkidle")
+            ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
+            ip.page.wait_for_timeout(3000)
             
-            # Check if we have results
-            results = ip.get_installations_table_rows()
-            check.greater(results.count(), 0, f"No results found for partial name '{partial_name}'")
+            # Get and log the results
+            results_rows = ip.get_installations_table_rows()
+            results_count = results_rows.count()
+            logger.info(f"Found {results_count} results for partial name '{partial_name}'")
             
+            # More comprehensive validation
+            if results_count > 0:
+                # Check that we got at least some reasonable number of results
+                check.greater(results_count, 0, f"No results found for partial name '{partial_name}'")
+                
+                # Log and verify a sample of the results contain our search term
+                matching_results = 0
+                max_to_check = min(results_count, 10)  # Don't check too many rows
+                
+                logger.info(f"Sampling {max_to_check} results to verify they contain the search term")
+                for i in range(max_to_check):
+                    try:
+                        name_cell = results_rows.nth(i).locator("td").first
+                        name = name_cell.inner_text(timeout=1000)
+                        logger.info(f"Result {i} name: {name}")
+                        
+                        if partial_name.lower() in name.lower():  # Case-insensitive check
+                            matching_results += 1
+                            logger.info(f"Result contains search term: {name}")
+                    except Exception as e:
+                        logger.warning(f"Error getting name from row {i}: {str(e)}")
+                        continue
+                
+                # Verify that at least some of our results contain the search term
+                # This ensures the search is working correctly
+                check.greater(matching_results, 0, 
+                            f"None of the sampled results contain the search term '{partial_name}'")
+                
+                logger.info(f"Verified {matching_results} out of {max_to_check} sampled results " 
+                            f"contain the search term '{partial_name}'")
+            else:
+                check.fail(f"No results found for partial name '{partial_name}'")
+                        
             # 3. Search for a non-existent name
             non_existent = "ZZZZZ_NonExistentInstallation_ZZZZ"
+            logger.info(f"Searching for non-existent name: {non_existent}")
             search_box.clear()
+            search_button.click()
+            ip.page.wait_for_load_state("networkidle")
             search_box.fill(non_existent)
             search_button.click()
             
             # Wait for results to load
             ip.page.wait_for_load_state("networkidle")
             
-            # Check that no results are found
-            results = ip.get_installations_table_rows()
-            check.equal(results.count(), 0, f"Found unexpected results for '{non_existent}'")
+            # Wait for page to settle
+            ip.page.wait_for_timeout(2000)
             
+            # Check that no results are found
+            results_rows = ip.get_installations_table_rows()
+            results_count = results_rows.count()
+            logger.info(f"Found {results_count} results for non-existent name '{non_existent}'")
+            
+            # Primary check - there should be no rows
+            check.equal(results_count, 0, 
+                    f"Found {results_count} unexpected results for non-existent name '{non_existent}'")
+            
+            # Additional checks for empty state indicators (if applicable)
+            try:
+                # Check if there's any empty state container 
+                # (adjust the selector based on your application's actual implementation)
+                empty_state = ip.page.locator("table tbody:empty, .no-results, .empty-state").count()
+                if empty_state > 0:
+                    logger.info("Empty state element found as expected")
+                
+                # Check if the table body itself exists but is empty
+                table_body = ip.page.locator("table tbody").count()
+                if table_body > 0:
+                    # If table body exists, check its inner HTML
+                    table_html = ip.page.locator("table tbody").evaluate("el => el.innerHTML.trim()")
+                    logger.info(f"Table body HTML: '{table_html}'")
+                    if not table_html:
+                        logger.info("Table body exists but is empty as expected")
+            except Exception as e:
+                logger.warning(f"Error checking empty state: {str(e)}")
+
+            # Log the search box value to verify it still contains our search term
+            search_text = search_box.input_value()
+            logger.info(f"Search box contains: '{search_text}'")
+
             # Clear the search to restore all results
+            logger.info("Clearing search to restore all results")
             search_box.clear()
             search_button.click()
+            ip.page.wait_for_load_state("networkidle")
         
     @pytest.mark.UI
     @pytest.mark.installations
