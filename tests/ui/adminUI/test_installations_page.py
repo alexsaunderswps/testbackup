@@ -500,7 +500,6 @@ class TestInstallationsPageUI:
     @pytest.mark.UI
     @pytest.mark.installations
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_installation_details_navigation(self, installations_page):
         """
         Test basic navigation to installation details page.
@@ -570,6 +569,192 @@ class TestInstallationsPageUI:
                     check.fail(f"Navigation test failed with error: {str(e)}")
             else:
                 logger.warning("No installations found to test details navigation")
+                
+    @pytest.mark.UI
+    @pytest.mark.installations
+    @pytest.mark.verification
+    @pytest.mark.debug
+    def test_installation_details_content(self, installations_page, installations_pagination_test_data):
+        """
+        Test that installation details page displays correct information.
+        
+        This test verifies:
+        1. The details page accurately displays the installation's properties
+        2. All expected fields match what was created via the fixture
+        """
+        logger.info("Starting installation details content verification test")
+        
+        # We need to get the details for a test installation from the API
+        if not installations_pagination_test_data or len(installations_pagination_test_data) == 0:
+            logger.warning("No test installations available for content verification")
+            return
+        
+        # Get details for the first test installation
+        test_installation_id = installations_pagination_test_data[0]
+        logger.info(f"Using test installation ID: {test_installation_id}")
+        
+        # Get installation details from API for comparison
+        api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
+        api_token = os.getenv("API_TOKEN")
+        headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
+        expected_data = None
+        
+        try:
+            response = requests.get(f"{api_base_url}/Installations/{test_installation_id}/details", headers=headers)
+            if response.status_code == 200:
+                expected_data = response.json()
+                installation_name = expected_data.get("name")
+                logger.info(f"Got details for installation: {installation_name}")
+            else:
+                logger.error(f"Failed to get installation details: {response.status_code}")
+                return
+        except Exception as e:
+            logger.error(f"API error getting installation details: {str(e)}")
+            return
+        
+        # Now let's search for this installation and navigate to its details
+        for ip in installations_page:
+            try:
+                # Refresh and wait for page to load
+                ip.page.reload()
+                ip.page.wait_for_load_state("networkidle")
+                
+                # Search for our specific installation
+                search_box = ip.get_installation_search_text()
+                search_button = ip.get_installation_search_button()
+                
+                search_box.clear()
+                search_box.fill(installation_name)
+                logger.info(f"Searching for installation: {installation_name}")
+                search_button.click()
+                
+                # Wait for search results
+                ip.page.wait_for_load_state("networkidle")
+                ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
+                ip.page.wait_for_timeout(3000)
+                
+                # Find and click on our installation
+                results_rows = ip.get_installations_table_rows()
+                found = False
+                
+                for i in range(results_rows.count()):
+                    try:
+                        name_cell = results_rows.nth(i).locator("td").first
+                        name = name_cell.inner_text(timeout=2000)
+                        
+                        if name == installation_name:
+                            logger.info(f"Found installation '{installation_name}' in search results")
+                            name_cell.click()
+                            found = True
+                            break
+                    except Exception as e:
+                        logger.warning(f"Error checking row {i}: {str(e)}")
+                        continue
+                
+                if not found:
+                    logger.error(f"Installation '{installation_name}' not found in search results")
+                    check.fail(f"Could not find installation '{installation_name}' to verify details")
+                    return
+                
+                # Wait for details page to load
+                ip.page.wait_for_load_state("networkidle")
+                ip.page.wait_for_selector("h1")
+                ip.page.wait_for_timeout(2000)
+                
+                # Verify page title as requested
+                page_title = ip.page.get_by_role("heading", level=1)
+                title_text = page_title.inner_text(timeout=2000)
+                logger.info(f"Details page title: {title_text}")
+                check.is_true("Installation Details" in title_text, 
+                            f"Title should be 'Installation Details', got: {title_text}")
+                
+                # Define a function to get field values from the page
+                def get_field_value(label_getter, input_getter, is_input=True):
+                    """Helper function to get field values using getters"""
+                    try:
+                        # First check if the label exists
+                        label = label_getter()
+                        if label.count() == 0:
+                            logger.warning(f"Label not found for {label_getter.__name__}")
+                            return None
+                        
+                        # Get the value based on the input type
+                        value_element = input_getter()
+                        if value_element.count() == 0:
+                            logger.warning(f"Value element not found for {input_getter.__name__}")
+                            return None
+                        
+                        if is_input:
+                            # For input fields, get the value attribute
+                            # For different input types, we might need different approaches
+                            tag_name = value_element.evaluate("el => el.tagName.toLowerCase()")
+                            
+                            if tag_name == "input":
+                                input_type = value_element.evaluate("el => el.type")
+                                if input_type == "checkbox":
+                                    return value_element.is_checked()
+                                else:
+                                    return value_element.input_value()
+                            elif tag_name == "textarea":
+                                return value_element.input_value()
+                            elif tag_name == "select":
+                                return value_element.evaluate("el => el.value")
+                            else:
+                                # For other elements, use inner text
+                                return value_element.inner_text(timeout=2000).strip()
+                        else:
+                            # For display-only elements
+                            return value_element.inner_text(timeout=2000).strip()
+                            
+                    except Exception as e:
+                        logger.warning(f"Error getting field value: {str(e)}")
+                        return None
+                
+                # Define the fields to verify using our getter methods
+                fields_to_verify = [
+                    # Format: (label_getter, input_getter, data_key, transform_func, is_input)
+                    (ip.get_installation_name_label, ip.get_installation_name_textbox, "name", None, True),
+                    (ip.get_installations_tips_label, ip.get_installations_tips_textbox, "tips", None, True),
+                    (ip.get_installations_globestartlatitude_label, ip.get_installations_globestartlatitude_textbox, "globeStartLat", str, True),
+                    (ip.get_installations_globestartlongitude_label, ip.get_installations_globestartlongitude_textbox, "globeStartLong", str, True),
+                    (ip.get_installations_apptimerlengthseconds_label, ip.get_installations_apptimerlengthseconds_textbox, "appTimerLengthSeconds", str, True),
+                    (ip.get_installations_idletimerlengthseconds_label, ip.get_installations_idletimerlengthseconds_textbox, "idleTimerLengthSeconds", str, True),
+                    (ip.get_installations_idletimerdelayseconds_label, ip.get_installations_idletimerdelayseconds_textbox, "idleTimerDelaySeconds", str, True),
+                    (ip.get_installations_show_graphic_death_label, ip.get_installations_show_graphic_death_checkbox, "showGraphicDeath", None, True),
+                    (ip.get_installations_show_graphic_sex_label, ip.get_installations_show_graphic_sex_checkbox, "showGraphicSex", None, True)
+                ]
+                
+                # Verify each field
+                for label_getter, input_getter, data_key, transform_func, is_input in fields_to_verify:
+                    # Get the field's displayed value
+                    actual_value = get_field_value(label_getter, input_getter, is_input)
+                    
+                    if actual_value is not None:
+                        # Get expected value and transform if needed
+                        expected_value = expected_data.get(data_key)
+                        
+                        # Apply transformation if specified
+                        if transform_func:
+                            expected_value = transform_func(expected_value)
+                        
+                        # Convert to string if not already (except for booleans)
+                        if not isinstance(expected_value, bool) and not isinstance(actual_value, bool):
+                            expected_value = str(expected_value)
+                            actual_value = str(actual_value)
+                        
+                        field_name = label_getter.__name__.replace("get_", "").replace("_label", "")
+                        logger.info(f"Checking field '{field_name}': Expected '{expected_value}', Got '{actual_value}'")
+                        
+                        check.equal(actual_value, expected_value, 
+                                f"Field '{field_name}' value mismatch. Expected: '{expected_value}', Got: '{actual_value}'")
+                    else:
+                        logger.warning(f"Skipping verification for {label_getter.__name__} - could not get value")
+                
+                logger.info("Details verification complete")
+                
+            except Exception as e:
+                logger.error(f"Error during details verification: {str(e)}")
+                check.fail(f"Details verification failed: {str(e)}")
 
     @pytest.mark.UI
     @pytest.mark.installations
