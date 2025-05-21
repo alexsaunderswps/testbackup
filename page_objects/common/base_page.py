@@ -192,14 +192,27 @@ class BasePage:
         Returns:
             int: The current page number, or None if not found.
         """
-        current_page = self.get_current_page_button()
-        if current_page.count() > 0:
-            try:
-                return int(current_page.inner_text())
-            except ValueError:
-                self.logger.error(f"Failed to parse current page number from text: {current_page.inner_text()}")
-                return None
-        return None
+        try:
+            # Try first using aria-current attribute
+            current_page = self.page.locator("[aria-current='page']")
+            if current_page.count() > 0:
+                page_text = current_page.inner_text().strip()
+                return int(page_text)
+        except Exception as e:
+            self.logger.debug(f"Could not get current page using aria-current: {str(e)}")
+            
+        try:
+            # Try finding by role and name containing "is your current page"
+            current_page = self.page.get_by_role("button", name=lambda n: "is your current page" in str(n) if n else False)
+            if current_page.count() > 0:
+                # Try to extract from name or inner text
+                text = current_page.inner_text().strip()
+                if text and text.isdigit():
+                    return int(text)
+        except Exception as e:
+            self.logger.debug(f"Could not get current page using button role: {str(e)}")
+            
+        return None  # Return None if we couldn't determine the page number
     
     def get_pagination_counts(self) -> Tuple[int, int, int]:
         """
