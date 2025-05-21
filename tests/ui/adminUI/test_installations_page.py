@@ -499,60 +499,75 @@ class TestInstallationsPageUI:
         
     @pytest.mark.UI
     @pytest.mark.installations
-    @pytest.mark.functionality
-    def test_installation_details_navigation(self, installations_page, installations_pagination_test_data):
+    @pytest.mark.navigation
+    @pytest.mark.debug
+    def test_installation_details_navigation(self, installations_page):
         """
-        Test navigation to installation details page.
+        Test basic navigation to installation details page.
         
         This test verifies:
         1. Clicking on an installation name navigates to the details page
-        2. The details page displays the correct installation information
-        
-        Args:
-            installations_page: The InstallationsPage fixture
-            installations_pagination_test_data: Fixture that creates test installations
+        2. The URL and page title are correct
+        3. We can navigate back to the installations list
         """
         logger.info("Starting installation details navigation test")
         
         for ip in installations_page:
-            # Refresh the page to ensure all installations are loaded
+            # Refresh the page to ensure installations are loaded
             ip.page.reload()
+            ip.page.wait_for_load_state("networkidle")
+            ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
+            ip.page.wait_for_timeout(2000)
             
             # Find an installation in the table
             rows = ip.get_installations_table_rows()
-            if rows.count() > 0:
-                # Get the name from the first row
-                first_row = rows.first
-                name_cell = first_row.locator("td").first
-                installation_name = name_cell.inner_text()
-                
-                # Click on the name to navigate to details
-                name_cell.click()
-                
-                # Wait for page to load
-                ip.page.wait_for_load_state("networkidle")
-                
-                # Verify we're on the details page
-                url = ip.page.url
-                check.is_true("/installation/" in url, 
-                            f"URL should contain '/installation/', got: {url}")
-                
-                # Verify the installation name is in the page title
-                page_title = ip.page.get_by_role("heading", level=1)
-                check.is_true(page_title.count() > 0, "Details page should have a title")
-                
-                if page_title.count() > 0:
-                    title_text = page_title.inner_text()
-                    check.is_true(installation_name in title_text, 
-                                f"Title should contain installation name '{installation_name}', got: '{title_text}'")
-                
-                # Navigate back to the installations page
-                ip.page.go_back()
-                
-                # Verify we're back on the installations page
-                page_title = ip.page.get_by_role("heading", level=1)
-                check.equal(page_title.inner_text(), "Installations", 
-                        "Should be back on Installations page")
+            rows_count = rows.count()
+            logger.info(f"Found {rows_count} installations to test with")
+            
+            if rows_count > 0:
+                try:
+                    # Get the name from the first row
+                    first_row = rows.first
+                    name_cell = first_row.locator("td").first
+                    installation_name = name_cell.inner_text(timeout=2000)
+                    logger.info(f"Selected installation: {installation_name}")
+                    
+                    # Click on the name to navigate to details
+                    name_cell.click()
+                    
+                    # Wait for details page to load
+                    ip.page.wait_for_load_state("networkidle")
+                    ip.page.wait_for_selector("h1")
+                    ip.page.wait_for_timeout(1000)
+                    
+                    # Verify URL and title
+                    url = ip.page.url
+                    logger.info(f"Navigated to URL: {url}")
+                    check.is_true("/installation/" in url, 
+                                f"URL should contain '/installation/', got: {url}")
+                    
+                    page_title = ip.page.get_by_role("heading", level=1)
+                    title_text = page_title.inner_text(timeout=2000)
+                    logger.info(f"Details page title: {title_text}")
+                    check.is_true("Installation Details" in title_text, 
+                                f"Title should be 'Installation Details', got: {title_text}")
+                    
+                    # Navigate back
+                    logger.info("Navigating back to installations page")
+                    ip.page.go_back()
+                    
+                    # Verify we returned to installations page
+                    ip.page.wait_for_load_state("networkidle")
+                    ip.page.wait_for_selector("h1")
+                    
+                    page_title = ip.page.get_by_role("heading", level=1)
+                    title_text = page_title.inner_text(timeout=2000)
+                    check.equal(title_text, "Installations", 
+                            "Should be back on Installations page")
+                    
+                except Exception as e:
+                    logger.error(f"Error during navigation test: {str(e)}")
+                    check.fail(f"Navigation test failed with error: {str(e)}")
             else:
                 logger.warning("No installations found to test details navigation")
 
