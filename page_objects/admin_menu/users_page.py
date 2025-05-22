@@ -13,7 +13,11 @@ BASE_URL = os.getenv("QA_BASE_URL")
 
 class UsersPage(BasePage):
     """
-    Page object for the Users page.
+    Page object for the Users page using Playwright.
+
+    This class provides methods to interact with elements on the Users page,
+    follwing the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
     """
     def __init__(self, page):
         super().__init__(page)
