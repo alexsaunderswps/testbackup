@@ -5,6 +5,13 @@ from fixtures.admin_menu.users_fixtures import users_page
 from utilities.utils import get_browser_name, logger
 
 class TestUsersPageUI:
+    """
+    Test suite for the Users page UI elements.
+
+    This class follows the established pattern for Playwright-based UI testing,
+    using the modern fixture-based approach and the verify_ui_elements pattern
+    for consistent element verification across different browsers.
+    """
     
     @pytest.mark.UI 
     @pytest.mark.users
