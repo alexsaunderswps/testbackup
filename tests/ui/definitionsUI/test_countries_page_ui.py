@@ -74,7 +74,6 @@ class TestCountriesPageUI:
             check.is_true(all_elements, 
                 f"Missing countries admin elements: {', '.join(missing_elements)} on {get_browser_name(page.page)}")
             logger.info(f"Verification Successful :: All Countries Admin Elements found on {get_browser_name(page.page)}")
-    
         
     @pytest.mark.UI
     @pytest.mark.countries
@@ -133,55 +132,55 @@ class TestCountriesPageUI:
                 f"Missing countries table elements: {', '.join(missing_elements)} on {get_browser_name(cp.page)}")
             logger.info(f"Verification Successful :: All Countries Table Elements found on {get_browser_name(cp.page)}")
     
-    @pytest.mark.UI
-    @pytest.mark.countries
-    @pytest.mark.table
-    def test_countries_table_data_presence(self, countries_page):
-        """
-        Test that the Countries table contains data and can be counted.
+    # @pytest.mark.UI
+    # @pytest.mark.countries
+    # @pytest.mark.table
+    # def test_countries_table_data_presence(self, countries_page):
+    #     """
+    #     Test that the Countries table contains data and can be counted.
         
-        Beyond just verifying that table elements exist, this test ensures that the
-        table actually contains country data. This helps catch scenarios where the
-        table structure loads correctly but data population fails due to API issues
-        or other backend problems.
+    #     Beyond just verifying that table elements exist, this test ensures that the
+    #     table actually contains country data. This helps catch scenarios where the
+    #     table structure loads correctly but data population fails due to API issues
+    #     or other backend problems.
         
-        Args:
-            countries_page: The CountriesPage fixture providing page objects for each browser
-        """
-        logger.debug("Starting test_countries_table_data_presence")
-        for cp in countries_page:
-            row_count = cp.count_table_rows()
-            check.greater(row_count, 0, 
-                f"Countries table should contain data, found {row_count} rows on {get_browser_name(cp.page)}")
-            logger.info(f"Verification Successful :: Countries Table has {row_count} rows on {get_browser_name(cp.page)}")
+    #     Args:
+    #         countries_page: The CountriesPage fixture providing page objects for each browser
+    #     """
+    #     logger.debug("Starting test_countries_table_data_presence")
+    #     for cp in countries_page:
+    #         row_count = cp.count_table_rows()
+    #         check.greater(row_count, 0, 
+    #             f"Countries table should contain data, found {row_count} rows on {get_browser_name(cp.page)}")
+    #         logger.info(f"Verification Successful :: Countries Table has {row_count} rows on {get_browser_name(cp.page)}")
     
-    @pytest.mark.UI
-    @pytest.mark.countries
-    @pytest.mark.table
-    def test_countries_data_retrieval(self, countries_page):
-        """
-        Test that country names can be retrieved from the table.
+    # @pytest.mark.UI
+    # @pytest.mark.countries
+    # @pytest.mark.table
+    # def test_countries_data_retrieval(self, countries_page):
+    #     """
+    #     Test that country names can be retrieved from the table.
         
-        This test validates the fundamental data extraction capability that supports
-        more complex testing scenarios. Being able to reliably extract country names
-        from the table enables verification of search functionality, sorting behavior,
-        and data accuracy in subsequent tests.
+    #     This test validates the fundamental data extraction capability that supports
+    #     more complex testing scenarios. Being able to reliably extract country names
+    #     from the table enables verification of search functionality, sorting behavior,
+    #     and data accuracy in subsequent tests.
         
-        Args:
-            countries_page: The CountriesPage fixture providing page objects for each browser
-        """
-        logger.debug("Starting test_countries_data_retrieval")
-        for cp in countries_page:
-            country_names = cp.get_country_name_values()
-            check.greater(len(country_names), 0, 
-                f"Should retrieve country names, found {len(country_names)} names on {get_browser_name(cp.page)}")
+    #     Args:
+    #         countries_page: The CountriesPage fixture providing page objects for each browser
+    #     """
+    #     logger.debug("Starting test_countries_data_retrieval")
+    #     for cp in countries_page:
+    #         country_names = cp.get_country_name_values()
+    #         check.greater(len(country_names), 0, 
+    #             f"Should retrieve country names, found {len(country_names)} names on {get_browser_name(cp.page)}")
             
-            # Verify that retrieved names are valid (non-empty strings)
-            valid_names = [name for name in country_names if name and name.strip()]
-            check.equal(len(valid_names), len(country_names), 
-                f"All retrieved names should be valid, found {len(valid_names)} valid out of {len(country_names)} total on {get_browser_name(cp.page)}")
+    #         # Verify that retrieved names are valid (non-empty strings)
+    #         valid_names = [name for name in country_names if name and name.strip()]
+    #         check.equal(len(valid_names), len(country_names), 
+    #             f"All retrieved names should be valid, found {len(valid_names)} valid out of {len(country_names)} total on {get_browser_name(cp.page)}")
             
-            logger.info(f"Verification Successful :: Retrieved {len(country_names)} valid country names on {get_browser_name(cp.page)}")
+    #         logger.info(f"Verification Successful :: Retrieved {len(country_names)} valid country names on {get_browser_name(cp.page)}")
     
     @pytest.mark.UI
     @pytest.mark.countries

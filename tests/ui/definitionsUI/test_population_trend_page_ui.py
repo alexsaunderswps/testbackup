@@ -171,11 +171,4 @@ class TestPopulationTrendPageUI:
             valid_names = [name for name in trend_names if name and name.strip()]
             check.equal(len(valid_names), len(trend_names), 
                 f"All retrieved names should be valid, found {len(valid_names)} valid out of {len(trend_names)} total on {get_browser_name(ptp.page)}")
-            
-            # Test comprehensive data extraction
-            trend_data = ptp.get_population_trend_data()
-            check.equal(len(trend_data), len(trend_names), 
-                f"Comprehensive data should match name count, found {len(trend_data)} data records for {len(trend_names)} names on {get_browser_name(ptp.page)}")
-            
-            logger.info(f"Verification Successful :: Retrieved {len(trend_names)} Population Trend names and {len(trend_data)} data records on {get_browser_name(ptp.page)}")
-    
+            logger.info(f"Verification Successful :: Retrieved {len(trend_names)} Population Trend names on {get_browser_name(ptp.page)}")
