@@ -1,15 +1,30 @@
-# tags_page.py
+# tags_page.py (Playwright version)
 import os
+from typing import Tuple, List
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.utils import logger
-from utilities.element_interactor import ElementInteractor
-from utilities.element_locator import ElementLocator
-from utilities.screenshot_manager import ScreenshotManager
 
 load_dotenv()
+
+# Environmental Variables
+
+BASE_URL = os.getenv("QA_BASE_URL")
+
+class TagsPage(BasePage):
+    """
+    Page object for the Tags page using Playwright.
+
+    This class provides methods to interact with elements on the Tags page,
+    following the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
+    """
+    def __init__(self, page):
+        super().__init__(page)
+        self.page = page
+        self.logger = logger
+        
+    # Element locators - Using method-based approach for consistency
+    def get_development_notice(self):
+        """Get the development notice element."""
+        return self.page.get_by_text("This page is currently in development")

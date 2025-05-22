@@ -1,17 +1,9 @@
-# iucn_status_page.py
+# iucn_status_page.py (Playwright version)
 import os
 from typing import Tuple, List
 from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.utils import logger
-from utilities.element_interactor import ElementInteractor
-from utilities.element_locator import ElementLocator
-from utilities.screenshot_manager import ScreenshotManager
 
 load_dotenv()
 
@@ -20,46 +12,134 @@ load_dotenv()
 BASE_URL = os.getenv("QA_BASE_URL")
 
 class IUCNStatusPage(BasePage):
-    """_summary_
-
-    Args:
-        BasePage (_type_): _description_
     """
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.driver = driver
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator(driver)
-        self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager()
+    Page object for the IUCN Status page using Playwright.
+    
+    This class provides methods to interact with elements on the IUCN Status page,
+    following the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
+    """
+    def __init__(self, page):
+        super().__init__(page)
+        self.page = page
         self.logger = logger
     
-    class IUCNStatusPageElements:
-        """_summary_
+    # Element locators - Using method-based approach for consistency
+    def get_page_title(self):
+        """Get the page title for the IUCN Status page."""
+        return self.page.get_by_role("heading", name="IUCN Status")
+    
+    def get_page_title_text(self):
+        """Get the page title text for the IUCN Status page."""
+        return self.page.get_by_role("heading", level=1).first().inner_text()
+    
+    # IUCN Status Table elements
+    def get_iucn_status_table_body(self):
+        """Get the IUCN Status table body element."""
+        return self.page.locator("table tbody")
+    
+    def get_iucn_status_table_rows(self):
+        """Get the IUCN Status table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    def get_iucn_status_by_name(self, name):
         """
-        IUCN_STATUS_PAGE_TITLE = "//h1[contains(text(),'IUCN Status')]"
+        Find a iucn status in the table by name.
         
-    class IUCNStatusTableElemenets:
-        IUCN_STATUS_TABLE_BODY = "//table//tbody"
-        IUCN_STUTUS_TABLE_ROWS = "//table//tbody/tr"
-        
-    # Check IUCN Status Page Title presence
-    
-    def verify_iucn_page_title_present(self):
-        """_summary_
+        Args:
+            name (str): The name of the iucn status to find
+
+        Returns:
+            Locator: The row containing the iucn status, or None if not found
         """
-        return super().verify_page_title_present(self.IUCNStatusPageElements.IUCN_STATUS_PAGE_TITLE)
+        rows = self.get_iucn_status_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
+        
+    # Check Page Element Presence
     
-    # Check IUCN Status Table presence
-    
+    def verify_iucn_page_title_present(self) -> bool:
+        """ Verify that the page title is present.
+        
+        Returns:
+            bool: True if the page title is present, False otherwise.
+        """
+        self.logger.info("Verifying the page title is present")
+        return super().verify_page_title("IUCN Status")
+
+    def verify_page_title(self) -> bool:
+        """
+        Verify that the page title is present and is the correct "IUCN Status" title.
+        
+        Returns:
+            bool: True if the page title correct, False otherwise.
+        """
+        return super().verify_page_title("IUCN Status", tag="h1")
+
     def verify_iucn_page_table_elements_present(self) -> Tuple[bool, List[str]]:
-        """_summary_
+        """
+        Verify that all expected iucn status table elements are present.
+
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
         self.logger.info("Checking IUCN Status Table Elements")
 
         #Define elements with readable names
         table_elements = {
-            "IUCN Table Body": self.IUCNStatusTableElemenets.IUCN_STATUS_TABLE_BODY,
-            "IUCN Table Rows": self.IUCNStatusTableElemenets.IUCN_STUTUS_TABLE_ROWS
+            "IUCN Table Body": self.get_iucn_status_table_body,
+            "IUCN Table Rows": self.get_iucn_status_table_rows
         }
         return self.verify_page_elements_present(table_elements, "IUCN Table Elements")
+    
+    def count_table_rows(self) -> int:
+        """
+        Count the number of rows in the IUCN Status Table.
+
+        Returns:
+            int: The number of rows in the IUCN Status Table.
+        """
+        self.logger.info("Counting the number of rows in the IUCN Status Table")
+        num_rows = 0
+        try:
+            rows = self.get_iucn_status_table_rows()
+            rows_count = rows.count()
+            self.logger.info(f"Found {rows_count} rows in the IUCN Status Table")
+            return rows_count
+        except Exception as e:
+            self.logger.error(f"An error occurred while trying to count the number of rows in the Countries Table: {str(e)}")
+            return 0
+        
+    def get_iucn_status_name_values(self) -> List[str]:
+        """
+        Get the names of all IUCN statuses visible in the current page of the table.
+
+        Returns:
+            List[str]: A list of IUCN status names, or empty list if none found
+        """
+        self.logger.info("Getting the names of all IUCN statuses in the table on current page")
+        iucn_status_names = []
+        try:
+            rows = self.get_iucn_status_table_rows()
+            rows_count = rows.count()
+            
+            for i in range(rows_count):
+                try:
+                    # Get the first cell (IUCN status name) from each row
+                    name_cell = rows.nth(i).locator("td").first
+                    iucn_status_name = name_cell.inner_text()
+                    iucn_status_names.append(iucn_status_name)
+                    self.logger.info(f"Found {len(iucn_status_names)} IUCN status names")
+                except Exception as row_error:
+                    self.logger.error(f"An error occurred while trying to get the IUCN status name from row {i}: {str(row_error)}")
+                    continue
+            self.logger.info(f"Found a total of {len(iucn_status_names)} IUCN status names")
+            return iucn_status_names
+        except Exception as e:
+            self.logger.error(f"An error occurred while trying to get the IUCN status names: {str(e)}")
+            return []
