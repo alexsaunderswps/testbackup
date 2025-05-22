@@ -79,19 +79,19 @@ class TestOrganizationsPageUI:
     @pytest.mark.UI
     @pytest.mark.organizations
     @pytest.mark.page
-    def test_organizations_page_elements(self, organizations_page):
+    def test_organizations_action_elements(self, organizations_page):
         """
-        Test that all page elements are present on the Organizations page.
-        
+        Test that all action elements are present on the Organizations page.
+
         Args:
             organizations_page: The OrganizationsPage fixture
         """
         for op in organizations_page:
-            all_elements, missing_elements = op.verify_all_organization_page_elements_present()
-            check.is_true(all_elements, f"Missing organizations page elements {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: All Organization page Elements found")
-            
-    @pytest.mark.UI 
+            all_elements, missing_elements = op.verify_all_organization_action_elements_present()
+            check.is_true(all_elements, f"Missing organizations action elements {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Organization action Elements found")
+
+    @pytest.mark.UI
     @pytest.mark.organizations
     @pytest.mark.table
     def test_organization_table_elements(self, organizations_page):

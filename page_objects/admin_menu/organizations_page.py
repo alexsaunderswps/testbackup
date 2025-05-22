@@ -91,17 +91,17 @@ class OrganizationsPage(BasePage):
         """
         return super().verify_page_title("Organizations", tag="h1")
     
-    def verify_all_organization_page_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_organization_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
-        Verify that all expected organization page elements are present.
-        
+        Verify that all expected organization action elements are present.
+
         Returns:
             Tuple containing:
                 - bool: True if all elements were found, False otherwise
                 - List[str]: List of missing element names (empty if all found)
         """
-        self.logger.info("Verifying all expected organization page elements are present")
-        
+        self.logger.info("Verifying all expected organization action elements are present")
+
         # Define elements with readable names
         action_elements = {
             "Search Text Box": self.get_search_text_box,
