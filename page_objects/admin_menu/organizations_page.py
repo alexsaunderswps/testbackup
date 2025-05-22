@@ -1,4 +1,4 @@
-# organizations_page.py
+# organizations_page.py (Playwright version)
 import os
 from dotenv import load_dotenv
 from typing import Tuple, List
