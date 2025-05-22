@@ -5,6 +5,13 @@ from fixtures.admin_menu.organizations_fixtures import organizations_page
 from utilities.utils import get_browser_name, logger
 
 class TestOrganizationsPageUI:
+    """
+    Test suite for the Organizations page UI elements.
+
+    This class follows the established pattern for Playwright-based UI testing,
+    using the modern fixture-based approach and the verify_ui_elements pattern
+    for consistent element verification across different browsers.
+    """
     
     @pytest.mark.UI 
     @pytest.mark.organizations
