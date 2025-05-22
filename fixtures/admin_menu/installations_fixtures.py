@@ -18,6 +18,42 @@ api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
+@pytest.fixture
+def installations_page(logged_in_page):
+    """
+    Fixture that provides the Installations page for each test
+
+    Args:
+        logged_in_page: A fixture providing a logged-in browser instance from conftest.py
+
+    Yields:
+        List[UsersPage]: A list of InstallationsPage objects for each logged-in browser instance
+    """
+    logger.debug("Staring installations_page fixture")
+    installation_pages = []
+    for page in logged_in_page:
+        logger.info("=" * 80)
+        logger.info(f"Navigating to Installations page on {get_browser_name(page)}")
+        logger.info("=" * 80)
+        
+        #Navigate to Installations page
+        page.get_by_role("button", name="Admin").click()
+        page.get_by_role("link", name="Installations").click()
+        
+        # Create the page object
+        installations_page = InstallationsPage(page)
+        
+        # Verify that we're on the Installations page
+        if installations_page.verify_page_title():
+            logger.info("Successfully navigated to Installations page")
+            installation_pages.append(installations_page)
+        else:
+            logger.error(f"Failed to navigate to Installations page on {get_browser_name(page)}")
+            
+    logger.info(f"installations_page fixture: yielding {len(installation_pages)} installations page(s)")
+    yield installation_pages
+    logger.debug("installations_page fixture: finished")
+
 @pytest.fixture(scope="function")
 def installations_pagination_test_data(request):
     """
@@ -112,38 +148,3 @@ def installations_pagination_test_data(request):
         except Exception as e:
             print(f"Exception during deletion: {str(e)}")
             
-@pytest.fixture
-def installations_page(logged_in_page):
-    """
-    Fixture that provides the Installations page for each test
-
-    Args:
-        logged_in_page: A fixture providing a logged-in browser instance from conftest.py
-
-    Yields:
-        List[UsersPage]: A list of InstallationsPage objects for each logged-in browser instance
-    """
-    logger.debug("Staring installations_page fixture")
-    installation_pages = []
-    for page in logged_in_page:
-        logger.info("=" * 80)
-        logger.info(f"Navigating to Installations page on {get_browser_name(page)}")
-        logger.info("=" * 80)
-        
-        #Navigate to Installations page
-        page.get_by_role("button", name="Admin").click()
-        page.get_by_role("link", name="Installations").click()
-        
-        # Create the page object
-        installations_page = InstallationsPage(page)
-        
-        # Verify that we're on the Installations page
-        if installations_page.verify_page_title():
-            logger.info("Successfully navigated to Installations page")
-            installation_pages.append(installations_page)
-        else:
-            logger.error(f"Failed to navigate to Installations page on {get_browser_name(page)}")
-            
-    logger.info(f"installations_page fixture: yielding {len(installation_pages)} installations page(s)")
-    yield installation_pages
-    logger.debug("installations_page fixture: finished")
