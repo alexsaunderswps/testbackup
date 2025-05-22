@@ -427,7 +427,6 @@ class TestInstallationsPageFunctional:
     @pytest.mark.functional
     @pytest.mark.installations
     @pytest.mark.verification
-    @pytest.mark.debug
     def test_installation_details_content(self, installations_page, installations_pagination_test_data):
         """
         Test that installation details page displays correct information.
@@ -612,6 +611,7 @@ class TestInstallationsPageFunctional:
 
     @pytest.mark.installations
     @pytest.mark.functional
+    @pytest.mark.debug
     def test_add_installation(self, installations_page):
         """
         Test creating a new installation through the UI.
@@ -644,7 +644,7 @@ class TestInstallationsPageFunctional:
             organization_dropdown = ip.get_installation_select_organization_dropdown()
             organization_dropdown.click()
             # Select the first option in the dropdown
-            ip.page.locator(".css-1n7v3ny-option").first.click()
+            ip.page.get_by_text("Test Organization").click()
             
             # Fill out tips
             ip.get_installations_tips_textbox().fill("Test tips from UI automation")
@@ -660,7 +660,7 @@ class TestInstallationsPageFunctional:
             video_catalogue_dropdown = ip.get_installations_select_video_catalogue_dropdown()
             video_catalogue_dropdown.click()
             # Select the first option in the dropdown
-            ip.page.locator(".css-1n7v3ny-option").first.click()
+            ip.page.get_by_text("Test Organization Catalogue").click()
             
             # Click Save
             ip.get_save_button().click()
