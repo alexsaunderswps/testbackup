@@ -4,6 +4,7 @@ import math
 import pytest
 import requests
 from datetime import datetime
+from fixtures.admin_menu.installations_fixtures import installations_page, installations_pagination_test_data
 from pytest_check import check
 from page_objects.common.base_page import BasePage
 from utilities.utils import logger
