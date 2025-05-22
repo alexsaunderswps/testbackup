@@ -13,7 +13,11 @@ BASE_URL = os.getenv("QA_BASE_URL")
 
 class InstallationsPage(BasePage):
     """
-    Page object for the Installations page.
+    Page object for the Installations page using Playwright.
+
+    This class provides methods to interact with elements on the Installations page,
+    following the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
     """
     def __init__(self, page):
         super().__init__(page)
@@ -217,7 +221,7 @@ class InstallationsPage(BasePage):
         return None
         
     # Check Page Element presence
-    def verify_page_title_present(self):
+    def verify_page_title_present(self) -> bool:
         """ Verify that the page title is present.
         
         Returns:
@@ -225,13 +229,13 @@ class InstallationsPage(BasePage):
         """
         self.logger.info("Verifying page title is present")
         return super().verify_page_title("Installations")
-    
-    def verify_page_title(self):
+
+    def verify_page_title(self) -> bool:
         """
         Verify that the page title is present and is the correct "Installations" title.
         
         Returns:
-            bool: True if the page title is present, False otherwise.
+            bool: True if the page title is correct, False otherwise.
         """
         return super().verify_page_title("Installations", tag="h1")
     
