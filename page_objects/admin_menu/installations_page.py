@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from typing import Tuple, List
 from page_objects.common.base_page import BasePage
-from fixtures.admin_menu.installations_fixtures import installations_page
 from utilities.utils import logger
 
 load_dotenv()
