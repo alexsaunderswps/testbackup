@@ -224,9 +224,8 @@ class InstallationsPage(BasePage):
             bool: True if the page title is present, False otherwise.
         """
         self.logger.info("Verifying page title is present")
-        return super().verify_page_title_present("Installations")
+        return super().verify_page_title("Installations")
     
-    # Check Page Element presence
     def verify_page_title(self):
         """
         Verify that the page title is present and is the correct "Installations" title.
