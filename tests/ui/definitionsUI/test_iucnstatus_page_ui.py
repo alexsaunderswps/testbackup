@@ -1,105 +1,173 @@
-#test_iucnstatus_page_ui.py
+# test_iucn_status_page_ui.py (Playwright version)
 import pytest
-from pytest_check import check 
-from page_objects.definitions_menu.iucn_status_page import IUCNStatusPage
-from page_objects.common.base_page import BasePage
-from tests.ui.test_base_page_ui import TestBasePageUI
-from utilities.screenshot_manager import ScreenshotManager
-from utilities.utils import logger
+from pytest_check import check
+from fixtures.definitions_menu.iucnstatus_fixture import iucn_status_page
+from utilities.utils import get_browser_name, logger
 
-# Initialize Screenshot
-screenshot = ScreenshotManager()
-
-@pytest.fixture
-def iucnstatus_page(logged_in_browser):
-    """_summary_
-
-    Args:
-        logged_in_browser (_type_): _description_
+class TestIUCNStatusPageUI:
     """
-    logger.debug("Starting iucnstatus_page fixture")
-    iucnstatus_pages = []
-    for login_page in logged_in_browser:
-        driver = login_page.driver
-        base_page = BasePage(driver)
-        logger.info("=" * 80)
-        logger.info(f"Navigating to IUCN Status page on {driver.name}")
-        logger.info("=" * 80)
+    Test suite for the IUCN Status page UI elements using Playwright.
+    
+    This class follows the established pattern for Playwright-based UI testing,
+    using the modern fixture-based approach and comprehensive element verification
+    strategies. IUCN Status data is critical for wildlife conservation tracking,
+    so these tests ensure the interface reliably presents this important information.
+    """
+    
+    @pytest.mark.UI
+    @pytest.mark.iucn_status
+    def test_iucn_status_page_title(self, iucn_status_page):
+        """
+        Test that the IUCN Status page title is present and correct.
         
-        # Navigate to IUCN Status page
-        base_page.click_definitions_button()
-        base_page.go_iucnstatus_page()
-        # Verfify that we're on the IUCN Status page
-        iucnstatus_page = IUCNStatusPage(driver)
-        if iucnstatus_page.verify_iucn_page_title_present():
-            logger.info("Successfully navigated to IUCN Status page")
-            iucnstatus_pages.append(iucnstatus_page)
-        else:
-            logger.error(f"Failed to navigate to IUCN Status page on {driver.name}")
-            
-    logger.info(f"iucnstatus_page fixture: yielding {len(iucnstatus_pages)} iucnstatus page(s)")
-    yield iucnstatus_pages
-    logger.debug("iucnstatus_page fixture: finished")
-    
-class TestIUCNStatusPageUI(TestBasePageUI):
-    
-    @pytest.mark.UI 
-    @pytest.mark.iucn_status
-    def test_iucnstatus_page_title(self, iucnstatus_page):
-        """_summary_
-
+        The IUCN Status page serves as a reference for conservation status definitions
+        that are used throughout the wildlife tracking system. A clear, prominent title
+        helps users understand they're viewing authoritative conservation status information.
+        
         Args:
-            iucnstatus_page (_type_): _description_
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
         """
-        logger.debug("Starting test_iucnstatus_page_title")
-        for ip in iucnstatus_page:
-            title = ip.verify_iucn_page_title_present()
-            check.is_true(title, "Title does not match")
-            logger.info("Verification Successful :: IUCN Status Page Title found")
-            
-    @pytest.mark.UI
-    @pytest.mark.iucn_status
-    @pytest.mark.navigation
-    def test_iucn_page_nav_elements(self, iucnstatus_page):
-        """_summary_
-
-        Args:
-            iucnstatus_page (_type_): _description_
-        """
-        assert self._verify_page_nav_elements(iucnstatus_page)
-    
-    @pytest.mark.UI 
-    @pytest.mark.iucn_status
-    @pytest.mark.navigation
-    def test_iucn_admin_elements(self, iucnstatus_page):
-        """_summary_
-
-        Args:
-            iucnstatus_page (_type_): _description_
-        """
-        assert self._verify_page_admin_elements(iucnstatus_page)
+        logger.debug("Starting test_iucn_status_page_title")
+        for isp in iucn_status_page:
+            title_present = isp.verify_page_title()
+            check.is_true(title_present, f"IUCN Status page title not found on {get_browser_name(isp.page)}")
+            logger.info(f"Verification Successful :: IUCN Status Page Title found on {get_browser_name(isp.page)}")
     
     @pytest.mark.UI
     @pytest.mark.iucn_status
     @pytest.mark.navigation
-    def test_iucn_definition_elements(self, iucnstatus_page):
-        """_summary_
-
-        Args:
-            iucnstatus_page (_type_): _description_
+    def test_iucn_status_page_nav_elements(self, iucn_status_page, verify_ui_elements):
         """
-        assert self._verify_page_definition_elements(iucnstatus_page)
+        Test that all navigation elements are present on the IUCN Status page.
+        
+        Users often access IUCN Status information while working with species data
+        or creating reports. Consistent navigation ensures they can seamlessly move
+        between the status reference and their primary workflow paths.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.nav_elements(iucn_status_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, 
+                f"Missing IUCN Status navigation elements: {', '.join(missing_elements)} on {get_browser_name(page.page)}")
+            logger.info(f"Verification Successful :: All IUCN Status Navigation Elements found on {get_browser_name(page.page)}")
     
-    @pytest.mark.UI 
+    @pytest.mark.UI
+    @pytest.mark.iucn_status
+    @pytest.mark.navigation
+    def test_iucn_status_page_admin_elements(self, iucn_status_page, verify_ui_elements):
+        """
+        Test that all admin elements are present in the Admin dropdown on the IUCN Status page.
+        
+        Conservation status definitions may require administrative updates as IUCN
+        classifications evolve. Ensuring admin access from the status page enables
+        efficient maintenance of this critical reference data.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.admin_elements(iucn_status_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, 
+                f"Missing IUCN Status admin elements: {', '.join(missing_elements)} on {get_browser_name(page.page)}")
+            logger.info(f"Verification Successful :: All IUCN Status Admin Elements found on {get_browser_name(page.page)}")
+    
+    @pytest.mark.UI
+    @pytest.mark.iucn_status
+    @pytest.mark.navigation
+    def test_iucn_status_page_definition_elements(self, iucn_status_page, verify_ui_elements):
+        """
+        Test that all definition elements are present in the Definitions dropdown on the IUCN Status page.
+        
+        The Definitions menu provides access to related reference data that works
+        together with IUCN Status information. Users working with conservation data
+        often need to cross-reference between different definition categories.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.definition_elements(iucn_status_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, 
+                f"Missing IUCN Status definition elements: {', '.join(missing_elements)} on {get_browser_name(page.page)}")
+            logger.info(f"Verification Successful :: All IUCN Status Definition Elements found on {get_browser_name(page.page)}")
+    
+    @pytest.mark.UI
     @pytest.mark.iucn_status
     @pytest.mark.table
-    def test_iucn_table_elements(self, iucnstatus_page):
-        """_summary_
-
-        Args:
-            iucnstatus_page (_type_): _description_
+    def test_iucn_status_table_elements(self, iucn_status_page):
         """
-        for ip in iucnstatus_page:
-            all_elements, missing_elements = ip.verify_iucn_page_table_elements_present()
-            check.is_true(all_elements, f"Table elements missing from IUCN Status Page: {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: IUCN Status Table elements found")
+        Test that all expected table elements are present on the IUCN Status page.
+        
+        The IUCN Status table presents standardized conservation classifications
+        that must be consistently accessible and readable. This test ensures the
+        table structure properly supports the display of this reference information.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+        """
+        logger.debug("Starting test_iucn_status_table_elements")
+        for isp in iucn_status_page:
+            all_elements, missing_elements = isp.verify_all_iucn_status_table_elements_present()
+            check.is_true(all_elements, 
+                f"Missing IUCN Status table elements: {', '.join(missing_elements)} on {get_browser_name(isp.page)}")
+            logger.info(f"Verification Successful :: All IUCN Status Table Elements found on {get_browser_name(isp.page)}")
+    
+    @pytest.mark.UI
+    @pytest.mark.iucn_status
+    @pytest.mark.table
+    def test_iucn_status_data_presence(self, iucn_status_page):
+        """
+        Test that the IUCN Status table contains the expected conservation status data.
+        
+        IUCN Status definitions are standardized globally, so the table should contain
+        the established set of conservation status categories. This test verifies that
+        the reference data has been properly loaded and is available to users.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+        """
+        logger.debug("Starting test_iucn_status_data_presence")
+        for isp in iucn_status_page:
+            row_count = isp.count_table_rows()
+            check.greater(row_count, 0, 
+                f"IUCN Status table should contain reference data, found {row_count} rows on {get_browser_name(isp.page)}")
+            logger.info(f"Verification Successful :: IUCN Status Table has {row_count} rows on {get_browser_name(isp.page)}")
+    
+    @pytest.mark.UI
+    @pytest.mark.iucn_status
+    @pytest.mark.table
+    def test_iucn_status_data_retrieval(self, iucn_status_page):
+        """
+        Test that IUCN Status names and data can be retrieved from the table.
+        
+        The ability to programmatically extract status information enables automated
+        verification of data consistency and supports integration testing scenarios
+        where status definitions need to be validated against external standards.
+        
+        Args:
+            iucn_status_page: The IUCNStatusPage fixture providing page objects for each browser
+        """
+        logger.debug("Starting test_iucn_status_data_retrieval")
+        for isp in iucn_status_page:
+            # Test basic name retrieval
+            status_names = isp.get_iucn_status_name_values()
+            check.greater(len(status_names), 0, 
+                f"Should retrieve IUCN Status names, found {len(status_names)} names on {get_browser_name(isp.page)}")
+            
+            # Verify that retrieved names are valid (non-empty strings)
+            valid_names = [name for name in status_names if name and name.strip()]
+            check.equal(len(valid_names), len(status_names), 
+                f"All retrieved names should be valid, found {len(valid_names)} valid out of {len(status_names)} total on {get_browser_name(isp.page)}")
+            
+            # Test comprehensive data retrieval
+            status_data = isp.get_iucn_status_data()
+            check.equal(len(status_data), len(status_names), 
+                f"Comprehensive data should match name count, found {len(status_data)} data records for {len(status_names)} names on {get_browser_name(isp.page)}")
+            
+            logger.info(f"Verification Successful :: Retrieved {len(status_names)} IUCN Status names and {len(status_data)} data records on {get_browser_name(isp.page)}")
+    

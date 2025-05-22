@@ -28,3 +28,8 @@ class TagsPage(BasePage):
     def get_development_notice(self):
         """Get the development notice element."""
         return self.page.get_by_text("This page is currently in development")
+
+    # Check Page Element presence
+    def verify_development_notice(self):
+        """Verify the presence of the development notice element."""
+        return self.get_development_notice().is_visible()
