@@ -77,7 +77,7 @@ class PopulationTrendPage(BasePage):
         """
         return super().verify_page_title("Population Trend", tag="h1")
 
-    def verify_population_trend_table_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_population_trend_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected population trend table elements are present.
 

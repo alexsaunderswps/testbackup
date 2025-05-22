@@ -82,7 +82,7 @@ class CountriesPage(BasePage):
         """
         return super().verify_page_title("Countries", tag="h1")
     
-    def verify_all_action_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_countries_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected country action elements are present.
         

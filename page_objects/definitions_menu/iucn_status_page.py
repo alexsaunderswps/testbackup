@@ -79,7 +79,7 @@ class IUCNStatusPage(BasePage):
         """
         return super().verify_page_title("IUCN Status", tag="h1")
 
-    def verify_iucn_page_table_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_iucn_status_page_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected iucn status table elements are present.
 
