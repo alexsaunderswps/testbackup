@@ -1,7 +1,7 @@
 #tags_fixture.py (Fixture)
 import pytest
 from utilities.utils import logger, get_browser_name
-from page_objects.definitions_menu.population_trend_page import TagsPage
+from page_objects.definitions_menu.tags_page import TagsPage
 
 @pytest.fixture
 def tags_page(logged_in_page):
