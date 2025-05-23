@@ -470,11 +470,14 @@ class BasePage:
         
         # Extract information from the showing count
         current_start = 1
+        current_end = 0
         total_records = 0
+        showing_element_exists = False
         
         try:
             showing_element = self.get_showing_count()
             if showing_element.count() > 0:
+                showing_element_exists = True
                 showing_text = showing_element.inner_text()
                 
                 # Parse "Showing x to y of z" format
@@ -487,7 +490,7 @@ class BasePage:
                 else:
                     self.logger.warning(f"Could not parse showing text: {showing_text}")
             else:
-                self.logger.warning("Showing count element not found")
+                self.logger.info("Showing count element not found - likely no records to display")
         except Exception as e:
             self.logger.error(f"Error getting pagination info: {str(e)}")
         
@@ -519,22 +522,22 @@ class BasePage:
         
         # Define expected state of each element
         should_be_present = {
-            "Previous Page": True,
-            "Next Page": True,
-            "Current Page": True,
+            "Previous Page": has_multiple_pages,
+            "Next Page": has_multiple_pages,
+            "Current Page": has_multiple_pages,
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": True
+            "Showing Count": showing_element_exists  # Only show when there are records to display
         }
         
         # Define enabled/disabled state of each element
         should_be_enabled ={
             "Previous Page": has_multiple_pages and not is_first_page,
             "Next Page": has_multiple_pages and not is_last_page,
-            "Current Page": True,
+            "Current Page": has_multiple_pages,
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": True
+            "Showing Count": showing_element_exists
         }
         
         for element_name, element_getter in pagination_element_getters.items():
