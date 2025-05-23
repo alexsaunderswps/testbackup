@@ -118,6 +118,7 @@ class TestPopulationTrendPageUI:
         """
         logger.debug("Starting test_population_trend_table_elements")
         for ptp in population_trend_page:
+            ptp.page.wait_for_timeout(1000)
             all_elements, missing_elements = ptp.verify_all_population_trend_table_elements_present()
             check.is_true(all_elements, 
                 f"Missing Population Trend table elements: {', '.join(missing_elements)} on {get_browser_name(ptp.page)}")
@@ -140,6 +141,7 @@ class TestPopulationTrendPageUI:
         """
         logger.debug("Starting test_population_trend_data_presence")
         for ptp in population_trend_page:
+            ptp.page.wait_for_timeout(1000)
             row_count = ptp.count_table_rows()
             check.greater(row_count, 0, 
                 f"Population Trend table should contain classification data, found {row_count} rows on {get_browser_name(ptp.page)}")
@@ -172,3 +174,11 @@ class TestPopulationTrendPageUI:
             check.equal(len(valid_names), len(trend_names), 
                 f"All retrieved names should be valid, found {len(valid_names)} valid out of {len(trend_names)} total on {get_browser_name(ptp.page)}")
             logger.info(f"Verification Successful :: Retrieved {len(trend_names)} Population Trend names on {get_browser_name(ptp.page)}")
+            
+            # Verify that all expected status names are present
+            for ptp in population_trend_page:
+                ptp.page.wait_for_timeout(1000)
+                all_elements, missing_elements = ptp.verify_all_population_trends_present_in_table()
+                check.is_true(all_elements, 
+                    f"Missing Population Trend names: {', '.join(missing_elements)} on {get_browser_name(ptp.page)}")
+                logger.info(f"Verification Successful :: All Population Trend Names found on {get_browser_name(ptp.page)}")
