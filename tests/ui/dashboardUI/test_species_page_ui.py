@@ -175,7 +175,6 @@ class TestSpeciesPageUI:
             species_page: The SpeciesPage fixture providing page objects for each browser
             verify_ui_elements: The fixture providing UI element verification functions
         """
-        self.page.wait_for_timeout(2000)
         results = verify_ui_elements.pagination_elements(species_page)
         for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing species pagination elements: {', '.join(missing_elements)}")
