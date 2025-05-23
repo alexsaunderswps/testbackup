@@ -1,47 +1,19 @@
 #test_installations_page.py (Playwright version)
+
 import pytest
+from datetime import datetime
+from fixtures.admin_menu.installations_fixtures import installations_page
 from pytest_check import check
-from page_objects.admin_menu.installations_page import InstallationsPage
-from page_objects.common.base_page import BasePage
 from utilities.utils import get_browser_name,logger
-
-@pytest.fixture
-def installations_page(logged_in_page):
-    """
-    Fixture that provides the Installations page for each test
-
-    Args:
-        logged_in_page: A fixture providing a logged-in browser instance from conftest.py
-
-    Yields:
-        List[UsersPage]: A list of InstallationsPage objects for each logged-in browser instance
-    """
-    logger.debug("Staring installations_page fixture")
-    installation_pages = []
-    for page in logged_in_page:
-        logger.info("=" * 80)
-        logger.info(f"Navigating to Installations page on {get_browser_name(page)}")
-        logger.info("=" * 80)
-        
-        #Navigate to Installations page
-        page.get_by_role("button", name="Admin").click()
-        page.get_by_role("link", name="Installations").click()
-        
-        # Create the page object
-        installations_page = InstallationsPage(page)
-        
-        # Verify that we're on the Installations page
-        if installations_page.verify_page_title():
-            logger.info("Successfully navigated to Installations page")
-            installation_pages.append(installations_page)
-        else:
-            logger.error(f"Failed to navigate to Installations page on {get_browser_name(page)}")
-            
-    logger.info(f"installations_page fixture: yielding {len(installation_pages)} installations page(s)")
-    yield installation_pages
-    logger.debug("installations_page fixture: finished")
     
 class TestInstallationsPageUI:
+    """
+    Test suite for the Installations page UI elements.
+
+    This class follows the established pattern for Playwright-based UI testing,
+    using the modern fixture-based approach and the verify_ui_elements pattern
+    for consistent element verification across different browsers.
+    """
     
     @pytest.mark.UI 
     @pytest.mark.installations
@@ -77,6 +49,7 @@ class TestInstallationsPageUI:
     @pytest.mark.UI
     @pytest.mark.installations
     @pytest.mark.navigation
+    @pytest.mark.debug
     def test_installations_page_admin_elements(self, installations_page, verify_ui_elements):
         """
         Test that all admin elements are present in the Admin dropdown on the Installations page.
@@ -143,12 +116,17 @@ class TestInstallationsPageUI:
     def test_installations_pagination_elements(self, installations_page, verify_ui_elements):
         """
         Test that pagination elements are correctly displayed on the Installations page.
-    
+
+        When there are many installations, pagination becomes essential for usability.
+        This test ensures that pagination controls are present and properly
+        configured based on the number of installations and page size settings.
+
         Args:
-            installations_page: The InstallationsPage fixture
+            installations_page: The InstallationsPage fixture providing page objects for each browser
             verify_ui_elements: The fixture providing UI element verification functions
-    """
+        """
         results = verify_ui_elements.pagination_elements(installations_page)
         for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing installations pagination elements: {', '.join(missing_elements)}")
             logger.info(f"Verification Successful :: All Installations Pagination Elements found on {get_browser_name(page)}")
+            

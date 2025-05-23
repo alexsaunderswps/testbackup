@@ -13,7 +13,11 @@ BASE_URL = os.getenv("QA_BASE_URL")
 
 class InstallationsPage(BasePage):
     """
-    Page object for the Installations page.
+    Page object for the Installations page using Playwright.
+
+    This class provides methods to interact with elements on the Installations page,
+    following the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
     """
     def __init__(self, page):
         super().__init__(page)
@@ -41,7 +45,65 @@ class InstallationsPage(BasePage):
         """ Get the add installation button element."""
         return self.page.get_by_role("link", name="Add")
     
-    # Add Modal Element locators
+    # Instalation Table Elements
+    def get_installations_table_body(self):
+        """ Get the installations table body element."""
+        return self.page.locator("table tbody")
+    
+    def get_installations_table_rows(self):
+        """ Get the installations table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    def get_installations_name_header(self):
+        """ Get the installations name header element."""
+        return self.page.get_by_role("cell", name="Name", exact=True)
+    
+    def get_installations_start_latlong_header(self):
+        """ Get the installations start latitude and longitude header element."""
+        return self.page.get_by_role("cell", name="Global Start LatLong ", exact=True)
+    
+    def get_installations_startup_video_header(self):
+        """ Get the installations startup video header element."""
+        return self.page.get_by_role("cell", name="Startup Video", exact=True)
+    
+    def get_installations_video_catalogue_header(self):
+        """ Get the installations video catalogue header element."""
+        return self.page.get_by_role("cell", name="Video Catalogue", exact=True)
+    
+    def get_installations_organization_header(self):
+        """ Get the installations organization header element."""
+        return self.page.get_by_role("cell", name="Organization", exact=True)
+    
+    def get_installation_by_name(self, name):
+        """ Find an installation in the table by name. """
+        rows = self.get_installations_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
+    
+    # Installations Pagination Elements
+    def get_installations_count_text(self):
+        """ Get the installations count text element."""
+        showing_element = self.get_showing_count()
+        if showing_element.count() > 0:
+            return showing_element.inner_text()
+        return None
+    
+    def get_pagination_counts(self):
+        """
+        Extract the pagination counts from the "Showing X to Y of Z" text.
+
+        Returns:
+            Tuple[int, int, int]: A tuple containing:
+                - start_count (int): The starting index of the current page.
+                - end_count (int): The ending index of the current page.
+                - total_count (int): The total number of items.
+        """
+        return super().get_pagination_counts()
+    
+    # Installations Add Modal Elements locators
     def get_save_button(self):
         """ Get the save button element."""
         return self.page.get_by_role("button", name="Save")
@@ -158,53 +220,23 @@ class InstallationsPage(BasePage):
     # there are some issues regarding select dropdowns because
     # of the way they are hidden and then appear at some points
     # so that nth() selectors change depending on what is visible 
-    
-    # Instalation Table Elements
-    def get_installations_table_body(self):
-        """ Get the installations table body element."""
-        return self.page.locator("table tbody")
-    
-    def get_installations_table_rows(self):
-        """ Get the installations table rows element."""
-        return self.page.locator("table tbody tr")
-    
-    def get_installations_name_header(self):
-        """ Get the installations name header element."""
-        return self.page.get_by_role("cell", name="Name", exact=True)
-    
-    def get_installations_start_latlong_header(self):
-        """ Get the installations start latitude and longitude header element."""
-        return self.page.get_by_role("cell", name="Global Start LatLong ", exact=True)
-    
-    def get_installations_startup_video_header(self):
-        """ Get the installations startup video header element."""
-        return self.page.get_by_role("cell", name="Startup Video", exact=True)
-    
-    def get_installations_video_catalogue_header(self):
-        """ Get the installations video catalogue header element."""
-        return self.page.get_by_role("cell", name="Video Catalogue", exact=True)
-    
-    def get_installations_organization_header(self):
-        """ Get the installations organization header element."""
-        return self.page.get_by_role("cell", name="Organization", exact=True)
         
     # Check Page Element presence
-    def verify_page_title_present(self):
+    def verify_page_title_present(self) -> bool:
         """ Verify that the page title is present.
         
         Returns:
             bool: True if the page title is present, False otherwise.
         """
         self.logger.info("Verifying page title is present")
-        return super().verify_page_title_present("Installations")
-    
-    # Check Page Element presence
-    def verify_page_title(self):
+        return super().verify_page_title("Installations")
+
+    def verify_page_title(self) -> bool:
         """
         Verify that the page title is present and is the correct "Installations" title.
         
         Returns:
-            bool: True if the page title is present, False otherwise.
+            bool: True if the page title is correct, False otherwise.
         """
         return super().verify_page_title("Installations", tag="h1")
     

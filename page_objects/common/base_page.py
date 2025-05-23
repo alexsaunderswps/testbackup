@@ -120,6 +120,167 @@ class BasePage:
     # PREVIOUS_PAGE_DISABLED = "//ul//a[@aria-label='Previous page']"
     # CURRENT_PAGE = "//ul//a[@aria-current='page']"
     
+    # Navigation methods for pagination
+    def navigate_to_next_page(self) -> bool:
+        """
+        Navigate to the next page by clicking the next page button.
+        
+        Returns:
+            bool: True if the next page button was clicked successfully, False otherwise.
+        """
+        next_page_button = self.get_next_page_button()
+        if next_page_button.count() > 0 and next_page_button.get_attribute("aria-disabled") != "true":
+            self.logger.info("Navigating to the next page")
+            next_page_button.click()
+            return True
+        else:
+            self.logger.warning("Failed to navigate to the next page: Next page button is disabled or not found")
+            return False
+    
+    def navigate_to_previous_page(self) -> bool:
+        """
+        Navigate to the previous page by clicking the previous page button.
+
+        Returns:
+            bool: True if the previous page button was clicked successfully, False otherwise.
+        """
+        previous_page_button = self.get_previous_page_button()
+        if previous_page_button.count() > 0 and previous_page_button.get_attribute("aria-disabled") != "true":
+            self.logger.info("Navigating to the previous page")
+            previous_page_button.click()
+            return True
+        else:
+            self.logger.warning("Failed to navigate to the previous page: Previous page button is disabled or not found")
+            return False
+        
+    def navigate_foward_ellipsis(self) -> bool:
+        """
+        Naigate forward by click the foward ellipsis button.
+
+        Returns:
+            bool: True if the foward ellipsis button was clicked successfully, False otherwise.
+        """
+        forward_ellipsis_button = self.get_FW_break_ellipsis_button()
+        if forward_ellipsis_button.count() > 0 and forward_ellipsis_button.get_attribute("aria-disabled") != "true":
+            self.logger.info("Navigating to the next page using foward ellipsis")
+            forward_ellipsis_button.click()
+            return True
+        else:
+            self.logger.warning("Failed to navigate to the next page using foward ellipsis: Foward ellipsis button is disabled or not found")
+            return False
+        
+    def navigate_backward_ellipsis(self) -> bool:
+        """
+        Navigate backward by clicking the backward ellipsis button.
+
+        Returns:
+            bool: True if the backward ellipsis button was clicked successfully, False otherwise.
+        """
+        backward_ellipsis_button = self.get_BW_break_ellipsis_button()
+        if backward_ellipsis_button.count() > 0 and backward_ellipsis_button.get_attribute("aria-disabled") != "true":
+            self.logger.info("Navigating to the previous page using backward ellipsis")
+            backward_ellipsis_button.click()
+            return True
+        else:
+            self.logger.warning("Failed to navigate to the previous page using backward ellipsis: Backward ellipsis button is disabled or not found")
+            return False
+        
+    def get_current_page_number(self) -> int:
+        """
+        Get the current page number from the pagination element.
+
+        Returns:
+            int: The current page number, or None if not found.
+        """
+        try:
+            # Try first using aria-current attribute
+            current_page = self.page.locator("[aria-current='page']")
+            if current_page.count() > 0:
+                page_text = current_page.inner_text().strip()
+                return int(page_text)
+        except Exception as e:
+            self.logger.debug(f"Could not get current page using aria-current: {str(e)}")
+            
+        try:
+            # Try finding by role and name containing "is your current page"
+            current_page = self.page.get_by_role("button", name=lambda n: "is your current page" in str(n) if n else False)
+            if current_page.count() > 0:
+                # Try to extract from name or inner text
+                text = current_page.inner_text().strip()
+                if text and text.isdigit():
+                    return int(text)
+        except Exception as e:
+            self.logger.debug(f"Could not get current page using button role: {str(e)}")
+            
+        return None  # Return None if we couldn't determine the page number
+    
+    def get_pagination_counts(self) -> Tuple[int, int, int]:
+        """
+        Extract pagination counts from the 'Showing X to Y of Z' text.
+        
+        Returns:
+            Tuple[int, int, int]: A tuple containing the start, end, and total record counts.
+        """
+        showing_element = self.get_showing_count()
+        if showing_element.count() > 0:
+            showing_text = showing_element.inner_text()
+            # Parse "Showing x to y of z" format
+            match = re.search(r'Showing\s+(\d+)\s+to\s+(\d+)\s+of\s+(\d+)', showing_text)
+            if match:
+                current_start = int(match.group(1))
+                current_end = int(match.group(2))
+                total_records = int(match.group(3))
+                self.logger.info(f"Showing count parsed: {current_start} to {current_end} of {total_records}")
+                return current_start, current_end, total_records
+            else:
+                self.logger.warning(f"Could not parse showing text: {showing_text}")
+                return None, None, None
+        else:
+            self.logger.warning("Showing count element not found")
+            return None, None, None
+        
+    def verify_navigation_updates_page(self, action, expected_page=None) -> bool:
+        """
+        Verify that the navigation action updates the page correctly.
+
+        Args:
+            action (str): The action to perform (e.g., self.navigate_to_next_page).
+            expected_page (str, optional): The expected page number after navigation, or None to calculate automatically.
+
+        Returns:
+            bool: True if the navigation was successful, False otherwise.
+        """
+        initial_page = self.get_current_page_number()
+        if initial_page is None:
+            self.logger.error("Could not determine the initial page number")
+            return False
+
+        if expected_page is None:
+            if action.__name__ == "navigate_to_next_page":
+                expected_page = initial_page + 1
+            elif action.__name__ == "navigate_to_previous_page":
+                expected_page = initial_page - 1
+            else:
+                self.logger.error(f"Cannot determine the expected page for action: {action.__name__}")
+                return False
+            
+        # Perform the navigation action
+        success = action()
+        if not success:
+            self.logger.error(f"Navigation action {action.__name__} failed")
+            return False
+        
+        # Wait for the page to update
+        self.page.wait_for_load_state("networkidle")
+        
+        # Check if the page number has updated
+        new_page = self.get_current_page_number()
+        if new_page == expected_page:
+            self.logger.info(f"Navigation action {action.__name__} was successful: Page updated to {new_page}")
+            return True
+        else:
+            self.logger.error(f"Navigation action {action.__name__} failed: Page number is still {new_page}, expected {expected_page}")
+            return False    
         
     # Check for page title (as h1) on each page
     def verify_page_title(self, expected_title: str, tag="h1") -> bool:
@@ -300,7 +461,7 @@ class BasePage:
             Tuple[bool, list]: A tuple containing a boolean (all expected elements present)
                         and a list of missing expected elements
         """
-        self.logger.info("Checking if the correct Pagination elements are present on Species Page")
+        self.logger.info("Checking if the correct Pagination elements are present on Page")
         all_elements_correct = True
         issues_found = []
         
@@ -309,11 +470,14 @@ class BasePage:
         
         # Extract information from the showing count
         current_start = 1
+        current_end = 0
         total_records = 0
+        showing_element_exists = False
         
         try:
             showing_element = self.get_showing_count()
             if showing_element.count() > 0:
+                showing_element_exists = True
                 showing_text = showing_element.inner_text()
                 
                 # Parse "Showing x to y of z" format
@@ -326,7 +490,7 @@ class BasePage:
                 else:
                     self.logger.warning(f"Could not parse showing text: {showing_text}")
             else:
-                self.logger.warning("Showing count element not found")
+                self.logger.info("Showing count element not found - likely no records to display")
         except Exception as e:
             self.logger.error(f"Error getting pagination info: {str(e)}")
         
@@ -358,22 +522,22 @@ class BasePage:
         
         # Define expected state of each element
         should_be_present = {
-            "Previous Page": True,
-            "Next Page": True,
-            "Current Page": True,
+            "Previous Page": has_multiple_pages,
+            "Next Page": has_multiple_pages,
+            "Current Page": showing_element_exists,  # Only show when there are records to display
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": True
+            "Showing Count": showing_element_exists  # Only show when there are records to display
         }
         
         # Define enabled/disabled state of each element
         should_be_enabled ={
             "Previous Page": has_multiple_pages and not is_first_page,
             "Next Page": has_multiple_pages and not is_last_page,
-            "Current Page": True,
+            "Current Page": showing_element_exists,  # Only show when there are records to display
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": True
+            "Showing Count": showing_element_exists
         }
         
         for element_name, element_getter in pagination_element_getters.items():
