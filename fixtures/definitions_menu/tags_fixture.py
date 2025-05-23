@@ -34,7 +34,7 @@ def tags_page(logged_in_page):
         tags_page = TagsPage(page)
         
         # Verify that we're on the Tags page
-        if tags_page.verify_page_title():
+        if tags_page.verify_development_notice():
             logger.info(f"Successfully navigated to Tags page on {get_browser_name(page)}")
             tag_pages.append(tags_page)
         else:
