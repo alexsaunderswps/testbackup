@@ -40,6 +40,26 @@ class PopulationTrendPage(BasePage):
     def get_population_trend_table_rows(self):
         """Get the Population Trend table rows element."""
         return self.page.locator("table tbody tr")
+    
+    def get_decreasing_trend(self):
+        """Get the Decreasing population trend element."""
+        return self.page.get_by_role("cell", name="Decreasing")
+
+    def get_increasing_trend(self):
+        """Get the Increasing population trend element."""
+        return self.page.get_by_role("cell", name="Increasing")
+
+    def get_stable_trend(self):
+        """Get the Stable population trend element."""
+        return self.page.get_by_role("cell", name="Stable")
+
+    def get_unknown_trend(self):
+        """Get the Unknown population trend element."""
+        return self.page.get_by_role("cell", name="Unknown")
+
+    def get_various_trend(self):
+        """Get the Various population trend element."""
+        return self.page.get_by_role("cell", name="Various")
 
     def get_population_trend_by_name(self, name):
         """
@@ -94,6 +114,27 @@ class PopulationTrendPage(BasePage):
             "Population Trend Table Rows": self.get_population_trend_table_rows
         }
         return self.verify_page_elements_present(table_elements, "Population Trend Table Elements")
+    
+    def verify_all_population_trends_present_in_table(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected population trends are present in the table.
+
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
+        """
+        self.logger.info("Checking Population Trend Table Elements")
+        
+        # Define expected population trends
+        trend_elements = {
+            "Decreasing": self.get_decreasing_trend,
+            "Increasing": self.get_increasing_trend,
+            "Stable": self.get_stable_trend,
+            "Unknown": self.get_unknown_trend,
+            "Various": self.get_various_trend
+        }
+        return self.verify_page_elements_present(trend_elements, "Population Trend Table Elements")
     
     def count_table_rows(self) -> int:
         """
