@@ -1,12 +1,9 @@
 #test_installations_page.py (Playwright version)
-import os
-import math
+
 import pytest
-import requests
 from datetime import datetime
 from fixtures.admin_menu.installations_fixtures import installations_page
 from pytest_check import check
-from page_objects.common.base_page import BasePage
 from utilities.utils import get_browser_name,logger
     
 class TestInstallationsPageUI:
