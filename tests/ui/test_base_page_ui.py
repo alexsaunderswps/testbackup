@@ -56,7 +56,7 @@ class TestBasePageUI:
         for index, bp in enumerate(base_page):
 
             logger.info(f"Testing admin elements on browser: {get_browser_name(bp.page)}")
-            success, missing = bp.verify_all_admin_links_present()
+            success, missing = bp.verify_all_admin_elements_present()
 
             if success:
                 logger.info(f"Verification Successful :: All Admin Elements found on {get_browser_name(bp.page)}")
@@ -83,7 +83,7 @@ class TestBasePageUI:
         for index, bp in enumerate(base_page):
 
             logger.info(f"Testing admin elements on browser: {get_browser_name(bp.page)}")
-            success, missing = bp.verify_all_definition_links_present()
+            success, missing = bp.verify_all_definition_elements_present()
 
             if success:
                 logger.info(f"Verification Successful :: All Admin Elements found on {get_browser_name(bp.page)}")
@@ -110,7 +110,7 @@ class TestBasePageUI:
         for index, bp in enumerate(base_page):
 
             logger.info(f"Testing pagination elements on browser: {get_browser_name(bp.page)}")
-            success, missing = bp.verify_pagination_elements_present()
+            success, missing = bp.verify_all_pagination_elements_present()
 
             if success:
                 logger.info(f"Verification Successful :: All Pagination Elements found on {get_browser_name(bp.page)}")
