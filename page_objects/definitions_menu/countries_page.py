@@ -112,7 +112,7 @@ class CountriesPage(BasePage):
         # Define elements with readable names
         table_elements = {
             "Countries Table Body": self.get_countries_table_body,
-            "Countries Table Rows": self.get_countries_table_rows
+            "Countries Table Rows": self.get_countries_table_rows,
         }
         return self.verify_page_elements_present(table_elements, "Countries Table Elements")
             

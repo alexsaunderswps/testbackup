@@ -42,6 +42,34 @@ class IUCNStatusPage(BasePage):
         """Get the IUCN Status table rows element."""
         return self.page.locator("table tbody tr")
     
+    def get_critically_endangered_status(self):
+        """Get the Critically Endangered status element."""
+        return self.page.get_by_role("cell", name="Critically Endangered (CR)")
+    
+    def get_endangered_status(self):
+        """Get the Endangered status element."""
+        return self.page.get_by_role("cell", name="Endangered (EN)")
+    
+    def get_least_concern_status(self):
+        """Get the Least Concern status element."""
+        return self.page.get_by_role("cell", name="Least Concern (LC)")
+    
+    def get_near_threatened_status(self):
+        """Get the Near Threatened status element."""
+        return self.page.get_by_role("cell", name="Near Threatened (NT)")
+    
+    def get_not_evaluated_status(self):
+        """Get the Not Evaluated status element."""
+        return self.page.get_by_role("cell", name="Not Evaluated (NE)")
+    
+    def get_various_status(self):
+        """Get the Various status element."""
+        return self.page.get_by_role("cell", name="Various")
+    
+    def get_vulnerable_status(self):
+        """Get the Vulnerable status element."""
+        return self.page.get_by_role("cell", name="Vulnerable (VU)")
+    
     def get_iucn_status_by_name(self, name):
         """
         Find a iucn status in the table by name.
@@ -79,7 +107,7 @@ class IUCNStatusPage(BasePage):
         """
         return super().verify_page_title("IUCN Status", tag="h1")
 
-    def verify_all_iucn_status_page_table_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_iucn_status_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected iucn status table elements are present.
 
@@ -97,6 +125,29 @@ class IUCNStatusPage(BasePage):
         }
         return self.verify_page_elements_present(table_elements, "IUCN Table Elements")
     
+    def verify_all_iucn_status_present_in_table(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected iucn status are present in the table.
+
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
+        """
+        self.logger.info("Checking IUCN Status Table Elements")
+        
+        # Define elements with readable names
+        status_elements = {
+            "Critically Endangered": self.get_critically_endangered_status,
+            "Endangered": self.get_endangered_status,
+            "Least Concern": self.get_least_concern_status,
+            "Near Threatened": self.get_near_threatened_status,
+            "Not Evaluated": self.get_not_evaluated_status,
+            "Various": self.get_various_status,
+            "Vulnerable": self.get_vulnerable_status,
+        }
+        return self.verify_page_elements_present(status_elements, "IUCN Status Elements")
+
     def count_table_rows(self) -> int:
         """
         Count the number of rows in the IUCN Status Table.
