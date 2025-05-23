@@ -95,6 +95,7 @@ class TestIUCNStatusPageUI:
         """
         logger.debug("Starting test_iucn_status_table_elements")
         for isp in iucn_status_page:
+            isp.page.wait_for_timeout(1000)
             all_elements, missing_elements = isp.verify_all_iucn_status_table_elements_present()
             check.is_true(all_elements, 
                 f"Missing IUCN Status table elements: {', '.join(missing_elements)} on {get_browser_name(isp.page)}")
@@ -125,7 +126,6 @@ class TestIUCNStatusPageUI:
     @pytest.mark.UI
     @pytest.mark.iucn_status
     @pytest.mark.table
-    @pytest.mark.debug
     def test_iucn_status_data_retrieval(self, iucn_status_page):
         """
         Test that IUCN Status names and data can be retrieved from the table.
