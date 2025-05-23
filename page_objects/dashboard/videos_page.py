@@ -44,7 +44,7 @@ class VideosPage(BasePage):
     
     def get_add_video_button(self):
         """Get the add video button element."""
-        return self.page.get_by_role("link", name="Add Video")
+        return self.page.get_by_role("link", name="Add")
     
     # Video Table Elements
     def get_videos_table_body(self):
@@ -400,30 +400,3 @@ class VideosPage(BasePage):
 # TODO - gather other table data if needed
 # TODO - with Published, check sort functionality
 # TODO - Check search functionality - modal window interaction                
-                
-    # def count_total_videos_shown(self) -> int:
-    #     total_videos = 0
-    #     while 
-    
-
-# Check Pagination
-
-
-
-    def get_page_locator(page_number):
-        return f"//ul//a[@aria-label='Page {page_number}']"
-            
-    def check_current_page(page_number):
-        return f"//ul//a[@aria-label='Page {page_number} is your current page']"
-    
-    def move_next_page_arrow(self):
-        self.interactor.element_click(self.PaginationElements.NEXT_PAGE)
-    
-    def move_prev_page_arrow(self):
-        self.interactor.element_click(self.PaginationElements.PREVIOUS_PAGE)
-        
-    def move_next_page_jump(self):
-        self.interactor.element_click(self.PaginationElements.FW_BREAK_ELIPSIS)
-    
-    def move_prev_page_jump(self):
-        self.interactor.element_click(self.PaginationElements.BW_BREAK_ELIPSIS)
