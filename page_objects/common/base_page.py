@@ -524,7 +524,7 @@ class BasePage:
         should_be_present = {
             "Previous Page": has_multiple_pages,
             "Next Page": has_multiple_pages,
-            "Current Page": has_multiple_pages,
+            "Current Page": showing_element_exists,  # Only show when there are records to display
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
             "Showing Count": showing_element_exists  # Only show when there are records to display
@@ -534,7 +534,7 @@ class BasePage:
         should_be_enabled ={
             "Previous Page": has_multiple_pages and not is_first_page,
             "Next Page": has_multiple_pages and not is_last_page,
-            "Current Page": has_multiple_pages,
+            "Current Page": showing_element_exists,  # Only show when there are records to display
             "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
             "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
             "Showing Count": showing_element_exists
