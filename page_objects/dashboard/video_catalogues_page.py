@@ -1,17 +1,10 @@
 # video_catalogues_page.py
 import os
-from dotenv import load_dotenv
+import re
 from typing import Tuple, List
+from dotenv import load_dotenv
 from page_objects.common.base_page import BasePage
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.utils import logger
-from utilities.element_interactor import ElementInteractor
-from utilities.element_locator import ElementLocator
-from utilities.screenshot_manager import ScreenshotManager
 
 load_dotenv()
 
@@ -19,97 +12,201 @@ load_dotenv()
 BASE_URL = os.getenv("QA_BASE_URL")
 
 class VideoCataloguesPage(BasePage):
-    """_summary_
-
-    Args:
-        BasePage (_type_): _description_
     """
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.driver = driver
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator(driver)
-        self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager()
+    Page object for the Video Catalogues page using Playwright.
+
+    This class provides methods to interact with elements on the Video Catalogues page,
+    following the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
+    """
+    def __init__(self, page):
+        super().__init__(page)
+        self.page = page
         self.logger = logger
         
-    class VideoCataloguesPageElements:
-        """_summary_
+    # Element locators
+    def get_page_title(self):
+        """Get the page title for the Video Catalogues page."""
+        return self.page.get_by_role("heading", name="Video Catalogues")
+    
+    def get_page_title_text(self):
+        """Get the text of the page title for the Video Catalogues page."""
+        return self.get_by_role("heading", level=1).inner_text()
+    
+    def get_video_catalogues_search_input(self):
+        """Get the video catalogues search input element."""
+        return self.page.get_by_placeholder("Filter by name")
+    
+    def get_video_catalogues_search_button(self):
+        """Get the search button element."""
+        return self.page.get_by_role("button", name="Search")
+    
+    def get_add_video_catalogue_button(self):
+        """Get the add video catalogue button element."""
+        return self.page.get_by_role("link", name="Add")
+    
+    # Video Catalogues Table Elements
+    def get_video_catalogues_table_body(self):
+        """Get the video catalogues table body element."""
+        return self.page.locator("table tbody")
+    
+    def get_video_catalogues_table_rows(self):
+        """Get the video catalogues table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    def get_video_catalogues_table_name_header(self):
+        """Get the video catalogues table name header element."""
+        return self.page.get_by_role("cell", name="Name")
+    
+    def get_video_catalogues_table_organization_header(self):
+        """Get the video catalogues table organization header element."""
+        return self.page.get_by_role("cell", name="Organization")
+    
+    def get_video_catalogues_table_description_header(self):
+        """Get the video catalogues table description header element."""
+        return self.page.get_by_role("cell", name="Description")
+    
+    def get_video_catalogues_table_last_edited_date_header(self):
+        """Get the video catalogues table last edited date header element."""
+        return self.page.get_by_role("cell", name="Last Edited Date")
+    
+    # def get_video_catalogues_table_sort_by_name_arrows(self):
+    #     """Get the video catalogues table sort by name arrows element."""
+    #     return self.page.get_by_role("row", name="Name Organization Description Last Edited By Last Edited Date").get_by_role("button")
+    
+    def get_video_catalogue_by_name(self, name):
+        """ Find a video catalogue in the table by name. """
+        rows = self.get_video_catalogues_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").nth(0)
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
+    
+    # Video Catalogues Pagination Elements
+    def get_video_catalogues_count_text(self):
+        """ Get the video catalogues count text element."""
+        showing_element = self.get_showing_count()
+        if showing_element.count() > 0:
+            return showing_element.inner_text()
+        return None
+    
+    def get_pagination_counts(self):
         """
-        VIDEO_CATALOGUES_PAGE_TITLE = "//h1[contains(text(),'Video Catalogues')]"
+        Extract the pagination counts from the "Showing X to Y of Z" text.
 
-    class VideoCataloguesSearchElements:
-        """_summary_
+        Returns:
+            Tuple[int, int, int]: A tuple containing:
+                - start_count (int): The starting index of the current page.
+                - end_count (int): The ending index of the current page.
+                - total_count (int): The total number of items.
         """
-        SEARCH_TEXT = "//input[@placeholder='Filter by name']"
-        SEARCH_BUTTON = "//button[text()='Search']"
-        ADD_VIDEO_CATALOGUE_LINK = "//a[@href='/videoCatalogue/add']"
+        return super().get_pagination_counts()
+
+    # Check Page Element presence
+    def verify_page_title_present(self) -> bool:
+        r""" Verify that the page title is present.
         
+        Returns:
+            bool: True if the page title is present, False otherwise.
+        """
+        self.logger.info("Verifying page title is present")
+        return super().verify_page_title("Video Catalogues")
+    
+    def verify_page_title(self) -> bool:
+        """
+        Verify that the page title is present and is the correct "Video Catalogues" title.
 
-    class VideoCataloguesTableElements:
-        """_summary_
+        Returns:
+            bool: True if the page title is correct, False otherwise.
         """
-        CATALOGUE_TABLE_BODY = "//table/tbody"
-        CATAGLOUE_TABLE_ROWS = "//table//tbody/tr"
-        CATALOGUE_NAME_HEADER = "//table/thead/tr/th/div[text()='Name']"
-        CATALOGUE_ORGANIZATION_HEADER = "//table/thead/tr/th[text()='Organization']"
-        CATALGOUE_DESCRIPTION_HEADER = "//table/thead/tr/th/div[text()='Description']"
-        CATALOGUE_LAST_EDITED_BY_HEADER = "//table/thead/tr/th[text()='Last Edited By']"
-        CATALOGUE_LAST_EDITED_DATE_HEADER = "//table/thead/tr/th[text()='Last Edited Date']"
-    
-    class VideoCataloguesSortingElements:
-        """_summary_
-        """
-        NAME_SORT = "//table//div[text()='Name']//button//i"
-        
-    # Check Title Element presence
+        return super().verify_page_title("Video Catalogues", tag="h1")
 
-    def verify_page_title_present(self):
-        """_summary_
+    def verify_all_video_catalogues_search_elements_present(self) -> Tuple[bool, List[str]]:
         """
-        return super().verify_page_title_present(self.VideoCataloguesPageElements.VIDEO_CATALOGUES_PAGE_TITLE)
-    
-    # Check Search Elements
-    
-    def verify_all_catalogue_search_elements_present(self) -> Tuple[bool, List[str]]:
+        Verify that all expected video catalogues search elements are present.
+
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise
+                - List[str]: List of missing element names (empty if all found)
         """
-        Verify that all expected video catalogue search elements are present.
+        self.logger.info("Verifying that all expected video catalogues search elements are present")
+
+        # Define elements with readable names
+        search_elements = {
+            "Search Input": self.get_video_catalogues_search_input,
+            "Search Button": self.get_video_catalogues_search_button,
+            "Add Video Catalogue Button": self.get_add_video_catalogue_button,
+        }
+        return self.verify_page_elements_present(search_elements, "Video Catalogues Search Elements")
+    
+    def verify_all_video_catalogues_table_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected video catalogues table elements are present.
         
         Returns:
             Tuple containing:
                 - bool: True if all elements were found, False otherwise
                 - List[str]: List of missing element names (empty if all found)
         """
-        self.logger.info("Verifying that all expected video catalogue search elements are present in: Video Catalogues Page")
+        self.logger.info("Verifying that all expected video catalogues table elements are present")
 
         # Define elements with readable names
-        search_elements ={
-            "Search Text": self.VideoCataloguesSearchElements.SEARCH_TEXT,
-            "Search Button": self.VideoCataloguesSearchElements.SEARCH_BUTTON,
-            "Add Video Catalogue Link": self.VideoCataloguesSearchElements.ADD_VIDEO_CATALOGUE_LINK
+        table_elements = {
+            "Table Body": self.get_video_catalogues_table_body,
+            "Table Rows": self.get_video_catalogues_table_rows,
+            "Name Header": self.get_video_catalogues_table_name_header,
+            "Organization Header": self.get_video_catalogues_table_organization_header,
+            "Description Header": self.get_video_catalogues_table_description_header,
+            "Last Edited Date Header": self.get_video_catalogues_table_last_edited_date_header,
+            # "Sort by Name Arrows": self.get_video_catalogues_table_sort_by_name_arrows,
         }
-        return self.verify_page_elements_present(search_elements, "Video Catalogue Search Elements")
-        
-    # Check Table Elements
-    
-    def verify_all_catalogue_table_elements_present(self) -> Tuple[bool, List[str]]:
+        return self.verify_page_elements_present(table_elements, "Video Catalogues Table Elements")
+
+    def count_table_rows(self) -> int:
         """
-        Verify that all expected video catalogue table elements are present.
-        
+        Count the number of rows in the Video Catalogues Table.
+
         Returns:
-            Tuple containing:
-                - bool: True if all elements were found, False otherwise
-                - List[str]: List of missing element names (empty if all found)
+            int: The number of rows in the Video Catalogues Table.
         """
-        self.logger.info("Checking if all Video Catalogue table elements are present")
+        self.logger.info("Counting the number of rows in the Video Catalogues Table")
+        num_rows = 0
+        try:
+            rows = self.get_video_catalogues_table_rows()
+            rows_count = rows.count()
+            self.logger.info(f"Found {rows_count} rows in the Video Catalogues Table")
+            return rows_count
+        except Exception as e:
+            self.logger.error(f"An error occurred while trying to count the number of rows in the Video Catalogues Table: {str(e)}")
+            return 0
 
-        # Define elements with readable names
-        table_elements ={
-            "Name Header": self.VideoCataloguesTableElements.CATALOGUE_NAME_HEADER,
-            "Organization Header": self.VideoCataloguesTableElements.CATALOGUE_ORGANIZATION_HEADER,
-            "Description Header": self.VideoCataloguesTableElements.CATALGOUE_DESCRIPTION_HEADER,
-            "Last Edited By Header": self.VideoCataloguesTableElements.CATALOGUE_LAST_EDITED_BY_HEADER,
-            "Last Edited Date Header": self.VideoCataloguesTableElements.CATALOGUE_LAST_EDITED_DATE_HEADER,
-            "Name Sorting Button": self.VideoCataloguesSortingElements.NAME_SORT
-        }
-        return self.verify_page_elements_present(table_elements, "Video Catalogue Table Elements")
+    def get_video_catalogue_name_values(self) -> List[str]:
+        """
+        Get the names of all video catalogues visible in the current page of the table.
+
+        Returns:
+            List[str]: A list of video catalogue names, or empty list if none found
+        """
+        self.logger.info("Getting the names of all video catalogues in the table on current page")
+        catalogue_names = []
+        try:
+            rows = self.get_video_catalogues_table_rows()
+            rows_count = rows.count()
+            
+            for i in range(rows_count):
+                try:
+                    # Get the first cell (catalogue name) from each row
+                    name_cell = rows.nth(i).locator("td").first
+                    catalogue_name = name_cell.inner_text()
+                    catalogue_names.append(catalogue_name)
+                    self.logger.info(f"Found {len(catalogue_names)} video catalogue names")
+                except Exception as row_error:
+                    self.logger.error(f"An error occurred while trying to get the video catalogue name from row {i}: {str(row_error)}")
+                    continue
+            self.logger.info(f"Found a total of {len(catalogue_names)} video catalogue names")
+            return catalogue_names
+        except Exception as e:
+            self.logger.error(f"An error occurred while trying to get the video catalogue names: {str(e)}")
+            return []

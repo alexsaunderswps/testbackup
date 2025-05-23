@@ -1,113 +1,180 @@
 #test_video_catalogues_page_ui.py
 import pytest
-from pytest_check import check 
-from page_objects.dashboard.video_catalogues_page import VideoCataloguesPage
-from page_objects.common.base_page import BasePage
-from tests.ui.test_base_page_ui import TestBasePageUI
-from utilities.screenshot_manager import ScreenshotManager
-from utilities.utils import logger
+from pytest_check import check
+from fixtures.dashboard.videocatalogues_fixtures import video_catalogue_page
+from utilities.utils import logger, get_browser_name
+class TestVideoCataloguesPageUI:
+    """
+    Test suite for the Video Catalogues page UI elements.
 
-# Initialize Screenshot
-screenshot = ScreenshotManager()
-
-@pytest.fixture
-def video_catalogue_page(logged_in_browser):
-    logger.debug("Starting video_catalogue_page fixture")
-    video_catalogue_pages = []
-    for login_page in logged_in_browser:
-        driver = login_page.driver
-        base_page = BasePage(driver)
-        logger.info("=" * 80)
-        logger.info(f"Navigating to Video Catalogues page on {driver.name}")
-        logger.info("=" * 80)
+    This class follows the established pattern for Playwright-based UI testing,
+    using the modern fixture-based approach and the verify_ui_elements pattern
+    for consistent element verification across different browsers.
+    """
     
-        # Navigate to Video Catalogues page
-        base_page.go_video_catalogues_page()
-        # Verify that we're on the Video Catalogues page
-        video_catalogue_page = VideoCataloguesPage(driver)
-        if video_catalogue_page.verify_page_title_present():
-            logger.info("Successfully navigated to Video Catalogues page")
-            video_catalogue_pages.append(video_catalogue_page)
-        else:
-            logger.error(f"Failed to navigate to Video Catalogues page on {driver.name}")
-    logger.info(f"video_catalogue_page fixture: yielding {len(video_catalogue_pages)} video catalogue page(s)")
-    yield video_catalogue_pages
-    logger.debug("video_catalogue_page fixture: finished")
-    
-class TestVideoCataloguesPageUI(TestBasePageUI):
-    
-    @pytest.mark.UI 
+    @pytest.mark.UI
     @pytest.mark.catalogue
     def test_video_catalogue_page_title(self, video_catalogue_page):
-        """_summary_
-
-        Args:
-            video_catalogue_page (_type_): _description_
         """
-        logger.debug("Starting video_catalogue_page_title")
+        Test that the Video Catalogues page title is present and correct.
+
+        This test verifies that when users navigate to the Video Catalogues page,
+        they see the correct page title, which is essential for user orientation
+        and navigation feedback.
+        
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+        """
+        logger.debug("Starting test_video_catalogue_page_title")
         for vcp in video_catalogue_page:
             title = vcp.verify_page_title_present()
-            check.equal(title, True, "Title does not match")
+            check.is_true(title, "Video Catalogues title does not match")
             logger.info("Verification Successful :: Video Catalogues Page Title found")
-        
-    @pytest.mark.UI 
-    @pytest.mark.catalogue
-    @pytest.mark.navigation
-    def test_catalogue_page_nav_elements(self, video_catalogue_page):
-        """_summary_
-
-        Args:
-            video_catalogue_page (_type_): _description_
-        """
-        assert self._verify_page_nav_elements(video_catalogue_page)
     
     @pytest.mark.UI
     @pytest.mark.catalogue
     @pytest.mark.navigation
-    def test_catalogue_page_admin_elements(self, video_catalogue_page):
-        """_summary_
+    def test_video_catalogue_page_nav_elements(self, video_catalogue_page, verify_ui_elements):
+        """
+        Test that all navigation elements are present on the Video Catalogues page.
+
+        Navigation consistency is crucial for user experience. This test ensures
+        that all standard navigation elements (logo, menu items, etc.) are present
+        and accessible on the Video Catalogues page, maintaining consistency across the application.
 
         Args:
-            video_catalogue_page (_type_): _description_
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
         """
-        assert self._verify_page_admin_elements(video_catalogue_page)
+        results = verify_ui_elements.nav_elements(video_catalogue_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, f"Missing video catalogues navigation elements: {', '.join(missing_elements)}")
+            logger.info(f"Verification Successful :: All Video Catalogues Navigation Elements found on {get_browser_name(page)}")
 
     @pytest.mark.UI
     @pytest.mark.catalogue
     @pytest.mark.navigation
-    def test_catalogue_page_defintion_elements(self, video_catalogue_page):
-        """_summary_
+    def test_video_catalogue_page_admin_elements(self, video_catalogue_page, verify_ui_elements):
+        """
+        Test that all admin elements are present in the Admin dropdown on the Video Catalogues page.
+
+        The Admin dropdown provides access to administrative functions. This test
+        ensures that all expected admin menu items are available when accessed
+        from the Video Catalogues page, maintaining administrative workflow consistency.
 
         Args:
-            video_catalogue_page (_type_): _description_
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
         """
-        assert self._verify_page_definition_elements(video_catalogue_page)
-    
+        results = verify_ui_elements.admin_elements(video_catalogue_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, f"Missing video catalogues admin elements: {', '.join(missing_elements)}")
+            logger.info(f"Verification Successful :: All Video Catalogues Admin Elements found on {get_browser_name(page)}")
+
     @pytest.mark.UI
     @pytest.mark.catalogue
-    @pytest.mark.table
+    @pytest.mark.navigation
+    def test_video_catalogue_page_definition_elements(self, video_catalogue_page, verify_ui_elements):
+        """
+        Test that all definition elements are present in the Definitions dropdown on the Video Catalogues page.
+
+        The Definitions dropdown provides access to configuration and reference data.
+        This test verifies that users can access all definition-related functions
+        from the Video Catalogues page, ensuring complete functionality is available.
+
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.definition_elements(video_catalogue_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, f"Missing video catalogues definition elements: {', '.join(missing_elements)}")
+            logger.info(f"Verification Successful :: All Video Catalogues Definition Elements found on {get_browser_name(page)}")
+
+    @pytest.mark.UI
+    @pytest.mark.action
+    @pytest.mark.catalogue
     def test_video_catalogue_search_elements(self, video_catalogue_page):
-        """_summary_
+        """
+        Test that all video catalogue search elements are present and functional.
+
+        This test ensures that the search input, search button, and Add Video Catalogue button
+        are all present and properly labeled for user interaction.
 
         Args:
-            video_catalogue_page (_type_): _description_
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
         """
         for vcp in video_catalogue_page:
-            all_elements_present, missing_elements = vcp.verify_all_catalogue_search_elements_present()
-            check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Video Catalogues page")
-            logger.info("Verification Successful :: All Video Catalogue search elements found")
-            
-    @pytest.mark.UI 
+            all_elements, missing_elements = vcp.verify_all_video_catalogues_search_elements_present()
+            check.is_true(all_elements, f"Search elements missing from Video Catalogues Page: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Search elements found on Video Catalogues Page")
+
+    @pytest.mark.UI
+    @pytest.mark.catalogue
+    @pytest.mark.table 
+    def test_video_catalogue_table_elements(self, video_catalogue_page):
+        """
+        Test that all video catalogue table elements are present and properly structured.
+
+        The video catalogues table is the primary interface for viewing catalogue information.
+        This test verifies that all expected columns (Name, Organization, Description,
+        Last Edited By, Last Edited Date) are present, ensuring users can access all relevant data.
+
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+        """
+        logger.info("Starting test_video_catalogue_table_elements")
+        for vcp in video_catalogue_page:
+            vcp.page.wait_for_timeout(2000)
+            all_elements, missing_elements = vcp.verify_all_video_catalogues_table_elements_present()
+            check.is_true(all_elements, f"Table elements missing from Video Catalogues Page: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Video Catalogue Table Elements found on Video Catalogues Page")
+
+    @pytest.mark.UI
     @pytest.mark.catalogue
     @pytest.mark.table
-    def test_video_catalogue_table_elements(self, video_catalogue_page):
-        """_summary_
+    def test_video_catalogue_table_rows(self, video_catalogue_page):
+        """
+        Test that video catalogue table rows can be counted and are accessible.
 
         Args:
-            video_catalogue_page (_type_): _description_
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
         """
         for vcp in video_catalogue_page:
-            all_elements_present, missing_elements = vcp.verify_all_catalogue_table_elements_present()
-            check.is_true(all_elements_present, f"Missing elements: {', '.join(missing_elements)} on Video Catalogues page")
-            logger.info("Verification Successful :: All Video Catalogue table elements found")
+            vcp.page.wait_for_timeout(2000)
+            row_count = vcp.count_table_rows()
+            logger.info(f"Verification Successful :: Able to count all table rows. {row_count} Rows found")
+
+    @pytest.mark.catalogue
+    @pytest.mark.table
+    def test_video_catalogue_name_retreval(self, video_catalogue_page):
+        """
+        Test that video catalogue names can be retrieved from the table.
+
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+        """
+        for vcp in video_catalogue_page:
+            vcp.page.wait_for_timeout(2000)
+            vcp.get_video_catalogue_name_values()
+            
+    @pytest.mark.UI
+    @pytest.mark.catalogue
+    @pytest.mark.pagination
+    def test_video_catalogue_pagination_elements(self, video_catalogue_page, verify_ui_elements):
+        """
+        Test that pagination elements are correctly displayed on the Video Catalogues page.
+
+        When there are many video catalogues, pagination becomes essential for usability.
+        This test ensures that pagination controls are present and properly
+        configured based on the number of catalogues and page size settings.
+
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.pagination_elements(video_catalogue_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, f"Missing video catalogue pagination elements: {', '.join(missing_elements)}")
+            logger.info(f"Verification Successful :: All Video Catalogue Pagination Elements found on {get_browser_name(page)}")
 
