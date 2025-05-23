@@ -94,7 +94,7 @@ class TestDevicesPageUI:
 
     @pytest.mark.UI
     @pytest.mark.devices
-    @pytest.mark.search
+    @pytest.mark.action
     def test_devices_action_elements(self, devices_page):
         """
         Test that all device action elements are present and functional.
