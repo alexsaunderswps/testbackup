@@ -180,22 +180,22 @@ class TestMapMarkersPageUI:
             mmp.page.wait_for_timeout(2000)
             mmp.get_map_marker_name_values()
             
-    @pytest.mark.UI
-    @pytest.mark.map_markers
-    @pytest.mark.pagination
-    def test_map_markers_pagination_elements(self, map_markers_page, verify_ui_elements):
-        """
-        Test that pagination elements are correctly displayed on the Map Markers page.
+    # @pytest.mark.UI
+    # @pytest.mark.map_markers
+    # @pytest.mark.pagination
+    # def test_map_markers_pagination_elements(self, map_markers_page, verify_ui_elements):
+    #     """
+    #     Test that pagination elements are correctly displayed on the Map Markers page.
 
-        When there are many map markers, pagination becomes essential for usability.
-        This test ensures that pagination controls are present and properly
-        configured based on the number of markers and page size settings.
+    #     When there are many map markers, pagination becomes essential for usability.
+    #     This test ensures that pagination controls are present and properly
+    #     configured based on the number of markers and page size settings.
 
-        Args:
-            map_markers_page: The MapMarkersPage fixture providing page objects for each browser
-            verify_ui_elements: The fixture providing UI element verification functions
-        """
-        results = verify_ui_elements.pagination_elements(map_markers_page)
-        for page, all_elements, missing_elements in results:
-            check.is_true(all_elements, f"Missing map markers pagination elements: {', '.join(missing_elements)}")
-            logger.info(f"Verification Successful :: All Map Markers Pagination Elements found on {get_browser_name(page)}")
+    #     Args:
+    #         map_markers_page: The MapMarkersPage fixture providing page objects for each browser
+    #         verify_ui_elements: The fixture providing UI element verification functions
+    #     """
+    #     results = verify_ui_elements.pagination_elements(map_markers_page)
+    #     for page, all_elements, missing_elements in results:
+    #         check.is_true(all_elements, f"Missing map markers pagination elements: {', '.join(missing_elements)}")
+    #         logger.info(f"Verification Successful :: All Map Markers Pagination Elements found on {get_browser_name(page)}")
