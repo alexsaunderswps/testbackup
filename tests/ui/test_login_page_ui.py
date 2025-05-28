@@ -5,32 +5,18 @@ from faker import Faker
 from dotenv import load_dotenv
 from pytest_check import check
 from page_objects.authentication.login_page import LoginPage
-from utilities.screenshot_manager import ScreenshotManager
 from utilities.utils import get_browser_name, logger
 
-
-# Initialize Faker and Screenshot
+# Initialize Faker
 fake = Faker()
-screenshot = ScreenshotManager()
 
 # Load environmental variables
 load_dotenv()
-BASE_URL = os.getenv("QA_BASE_URL")
-LOGIN_URL = os.getenv("QA_LOGIN_URL")
-ADMIN_USER = os.getenv("ADMIN_USERNAME")
-ADMIN_PASS = os.getenv("ADMIN_PASSWORD")
-VALID_USER = os.getenv("VALID_USERNAME")
-VALID_PASS = os.getenv("VALID_PASSWORD")
-
-@pytest.fixture
-def login_page(setup_isolated):
-    login_pages = []
-    for driver, wait in setup_isolated:
-        logger.info(f"Navigating to login page on {driver.name}")
-        driver.get(BASE_URL)
-        login_pages.append(LoginPage(driver))
-        
-    yield login_pages
+QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":")
+SYS_ADMIN_USER = os.getenv("SYS_ADMIN_USERNAME")
+SYS_ADMIN_PASS = os.getenv("SYS_ADMIN_PASSWORD")
+ORG_WPS_USER = os.getenv("ORG_ADMIN_WPS_USERNAME")
+ORG_WPS_PASS = os.getenv("ORG_ADMIN_WPS_PASSWORD")
 
 class TestLoginPageUI:
     
