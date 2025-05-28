@@ -27,7 +27,7 @@ class MapMarkersPage(BasePage):
     # Element locators
     def get_page_title(self):
         """Get the page title for the Map Markers page."""
-        return self.page.get_by_role("heading", name="Map Markers")
+        return self.page.get_by_role("heading", name="Map Marker Admin")
     
     def get_page_title_text(self):
         """Get the text of the page title for the Map Markers page."""
@@ -36,11 +36,11 @@ class MapMarkersPage(BasePage):
     # Tab Elements
     def get_map_markers_core_tab(self):
         """Get the core map markers tab element."""
-        return self.page.get_by_role("tab", name="Map Markers")
+        return self.page.locator("label").filter(has_text=re.compile(r"^Map Markers$"))
     
     def get_map_markers_custom_tab(self):
         """Get the custom map markers tab element."""
-        return self.page.get_by_role("tab", name="Custom Map Markers")
+        return self.page.get_by_text("Custom Map Markers")
     
     def get_add_map_marker_button(self):
         """Get the add map marker button element."""
@@ -116,16 +116,16 @@ class MapMarkersPage(BasePage):
             bool: True if the page title is present, False otherwise.
         """
         self.logger.info("Verifying page title is present")
-        return super().verify_page_title("Map Markers")
+        return super().verify_page_title("Map Marker Admin")
     
     def verify_page_title(self) -> bool:
         """
-        Verify that the page title is present and is the correct "Map Markers" title.
+        Verify that the page title is present and is the correct "Map Marker Admin" title.
 
         Returns:
             bool: True if the page title is correct, False otherwise.
         """
-        return super().verify_page_title("Map Markers", tag="h1")
+        return super().verify_page_title("Map Marker Admin", tag="h1")
 
     def verify_all_map_markers_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
