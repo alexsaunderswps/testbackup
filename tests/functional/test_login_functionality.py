@@ -1,5 +1,4 @@
 #test_login_functionality.py (Playwright version)
-
 import os
 import pytest
 from faker import Faker
