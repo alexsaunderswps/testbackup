@@ -1,5 +1,4 @@
 #test_base_page_ui.py (Playwright version)
-
 import pytest
 from pytest_check import check
 from page_objects.common.base_page import BasePage
