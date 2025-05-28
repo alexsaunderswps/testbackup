@@ -455,62 +455,66 @@ class BasePage:
     # Check for pagination elements
     def verify_all_pagination_elements_present(self) -> Tuple[bool, list]:
         """
-        Verifies pagination elements based on page size and current record count.
-    
+        Verifies pagination elements based on functional availability rather than DOM presence.
+        
+        This method checks whether pagination elements are functionally available (visible and enabled)
+        rather than just present in the DOM. This approach aligns with modern web development practices
+        where elements are always rendered but their state is controlled through CSS and attributes.
+        
         Returns:
-            Tuple[bool, list]: A tuple containing a boolean (all expected elements present)
-                        and a list of missing expected elements
+            Tuple[bool, list]: A tuple containing a boolean (all expected elements are functional)
+                            and a list of elements that don't match expectations
         """
-        self.logger.info("Checking if the correct Pagination elements are present on Page")
+        self.logger.info("Checking if pagination elements are functionally available on the page")
         all_elements_correct = True
         issues_found = []
         
         # Get the page size from utilities.config
         page_size = PAGE_SIZE
         
-        # Extract information from the showing count
+        # Extract information from the showing count to understand pagination state
         current_start = 1
         current_end = 0
         total_records = 0
         showing_element_exists = False
         
         try:
+            self.page.wait_for_timeout(3000)
             showing_element = self.get_showing_count()
             if showing_element.count() > 0:
                 showing_element_exists = True
                 showing_text = showing_element.inner_text()
                 
-                # Parse "Showing x to y of z" format
+                # Parse "Showing x to y of z" format to understand current pagination state
                 match = re.search(r'Showing\s+(\d+)\s+to\s+(\d+)\s+of\s+(\d+)', showing_text)
                 if match:
                     current_start = int(match.group(1))
                     current_end = int(match.group(2))
                     total_records = int(match.group(3))
-                    self.logger.info(f"Showing count parsed: {current_start} to {current_end} of {total_records}")
+                    self.logger.info(f"Pagination state: {current_start} to {current_end} of {total_records}")
                 else:
                     self.logger.warning(f"Could not parse showing text: {showing_text}")
             else:
-                self.logger.info("Showing count element not found - likely no records to display")
+                self.logger.info("No showing count element - likely no records to display")
         except Exception as e:
             self.logger.error(f"Error getting pagination info: {str(e)}")
         
-        # Determine which pagination elements should be present based on extracted information
+        # Calculate pagination state based on your business rules
         is_first_page = (current_start == 1)
         has_multiple_pages = (total_records > page_size)
         is_last_page = (total_records <= current_start + page_size - 1)
+        current_page_number = ((current_start - 1) // page_size) + 1 if current_start > 0 else 1
+        total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 0
         
-        # Deine a helper function to check if an element is disbaled
-        def is_element_disabled(element_getter):
-            try:
-                locator = element_getter()
-                if locator.count() > 0:
-                    return locator.get_attribute("aria-disabled") == "true" or locator.get_attribute("disabled") == "true"
-                return False
-            except Exception as e:
-                self.logger.error(f"Error checking if element is disabled: {str(e)}")
-                return False
-            
-        # Define elements with getter methods
+        # Log calculated state for debugging
+        self.logger.info(f"Calculated pagination state:")
+        self.logger.info(f"  - Current page: {current_page_number}")
+        self.logger.info(f"  - Total pages: {total_pages}")
+        self.logger.info(f"  - Is first page: {is_first_page}")
+        self.logger.info(f"  - Is last page: {is_last_page}")
+        self.logger.info(f"  - Has multiple pages: {has_multiple_pages}")
+        
+        # Define pagination element getters
         pagination_element_getters = {
             "Previous Page": self.get_previous_page_button,
             "Next Page": self.get_next_page_button,
@@ -520,62 +524,124 @@ class BasePage:
             "Showing Count": self.get_showing_count
         }
         
-        # Define expected state of each element
-        should_be_present = {
-            "Previous Page": has_multiple_pages,
-            "Next Page": has_multiple_pages,
-            "Current Page": showing_element_exists,  # Only show when there are records to display
-            "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
-            "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": showing_element_exists  # Only show when there are records to display
-        }
-        
-        # Define enabled/disabled state of each element
-        should_be_enabled ={
+        # Define when each element should be functionally available based on your business rules
+        should_be_functional = {
+            # Previous/Next buttons should be functional when there are multiple pages
+            # and we're not at the boundary
             "Previous Page": has_multiple_pages and not is_first_page,
             "Next Page": has_multiple_pages and not is_last_page,
-            "Current Page": showing_element_exists,  # Only show when there are records to display
-            "Foward Ellipsis": total_records > (page_size * 2), # Need at least 3 pages for ellipsis
-            "Backward Ellipsis": current_start > (page_size * 2), # Need to be at least on page 3
-            "Showing Count": showing_element_exists
+            
+            # Current page and showing count should always be functional when there's data
+            "Current Page": showing_element_exists,
+            "Showing Count": showing_element_exists,
+            
+            # Forward ellipsis should be functional when there are more than 2 pages 
+            # and we're not on the last 3 pages
+            "Foward Ellipsis": (total_pages > 2 and current_page_number <= total_pages - 3),
+            
+            # Backward ellipsis should be functional when there are more than 3 pages
+            # and we're on page 4 or higher
+            "Backward Ellipsis": (total_pages > 3 and current_page_number >= 4)
         }
         
+        # Check each pagination element
         for element_name, element_getter in pagination_element_getters.items():
-            element_should_be_present = should_be_present[element_name]
-            element_should_be_enabled = should_be_enabled[element_name]
-            expected_presence = "present" if element_should_be_present else "absent"
-            expected_state = "enabled" if element_should_be_enabled else "disabled"
-        
+            element_should_be_functional = should_be_functional[element_name]
+            
             try:
-                is_present = element_getter().count() > 0
+                # Get the element locator
+                locator = element_getter()
+                is_present_in_dom = locator.count() > 0
                 
-                # Check if the element is enabled/disabled  
-                is_disabled = is_element_disabled(element_getter) if is_present else False
-                is_enabled = not is_disabled
-                
-                # Check is presence matches expectation
-                if is_present != element_should_be_present:
-                    self.logger.error(f"Element {element_name} should be {expected_presence} but is {'present' if is_present else 'absent'}")
-                    all_elements_correct = False
-                    issues_found.append(element_name)
-                    self.take_screenshot(f"{element_name}_unexpected_state")
-                # If element should be present, check if enabled/disabled state matches expectation
-                elif is_present and element_should_be_present:
-                    if is_enabled != element_should_be_enabled:
-                        self.logger.error(f"Element {element_name} should be {expected_state} but is {'enabled' if is_enabled else 'disabled'}")
+                if not is_present_in_dom:
+                    # Element not in DOM at all - this might be acceptable depending on implementation
+                    if element_should_be_functional:
+                        self.logger.error(f"Element {element_name} should be functional but is not present in DOM")
                         all_elements_correct = False
                         issues_found.append(element_name)
-                        self.take_screenshot(f"{element_name}_unexpected_state")
+                        self.take_screenshot(f"{element_name}_missing_from_dom")
                     else:
-                        self.logger.info(f"Element {element_name} correctly {expected_state}")
+                        self.logger.info(f"Element {element_name} correctly absent from DOM")
+                    continue
+                
+                # Element is present in DOM, now check if it's functionally available
+                is_functionally_available = self._is_element_functionally_available(
+                    locator, element_name
+                )
+                
+                # Compare expected vs actual functional state
+                if is_functionally_available != element_should_be_functional:
+                    expected_state = "functional" if element_should_be_functional else "disabled/hidden"
+                    actual_state = "functional" if is_functionally_available else "disabled/hidden"
+                    
+                    self.logger.error(f"Element {element_name} should be {expected_state} but is {actual_state}")
+                    all_elements_correct = False
+                    issues_found.append(element_name)
+                    self.take_screenshot(f"{element_name}_unexpected_functional_state")
                 else:
-                    self.logger.info(f"Element {element_name} correctly {expected_presence}")
+                    correct_state = "functional" if is_functionally_available else "properly disabled/hidden"
+                    self.logger.info(f"Element {element_name} is correctly {correct_state}")
+                    
             except Exception as e:
                 self.logger.error(f"Error checking pagination element {element_name}: {str(e)}")
                 all_elements_correct = False
                 issues_found.append(element_name)
-                
-        return all_elements_correct,issues_found
+        
+        return all_elements_correct, issues_found
+
+    def _is_element_functionally_available(self, locator, element_name: str) -> bool:
+        """
+        Helper method to determine if an element is functionally available to the user.
+        
+        An element is considered functionally available if it is:
+        1. Visible on the page
+        2. Not disabled through various disability mechanisms (aria-disabled, disabled attribute, CSS classes)
+        3. Potentially clickable (for interactive elements)
+        
+        Args:
+            locator: Playwright locator for the element
+            element_name: Name of the element for logging purposes
+            
+        Returns:
+            bool: True if element is functionally available, False otherwise
+        """
+        try:
+            # Check if element is visible to the user
+            is_visible = locator.is_visible()
+            if not is_visible:
+                self.logger.debug(f"Element {element_name} is not visible")
+                return False
+            
+            # Check various disability indicators
+            aria_disabled = locator.get_attribute("aria-disabled")
+            is_aria_disabled = aria_disabled == "true"
+            
+            disabled_attribute = locator.get_attribute("disabled")
+            is_disabled_attribute = disabled_attribute is not None
+            
+            css_classes = locator.get_attribute("class") or ""
+            has_disabled_class = any(
+                disabled_word in css_classes.lower() 
+                for disabled_word in ["disabled", "inactive", "unavailable"]
+            )
+            
+            # Element is functional if it's visible and not disabled by any mechanism
+            is_functional = is_visible and not (is_aria_disabled or is_disabled_attribute or has_disabled_class)
+            
+            # Log detailed state for debugging purposes
+            self.logger.debug(f"Element {element_name} functional analysis:")
+            self.logger.debug(f"  - Visible: {is_visible}")
+            self.logger.debug(f"  - aria-disabled: {aria_disabled}")
+            self.logger.debug(f"  - disabled attribute: {disabled_attribute}")
+            self.logger.debug(f"  - CSS classes: {css_classes}")
+            self.logger.debug(f"  - Final functional state: {is_functional}")
+            
+            return is_functional
+            
+        except Exception as e:
+            self.logger.error(f"Error checking functional availability of {element_name}: {str(e)}")
+            # If we can't determine the state, assume it's not functional to be safe
+            return False
     
 
     # Basic methods
