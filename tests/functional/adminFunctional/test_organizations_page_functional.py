@@ -9,7 +9,7 @@ from pytest_check import check
 from page_objects.common.base_page import BasePage
 from utilities.utils import logger
 
-# class TestOrganizationsPageFunctional:
+class TestOrganizationsPageFunctional:
     
 #     @pytest.mark.functional
 #     @pytest.mark.organizations
@@ -154,3 +154,74 @@ from utilities.utils import logger
 #                         logger.info("Not enough pages to test navigation")
 #                 else:
 #                     logger.info("Could not get pagination counts, skipping organization pagination test")
+
+    @pytest.mark.organizations
+    @pytest.mark.functional
+    @pytest.mark.debug
+    def test_add_organization(self, organizations_page):
+        """
+        Test creating a new organization through the UI.
+        
+        This test verifies:
+        1. Clicking the Add button opens the creation form
+        2. Filling out the form and submitting creates a new organization
+        3. The new organization appears in the list
+
+        Args:
+            organizations_page: The OrganizationsPage fixture
+        """
+        logger.info("Starting organization creation test")
+
+        # Generate a unique name for the test organization
+        test_organization_name = f"Test Organization UI {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        logger.info(f"Test organization name: {test_organization_name}")
+        
+        for op in organizations_page:
+            # Click the Add button
+            add_button = op.get_add_organization_button()
+            add_button.click()
+            
+            # Wait for the form to appear
+            op.page.wait_for_selector("input[name=\"name\"]")
+            
+            # Fill out the form
+            op.get_add_organization_textbox().fill(test_organization_name)
+            
+            # Click Save
+            op.get_save_button().click()
+            
+            # Wait for the page to refresh
+            op.page.wait_for_load_state("networkidle")
+            
+            # Navigate back to Organizations page
+            # Hopefully this can be removed once bug is fixed
+            op.page.get_by_role("button", name="Admin").click()
+            op.page.get_by_role("link", name="Organizations").click()
+
+            # Verify we're back on the organizations list page
+            page_title = op.page.get_by_role("heading", level=1)
+            check.equal(page_title.inner_text(), "Organizations", 
+                    "Should be back on Organizations page after saving")
+
+            # Search for the new organization
+            # Search not implemented in this test, but could be added later
+            # search_box = op.get_organization_search_text()
+            # search_button = op.get_organization_search_button()
+
+            # search_box.clear()
+            # search_box.fill(test_organization_name)
+            # search_button.click()
+            
+            # Wait for results to load
+            op.page.wait_for_load_state("networkidle")
+
+            # Verify the new organization is in the results
+            rows = op.get_organization_table_rows()
+            found = False
+            for i in range(rows.count()):
+                name_cell = rows.nth(i).locator("td").first
+                if name_cell.inner_text() == test_organization_name:
+                    found = True
+                    break
+
+            check.is_true(found, f"New organization '{test_organization_name}' not found after creation")
