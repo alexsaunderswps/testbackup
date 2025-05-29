@@ -611,7 +611,6 @@ class TestInstallationsPageFunctional:
 
     @pytest.mark.installations
     @pytest.mark.functional
-    @pytest.mark.debug
     def test_add_installation(self, installations_page):
         """
         Test creating a new installation through the UI.
