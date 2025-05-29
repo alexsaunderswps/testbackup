@@ -1,5 +1,4 @@
 #test_login_functionality.py (Playwright version)
-
 import os
 import pytest
 from faker import Faker
@@ -31,7 +30,7 @@ def login_page(browser_context_and_page):
 class TestLoginPageFunctionality:
     
     @pytest.mark.login
-    @pytest.mark.functionality
+    @pytest.mark.functional
     @pytest.mark.valid_credentials
     def test_valid_admin_login(self, login_page):
         """
@@ -47,7 +46,7 @@ class TestLoginPageFunctionality:
             logger.info("Verification Successful :: Admin Login Succeeded")
     
     @pytest.mark.login
-    @pytest.mark.functionality
+    @pytest.mark.functional
     @pytest.mark.valid_credentials
     def test_valid_org_login(self, login_page):
         """
@@ -63,7 +62,7 @@ class TestLoginPageFunctionality:
             logger.info("Verification Successful :: Organization Login Succeeded")
             
     @pytest.mark.login
-    @pytest.mark.functionality
+    @pytest.mark.functional
     @pytest.mark.invalid_credentials
     @pytest.mark.parametrize("username, password, verification_method, expected_message",[
         ("", "", "verify_both_missing", "Login should fail with empty credentials"),

@@ -1,17 +1,9 @@
-# devices_page.py
+# devices_page.py (Playwright version)
 import os
 from dotenv import load_dotenv
 from typing import Tuple, List
 from page_objects.common.base_page import BasePage
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from utilities.config import DEFAULT_TIMEOUT, EXTENDED_TIMEOUT
 from utilities.utils import logger
-from utilities.element_interactor import ElementInteractor
-from utilities.element_locator import ElementLocator
-from utilities.screenshot_manager import ScreenshotManager
 
 load_dotenv()
 
@@ -20,68 +12,145 @@ load_dotenv()
 BASE_URL = os.getenv("QA_BASE_URL")
 
 class DevicesPage(BasePage):
-    """_summary_
-
-    Args:
-        BasePage (_type_): _description_
     """
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.driver = driver
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.locator = ElementLocator(driver)
-        self.interactor = ElementInteractor(driver)
-        self.screenshot = ScreenshotManager()
+    Page object for the Devices page using Playwright.
+    
+    This class provides methods to interact with elements on the Devices page,
+    follwing the established pattern of method-based element getters that return
+    Playwright locators for reliable element interaction.
+    """
+    
+    def __init__(self, page):
+        super().__init__(page)
+        self.page = page
         self.logger = logger
         
-    class DevicePageElements:
-        """_summary_
+    # Element locators - Using method-based approach for consistency
+    def get_page_title(self):
+        """Get the page title for the Devices page/"""
+        return self.page.get_by_role("heading", name="Devices")
+    
+    def get_page_title_text(self):
+        """Get the page title text for the Devices page."""
+        return self.page.get_by_role("heading", level=1).first().inner_text()
+    
+    def get_devices_search_text(self):
+        """Get the devices search text element."""
+        return self.page.get_by_role("textbox", name="Filter by name")
+    
+    def get_devices_search_button(self):
+        """Get the devices search button element."""
+        return self.page.get_by_role("button", name="Search")
+    
+    def get_devices_lookup_button(self):
+        """Get the devices lookup button element."""
+        return self.page.get_by_role("button", name="Device Lookup")
+    
+    # Device Lookup Modal elements
+    
+    def get_search_wildxr_number_label(self):
+        """Get the search WildXR number label element."""
+        return self.page.get_by_text("Search by WildXR Number")
+    
+    def get_search_wildxr_number_text(self):
+        return self.page.locator("input[name='wildXRNumber\']")
+    
+    def get_wildxr_number_apply_button(self):
+        """Get the WildXR number apply button element."""
+        return self.page.get_by_role("button", name="Apply")
+    
+    def get_wildxr_number_close_button(self):
+        """Get the WildXR number close button element."""
+        return self.page.get_by_role("button", name="x")
+    
+    # This needs to be built out as possible for assigning devices organizations, installations, etc.
+    
+    # Device Table Elements
+    def get_devices_table_body(self):
+        """Get the devices table body element."""
+        return self.page.locator("table tbody")
+    
+    def get_devices_table_rows(self):
+        """Get the devices table rows element."""
+        return self.page.locator("table tbody tr")
+    
+    def get_devices_name_header(self):
+        """Get the devices name header element."""
+        return self.page.get_by_role("cell", name="Name", exact=True)
+    
+    def get_devices_wildxr_number_header(self):
+        """Get the devices WildXR number header element."""
+        return self.page.get_by_role("cell", name="WildXR Number", exact=True)
+    
+    def get_devices_installation_header(self):
+        """Get the devices installation header element."""
+        return self.page.get_by_role("cell", name="Installation", exact=True)
+    
+    def get_devices_organization_header(self):
+        """Get the devices organization header element."""
+        return self.page.get_by_role("cell", name="Organization", exact=True)
+    
+    def get_pagination_counts(self):
         """
-        DEVICES_PAGE_TITLE = "//h1[text()='Devices']"
-        
-    class DeviceSearchElements:
-        """_summary_
+        Extract the pagination counts from the "Showing X to Y of Z" text.
+
+        Returns:
+            Tuple[int, int, int]: A tuple containing:
+                - start_count (int): The starting index of the current page.
+                - end_count (int): The ending index of the current page.
+                - total_count (int): The total number of items.
         """
-        SEARCH_TEXT = "//input[@placeholder='Filter by name']"
-        SEARCH_BUTTON = "//button[text()='Search']"
-        ADD_DEVICE_LINK = "//a[@href='/device/add']"
-        
-    class DeviceTableElements:
-        """_summary_
-        """
-        DEVICE_TABLE_BODY = "//table//tbody"
-        DEVICE_TABLE_ROWS = "//table//tbody/tr"
-        DEVICE_NAME_HEADER = "//table//th[text()='Name']"
-        DEVICE_SERIAL_HEADER = "//table//th[text()='Serial Number ']"
-        DEVICE_INSTALLATION_HEADER = "//table//th[text()='Installation']"
-        DEVICE_ORGANIZATION_HEADER = "//table//th[text()='Organization']"
-        
+        return super().get_pagination_counts()
+    
+    def get_device_by_name(self, name):
+        """ Find a device in the table by name. """
+        rows = self.get_devices_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
+
     # Check Page Element presence
     def verify_page_title_present(self):
-        """_summary_
+        """ Verify that the page title is present.
+        
+        Returns:
+            bool: True if the page title is present, False otherwise.
         """
-        return super().verify_page_title_present(self.DevicePageElements.DEVICES_PAGE_TITLE)
+        self.logger.info("Verifying page title is present")
+        return super().verify_page_title("Devices")
     
-    def verify_all_devices_search_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_page_title(self):
         """
-        Verify that all expected device search elements are present.
+        Verify that the page title is present and is the correct "Devices" title.
+
+        Returns:
+            bool: True if the page title is present, False otherwise.
+        """
+        return super().verify_page_title("Devices", tag="h1")
+    
+    def verify_all_devices_action_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected device action elements are present.
+        This includes the search text box, search button, and add device button.
         
         Returns:
             Tuple containing:
                 - bool: True if all elements were found, False otherwise
                 - List[str]: List of missing element names (empty if all found)
         """
-        self.logger.info("Verifying that all exepcted device search elements are present")
+        self.logger.info("Verifying that all expected device action elements are present")
 
         # Define elements with readable names
-        search_elements = {
-            "Search Text Box": self.DeviceSearchElements.SEARCH_TEXT,
-            "Search Button": self.DeviceSearchElements.SEARCH_BUTTON,
-            "Add Device Button": self.DeviceSearchElements.ADD_DEVICE_LINK,
+        action_elements = {
+            "Search Text Box": self.get_devices_search_text,
+            "Search Button": self.get_devices_search_button,
+            "Lookup Device Button": self.get_devices_lookup_button,
         }
-        
-        return self.verify_page_elements_present(search_elements, "Device Search Elements")
-    
+
+        return self.verify_page_elements_present(action_elements, "Device Action Elements")
+
     def verify_all_device_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected device table elements are present.
@@ -95,11 +164,11 @@ class DevicesPage(BasePage):
         
         # Define elements with readable names
         table_elements = {
-            "Table Body": self.DeviceTableElements.DEVICE_TABLE_BODY,
-            "Table Rows": self.DeviceTableElements.DEVICE_TABLE_ROWS,
-            "Device Name": self.DeviceTableElements.DEVICE_NAME_HEADER,
-            "Device Serial": self.DeviceTableElements.DEVICE_SERIAL_HEADER,
-            "Device Installation": self.DeviceTableElements.DEVICE_INSTALLATION_HEADER,
-            "Device Organization": self.DeviceTableElements.DEVICE_ORGANIZATION_HEADER,
+            "Table Body": self.get_devices_table_body,
+            "Table Rows": self.get_devices_table_rows,
+            "Device Name": self.get_devices_name_header,
+            "Device Serial": self.get_devices_wildxr_number_header,
+            "Device Installation": self.get_devices_installation_header,
+            "Device Organization": self.get_devices_organization_header,
         }
         return self.verify_page_elements_present(table_elements, "Device Table Elements")

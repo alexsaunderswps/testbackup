@@ -9,8 +9,8 @@ from utilities.utils import logger
 load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL")
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+SYS_ADMIN_USERNAME = os.getenv("SYS_ADMIN_USERNAME")
+SYS_ADMIN_PASSWORD = os.getenv("SYS_ADMIN_PASSWORD")
 
 class APIBase:
     def __init__(self):
@@ -25,8 +25,8 @@ class APIBase:
         """
         auth_url = urljoin(self.base_url, self.auth_endpoint)
         auth_data = {
-            "username": ADMIN_USERNAME,
-            "password": ADMIN_PASSWORD
+            "username": SYS_ADMIN_USERNAME,
+            "password": SYS_ADMIN_PASSWORD
         }
         
         try:
