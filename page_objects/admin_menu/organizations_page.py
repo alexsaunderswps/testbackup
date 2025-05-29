@@ -45,7 +45,7 @@ class OrganizationsPage(BasePage):
         """ Get the add organization button element."""
         return self.page.get_by_role("link", name="Add")
     
-    # Add Modal Element locators
+    # Organizations Add Modal Elements locators
     def get_save_button(self):
         """ Get the save button element."""
         return self.page.get_by_role("button", name="Save")
@@ -71,7 +71,36 @@ class OrganizationsPage(BasePage):
         """ Get the organization table rows element."""
         return self.page.locator("table tbody tr")
     
-    # Verification methods
+    def get_organization_by_name(self, name):
+        """ Find an organization in the table by name. """
+        rows = self.get_organization_table_rows()
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            if name_cell.inner_text() == name:
+                return rows.nth(i)
+        return None
+    
+    # Organizations Pagination Elements
+    def get_organizations_count_text(self):
+        """ Get the organizations count text element."""
+        showing_element = self.get_showing_count()
+        if showing_element.count() > 0:
+            return showing_element.inner_text()
+        return None
+    
+    def get_pagination_counts(self):
+        """
+        Extract the pagination counts from the "Showing X to Y of Z" text.
+
+        Returns:
+            Tuple[int, int, int]: A tuple containing:
+                - start_count (int): The starting index of the current page.
+                - end_count (int): The ending index of the current page.
+                - total_count (int): The total number of items.
+        """
+        return super().get_pagination_counts()
+
+    # Check Page Element presence
     def verify_page_title_present(self,) -> bool:
         """ Verify that the page title is present.
         
@@ -81,7 +110,6 @@ class OrganizationsPage(BasePage):
         self.logger.info("Verifying page title is present")
         return super().verify_page_title_present("Organizations")
     
-    # Check Page Element presence
     def verify_page_title(self):
         """
         Verify that the page title is present.
