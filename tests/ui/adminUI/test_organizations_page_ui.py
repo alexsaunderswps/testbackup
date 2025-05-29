@@ -106,3 +106,22 @@ class TestOrganizationsPageUI:
             check.is_true(all_elements, f"Missing organization table elements {', '.join(missing_elements)}")
             logger.info("Verification Successful :: All Organization table elements found")
     
+    @pytest.mark.UI
+    @pytest.mark.organizations
+    @pytest.mark.pagination
+    def test_organizations_pagination_elements(self, organizations_page, verify_ui_elements):
+        """
+        Test that pagination elements are correctly displayed on the Organizations page.
+
+        When there are many organizations, pagination becomes essential for usability.
+        This test ensures that pagination controls are present and properly
+        configured based on the number of organizations and page size settings.
+
+        Args:
+            organizations_page: The OrganizationsPage fixture providing page objects for each browser
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        results = verify_ui_elements.pagination_elements(organizations_page)
+        for page, all_elements, missing_elements in results:
+            check.is_true(all_elements, f"Missing organizations pagination elements: {', '.join(missing_elements)}")
+            logger.info(f"Verification Successful :: All Organizations Pagination Elements found on {get_browser_name(page)}")
