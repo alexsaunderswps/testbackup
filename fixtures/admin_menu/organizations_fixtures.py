@@ -98,11 +98,11 @@ def organizations_pagination_test_data(request):
         
         # Make the API call to create organizations
         try:
-            organization_endpoint = f"{api_url}/organization/create"
+            organization_endpoint = f"{api_url}/Organization/Create"
             logger.info(f"Creating organization: {unique_suffix}")
             
             # Use put method for creating organizations
-            response = request.put(organization_endpoint, json=payload, headers=headers)
+            response = requests.put(organization_endpoint, json=payload, headers=headers)
             
             # Since we know our API returns empty responses on success,
             # we'll just use our generated ID if the status code indicates success
