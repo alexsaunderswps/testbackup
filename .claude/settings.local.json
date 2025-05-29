@@ -4,5 +4,6 @@
       "WebFetch(domain:wildxr-web-qa.azurewebsites.net)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": false
 }
