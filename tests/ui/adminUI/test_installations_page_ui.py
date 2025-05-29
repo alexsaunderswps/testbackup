@@ -49,7 +49,6 @@ class TestInstallationsPageUI:
     @pytest.mark.UI
     @pytest.mark.installations
     @pytest.mark.navigation
-    @pytest.mark.debug
     def test_installations_page_admin_elements(self, installations_page, verify_ui_elements):
         """
         Test that all admin elements are present in the Admin dropdown on the Installations page.
