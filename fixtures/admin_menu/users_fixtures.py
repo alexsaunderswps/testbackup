@@ -44,3 +44,29 @@ def users_page(logged_in_page):
     logger.info(f"users_page fixture: yielding {len(user_pages)} users page(s)")
     yield user_pages
     logger.debug("users_page fixture: finished")
+    
+    
+    
+# User payload
+# payload = {
+#     "email": f"testuser{unique_suffix}@example.com", 
+#     "firstName": f"Test user {unique_suffix}",
+#     "isHeadSetAdmin": False,
+#     "isSystemAdmin": False,
+#     "lastName": "User",
+#     "organizations": [
+#         {
+#             "name": f"Test Organization {unique_suffix}",
+#             "organizationId": organization_id
+            
+#         }
+#     ],
+#     "roles": [
+#         {
+#             "id": "94e9113c-d7c6-4190-9338-dfb8a9434df9",
+#             "name": "OrgAdmin"
+#         }
+#     ],
+#     "userId": user_id,
+#     "userName": f"ausername{unique_suffix}"
+# }
