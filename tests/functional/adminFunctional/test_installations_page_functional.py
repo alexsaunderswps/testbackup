@@ -32,7 +32,7 @@ class TestInstallationsPageFunctional:
         
         # Verify the fixture created enough installations for pagination
         installation_ids = installations_pagination_test_data
-        assert len(installation_ids) > 25, "Need more than 25 installatins to test pagination."
+        assert len(installation_ids) > 25, "Need more than 25 installations to test pagination."
         
         for ip in installations_page:
             # Refresh the page to ensure that all installations are loaded
@@ -86,13 +86,13 @@ class TestInstallationsPageFunctional:
                     check.is_true(next_button.count() > 0, "Next page button not found")
                     
                     if next_button.count() > 0:
-                        # click and wait for the page to load
+                        # Click and wait for the page to load
                         logger.info("Clicking next page button")
                         next_button.click()
                         ip.page.wait_for_load_state("networkidle")
                         ip.page.wait_for_timeout(500)
                         
-                        # Get the second page rows with better error handling
+                        # Get the second page rows with error handling
                         second_page_rows = ip.get_installations_table_rows()
                         second_page_count = second_page_rows.count()
                         logger.info(f"Found second page with {second_page_count} rows")
@@ -132,7 +132,7 @@ class TestInstallationsPageFunctional:
                             current_rows_count = current_rows.count()
                             logger.info(f"Found {current_rows_count} rows after navigating back to first page")
                             
-                            # Get names current page
+                            # Get names on current page
                             current_page_names = []
                             
                             for i in range(current_rows_count):
@@ -151,8 +151,8 @@ class TestInstallationsPageFunctional:
                     else:
                         logger.info("Not enough pages to test navigation")
                 else:
-                    logger.info("Could not get pagination counts, skipping test")
-                
+                    logger.info("Could not get pagination counts, skipping installation pagination test")
+
     @pytest.mark.functional
     @pytest.mark.installations
     @pytest.mark.search
