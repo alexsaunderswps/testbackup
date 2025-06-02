@@ -643,7 +643,7 @@ class TestInstallationsPageFunctional:
             organization_dropdown = ip.get_installation_select_organization_dropdown()
             organization_dropdown.click()
             # Select the first option in the dropdown
-            ip.page.get_by_text("Test Organization").click()
+            ip.page.get_by_text("Test Organization", exact=True).click()
             
             # Fill out tips
             ip.get_installations_tips_textbox().fill("Test tips from UI automation")
