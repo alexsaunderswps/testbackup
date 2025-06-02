@@ -29,6 +29,7 @@ def tags_page(logged_in_page):
         # Navigate to Tags page through the Definitions menu
         page.get_by_role("button", name="Definitions").click()
         page.get_by_role("link", name="Tags").click()
+        page.wait_for_timeout(1000)  # Wait for the page to load
         
         # Create the page object
         tags_page = TagsPage(page)
