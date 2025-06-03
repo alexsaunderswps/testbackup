@@ -3,6 +3,7 @@ import os
 import pytest
 import requests
 import uuid
+from datetime import datetime
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
@@ -80,12 +81,16 @@ def installations_pagination_test_data(request):
     for i in range(min_records_needed):
         # Generate unique identifier
         installation_id = str(uuid.uuid4())
-        unique_suffix = installation_id[:8]
+        test_run_id = installation_id[:8]
+        username = os.getenv("USER", "unknown")
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        test_installation_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
         
         # Create installation payload based on the captured data
         payload = {
             "installationId": installation_id,
-            "name": f"Test Installation {unique_suffix}",
+            "name": test_installation_name,
             "videoCatalogueId": video_catalogue_id,
             "forceOfflineMode": False,
             "showGraphicDeath": True,
@@ -112,7 +117,7 @@ def installations_pagination_test_data(request):
         # Make API call to create installation
         try:
             installation_endpoint = f"{api_url}/Installations/create"
-            logger.info(f"Creating installation: {unique_suffix}")
+            logger.info(f"Creating installation: {test_installation_name}")
             
             # Use post instead of put (if needed)
             response = requests.put(installation_endpoint, json=payload, headers=headers)
