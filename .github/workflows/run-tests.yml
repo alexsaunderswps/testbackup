@@ -12,10 +12,13 @@ jobs:
       QA_BASE_URL: "https://wildxr-web-qa.azurewebsites.net/"
       QA_LOGIN_URL: "https://wildxr-web-qa.azurewebsites.net/login"
       API_BASE_URL: "https://wildxr-api-qa.azurewebsites.net/api"
-      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      VALID_USERNAME: ${{ secrets.VALID_USERNAME }}
-      VALID_PASSWORD: ${{ secrets.VALID_PASSWORD }}
+      TEST_ORGANIZATION_ID: 4ffbb8fe-d8b4-49d9-982d-5617856c9cce
+      TEST_ORGNAIZATION_CATALOGUE_ID: d7599af7-2414-402f-9b1b-0feea546260e
+      API_TOKEN: ${{ secrets.API_TOKEN }}
+      SYS_ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      SYS_ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      ORG_WPS_USERNAME: ${{ secrets.ORG_WPS_USERNAME }}
+      ORG_WPS_PASSWORD: ${{ secrets.ORG_WPS_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -32,10 +35,10 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
-    #   - name: Run API Tests
-    #     run: |
-    #       source venv/bin/activate
-    #       pytest -m api
+      - name: Run API Tests
+        run: |
+          source venv/bin/activate
+          pytest -m api
 
       - name: Run UI Tests
         run: |
