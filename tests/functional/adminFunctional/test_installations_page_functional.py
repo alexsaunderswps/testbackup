@@ -3,13 +3,21 @@ import os
 import math
 import pytest
 import requests
+import uuid
 from datetime import datetime
 from fixtures.admin_menu.installations_fixtures import installations_page, installations_pagination_test_data
 from pytest_check import check
 from page_objects.common.base_page import BasePage
+from utilities.search_mixins import SimpleSearchMixin
 from utilities.utils import logger
+from urllib.parse import urlparse
     
-class TestInstallationsPageFunctional:
+class TestInstallationsPageFunctional(SimpleSearchMixin):
+    """
+    Test suite for Installations page functionality.
+    
+    Now inherits from SimpleSearchMixin to get robust search testing capabilities.
+    """
         
     @pytest.mark.functional
     @pytest.mark.installations
@@ -156,6 +164,7 @@ class TestInstallationsPageFunctional:
     @pytest.mark.functional
     @pytest.mark.installations
     @pytest.mark.search
+    @pytest.mark.debug
     def test_installations_search(self, installations_page, installations_pagination_test_data):
         """
         Test the search functionality on the Installations page.
@@ -169,7 +178,7 @@ class TestInstallationsPageFunctional:
             installations_page: The InstallationsPage fixture
             installations_pagination_test_data: Fixture that creates test installations
         """
-        logger.info("Starting installations search test")
+        logger.info("Starting installations search test with search mixin")
         
         # Get the names of our test installations
         # We'll need to query the API since the fixture only returns IDs
@@ -196,160 +205,38 @@ class TestInstallationsPageFunctional:
             return
         
         for ip in installations_page:
-            # Refresh the page to ensure all installations are loaded
-            ip.page.reload()
-            ip.page.wait_for_load_state("networkidle")
+            # Define the search configuration for installations
+            search_config = {
+                'search_input_getter': ip.get_installation_search_text,
+                'search_button_getter': ip.get_installation_search_button,
+                'results_container_getter': ip.get_installations_table_rows,
+                'results_selector': "table tbody tr:has(td:not(:empty))",
+            }
             
-            # 1. Search for the exact name
-            search_box = ip.get_installation_search_text()
-            search_button = ip.get_installation_search_button()
+            # Define the test cases for installations search
+            test_cases = [
+                {
+                    'name': 'Exact Name Match',
+                    'search_term': installation_name,
+                    'expected_min_results': 1,
+                    'description': f'Should find the test installation with ID {test_installation_id}'
+                },
+                {
+                    'name': 'Partial Name Match',
+                    'search_term': installation_name[-8:],  # Last 8 characters
+                    'expected_min_results': 1,
+                    'description': f'Should find installations with names containing "{installation_name[-8:]}"'
+                },
+                {
+                    'name': 'Non-Existent Name',
+                    'search_term': "ZZZZZ_NonExistentInstallation_ZZZZ",
+                    'expected_min_results': 0,
+                    'description': 'Should not find any installations with a non-existent name'
+                }
+            ]
             
-            # Clear any existing text and enter search term
-            logger.info(f"Searching for exact name match: {installation_name}")
-            search_box.clear()
-            search_box.fill(installation_name)
-            search_button.click()
-            
-            # Wait for results to load
-            try:
-                ip.page.wait_for_load_state("networkidle")
-                
-                # Check if our installation is in the results
-                ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
-                ip.page.wait_for_timeout(3000)
-                results_rows = ip.get_installations_table_rows()
-                results_rows_count = results_rows.count()
-                logger.info(f"Found {results_rows_count} results for '{installation_name}'")
-
-                # Only process if we have results
-                if results_rows_count > 0:
-                    found = False
-                    for i in range(results_rows_count):
-                        try:
-                            name_cell = results_rows.nth(i).locator("td").first
-                            name = name_cell.inner_text(timeout=1000)
-                            logger.info(f"First result name: {name}")
-                            
-                            if name == installation_name:
-                                logger.info(f"Found expected installation '{installation_name}' in results")
-                                found = True
-                                break
-                        except Exception as e:
-                            logger.warning(f"Error getting name from row {i}: {str(e)}")
-                            continue
-                    check.is_true(found, f"Expected installation '{installation_name}' not found in results")
-                else:
-                    # If no results are found, this is a failure for the exact match search
-                    check.fail(f"No results found for exact name '{installation_name}'")
-            except Exception as e:
-                logger.error(f"Error waiting for results: {str(e)}")
-                check.fail(f"Error waiting for results: {str(e)}")
-                
-                
-            # 2. Search for a partial name (last 8 characters)
-            partial_name = installation_name[-8:]
-            search_box.clear()
-            search_button.click()
-            ip.page.wait_for_load_state("networkidle")
-            search_box.fill(partial_name)
-            logger.info(f"Searching for partial name: {partial_name}")
-            search_button.click()
-            
-            # Wait for results to load - use the same robust waiting approach
-            ip.page.wait_for_load_state("networkidle")
-            ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
-            ip.page.wait_for_timeout(3000)
-            
-            # Get and log the results
-            results_rows = ip.get_installations_table_rows()
-            results_count = results_rows.count()
-            logger.info(f"Found {results_count} results for partial name '{partial_name}'")
-            
-            # More comprehensive validation
-            if results_count > 0:
-                # Check that we got at least some reasonable number of results
-                check.greater(results_count, 0, f"No results found for partial name '{partial_name}'")
-                
-                # Log and verify a sample of the results contain our search term
-                matching_results = 0
-                max_to_check = min(results_count, 10)  # Don't check too many rows
-                
-                logger.info(f"Sampling {max_to_check} results to verify they contain the search term")
-                for i in range(max_to_check):
-                    try:
-                        name_cell = results_rows.nth(i).locator("td").first
-                        name = name_cell.inner_text(timeout=1000)
-                        logger.info(f"Result {i} name: {name}")
-                        
-                        if partial_name.lower() in name.lower():  # Case-insensitive check
-                            matching_results += 1
-                            logger.info(f"Result contains search term: {name}")
-                    except Exception as e:
-                        logger.warning(f"Error getting name from row {i}: {str(e)}")
-                        continue
-                
-                # Verify that at least some of our results contain the search term
-                # This ensures the search is working correctly
-                check.greater(matching_results, 0, 
-                            f"None of the sampled results contain the search term '{partial_name}'")
-                
-                logger.info(f"Verified {matching_results} out of {max_to_check} sampled results " 
-                            f"contain the search term '{partial_name}'")
-            else:
-                check.fail(f"No results found for partial name '{partial_name}'")
-                        
-            # 3. Search for a non-existent name
-            non_existent = "ZZZZZ_NonExistentInstallation_ZZZZ"
-            logger.info(f"Searching for non-existent name: {non_existent}")
-            search_box.clear()
-            search_button.click()
-            ip.page.wait_for_load_state("networkidle")
-            search_box.fill(non_existent)
-            search_button.click()
-            
-            # Wait for results to load
-            ip.page.wait_for_load_state("networkidle")
-            
-            # Wait for page to settle
-            ip.page.wait_for_timeout(2000)
-            
-            # Check that no results are found
-            results_rows = ip.get_installations_table_rows()
-            results_count = results_rows.count()
-            logger.info(f"Found {results_count} results for non-existent name '{non_existent}'")
-            
-            # Primary check - there should be no rows
-            check.equal(results_count, 0, 
-                    f"Found {results_count} unexpected results for non-existent name '{non_existent}'")
-            
-            # Additional checks for empty state indicators (if applicable)
-            try:
-                # Check if there's any empty state container 
-                # (adjust the selector based on your application's actual implementation)
-                empty_state = ip.page.locator("table tbody:empty, .no-results, .empty-state").count()
-                if empty_state > 0:
-                    logger.info("Empty state element found as expected")
-                
-                # Check if the table body itself exists but is empty
-                table_body = ip.page.locator("table tbody").count()
-                if table_body > 0:
-                    # If table body exists, check its inner HTML
-                    table_html = ip.page.locator("table tbody").evaluate("el => el.innerHTML.trim()")
-                    logger.info(f"Table body HTML: '{table_html}'")
-                    if not table_html:
-                        logger.info("Table body exists but is empty as expected")
-            except Exception as e:
-                logger.warning(f"Error checking empty state: {str(e)}")
-
-            # Log the search box value to verify it still contains our search term
-            search_text = search_box.input_value()
-            logger.info(f"Search box contains: '{search_text}'")
-
-            # Clear the search to restore all results
-            logger.info("Clearing search to restore all results")
-            search_box.clear()
-            search_button.click()
-            ip.page.wait_for_load_state("networkidle")
+            # Execute the sarch test suite using the mixin
+            self.execute_simple_search_test(ip, search_config, test_cases)
         
     @pytest.mark.functional
     @pytest.mark.installations
@@ -619,77 +506,294 @@ class TestInstallationsPageFunctional:
         1. Clicking the Add button opens the creation form
         2. Filling out the form and submitting creates a new installation
         3. The new installation appears in the list
+        4. We can navigate to the installation details
+        5. Clean up the created installation via API    
         
         Args:
             installations_page: The InstallationsPage fixture
         """
         logger.info("Starting installation creation test")
         
-        # Generate a unique name for the test installation
-        test_installation_name = f"Test Installation UI {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        # Generate a unique identifier for this test run
+        test_run_id = str(uuid.uuid4())[:8]  # Short UUID for readability
+        username = os.getenv("USER", "unknown")  # Get current user
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        test_installation_name = f"AUTOTEST_UI_{username}_{timestamp}_{test_run_id}"
         
-        for ip in installations_page:
-            # Click the Add button
-            add_button = ip.get_installation_add_button()
-            add_button.click()
+        created_installation_id = None  # To store the ID of the created installation
+        
+        try:
+            for ip in installations_page:
+                # Step 1 - Create the installation through the UI
+                logger.info(f"Creating new installation: {test_installation_name}")
+                created_installation_id = self._create_installation_via_ui(ip, test_installation_name)
+                
+                # Step 2 - Verify the installation was created and is accessible
+                self._verify_installation_creation(ip, test_installation_name)
+                
+                logger.info(f"Successfully created installation: {test_installation_name} with ID {created_installation_id}")
+                
+        finally:
+            # Step 3 - Clean up the created installation via API
+            if created_installation_id:
+                self._cleanup_test_installation(created_installation_id, test_installation_name)
+            else:
+                logger.warning("No installation was created, skipping cleanup")
             
-            # Wait for the form to appear
-            ip.page.wait_for_selector("input[name=\"name\"]")
+    def _create_installation_via_ui(self, ip, test_installation_name):
+        """
+        Create an installation through the UI and return its ID.
+        
+        This method handles the UI interaction and extracts the installation ID
+        from the details page URL after creation.
+        
+        Returns:
+            str: The installation ID (UUID) for the created installation
+        """
+        logger.info("Creating installation through UI")
+        
+        # Click the Add button to open the creation form
+        add_button = ip.get_installation_add_button()
+        add_button.click()
+        
+        # Wait for the form to appear
+        ip.page.wait_for_selector("input[name=\'name\']")
+        
+        # Fill out the form fields
+        ip.get_installation_name_textbox().fill(test_installation_name)
+        
+        # Select an organization from the dropdown
+        organization_dropdown = ip.get_installation_select_organization_dropdown()
+        organization_dropdown.click()
+        ip.page.get_by_text("Test Organization", exact=True).click()
+        
+        # Fill out Tips
+        ip.get_installations_tips_textbox().fill("Test tips from UI automation")
+        
+        # Fill out numeric fields
+        ip.get_installations_globestartlatitude_textbox().fill("1")
+        ip.get_installations_globestartlongitude_textbox().fill("1")
+        ip.get_installations_apptimerlengthseconds_textbox().fill("5")
+        ip.get_installations_idletimerlengthseconds_textbox().fill("10")
+        ip.get_installations_idletimerdelayseconds_textbox().fill("15")
+        
+        # Select video catalogue
+        video_catalogue_dropdown = ip.get_installations_select_video_catalogue_dropdown()
+        video_catalogue_dropdown.click()
+        ip.page.get_by_text("Test Organization Catalogue").click()
+        
+        # Click Save
+        ip.get_save_button().click()
+        
+        # Wait for the page to refresh
+        ip.page.wait_for_load_state("networkidle")
+        
+        # Verify we're back on the installations list page
+        page_title = ip.page.get_by_role("heading", level=1)
+        check.equal(page_title.inner_text(), "Installations",
+                    "Should be back on Installations page after creation")
+        
+        # Find installation and get its ID from the details page URL
+        installation_id = self._find_and_extract_installation_id(ip, test_installation_name)
+        
+        if not installation_id:
+            raise Exception(f"Could not extract installation ID for '{test_installation_name}'")
+        
+        logger.info(f"Successfully created installation '{test_installation_name}' with ID {installation_id}")
+        return installation_id
+    
+    def _find_and_extract_installation_id(self, ip, test_installation_name):
+        """
+        Find the created installation and extract its ID by navigating to details.
+        
+        This method searches for the installation, clicks on it to go to details,
+        and extracts the UUID from the URL.
+        
+        Returns:
+            str: The installation ID (UUID) or None if not found
+        """
+        logger.info(f"Searching for installation '{test_installation_name}' to extract ID")
+        
+        # Search for new installation
+        search_box = ip.get_installation_search_text()
+        search_button = ip.get_installation_search_button()
+        
+        search_box.clear()
+        search_box.fill(test_installation_name)
+        search_button.click()
+        
+        # Wait for results to load
+        ip.page.wait_for_load_state("networkidle")
+        ip.page.wait_for_selector("table tbody tr:has(td:not(:empty))")
+        ip.page.wait_for_timeout(3000)
+        
+        rows = ip.get_installations_table_rows()
+        installation_found = False
+        
+        for i in range(rows.count()):
+            name_cell = rows.nth(i).locator("td").first
+            displayed_name = name_cell.inner_text()
             
-            # Fill out the form
-            ip.get_installation_name_textbox().fill(test_installation_name)
+            if displayed_name == test_installation_name:
+                logger.info(f"Found installation '{test_installation_name}' in search results")
+                installation_found = True
+                
+                # Click on the instalation name to navigate to details
+                
+                name_cell.click()
+                break
+        
+        if not installation_found:
+            logger.error(f"Installation '{test_installation_name}' not found in search results")
+            return None
+        
+        # Wait for details page to load
+        ip.page.wait_for_load_state("networkidle")
+        ip.page.wait_for_selector("h1")
+        ip.page.wait_for_timeout(2000)
+        
+        # Extract the installation ID from the URL
+        current_url = ip.page.url
+        logger.info(f"Details page URL after creation: {current_url}")
+        
+        # The URL should be .../installations/{uuid}/details
+        # We need to extract the UUID part
+        installation_id = self._extract_id_from_url(current_url)
+        
+        if installation_id:
+            logger.info(f"Extracted installation ID: {installation_id}")
+        else:
+            logger.error(f"Could not extract installation ID from URL: {current_url}")
             
-            # Select an organization from the dropdown
-            organization_dropdown = ip.get_installation_select_organization_dropdown()
-            organization_dropdown.click()
-            # Select the first option in the dropdown
-            ip.page.get_by_text("Test Organization", exact=True).click()
+        return installation_id
+    
+    def _extract_id_from_url(self, url):
+        """
+        Extract the installation ID (UUID) from the details page URL.
+        
+        Expected URL format: .../installation/{uuid}/details
+        or: .../Installations/{uuid}/details
+        
+        Returns:
+            str: The UUID if found, None otherwise
+        """
+        try:
+            # Parse the URL to get the path
+            parsed_url = urlparse(url)
+            path_parts = parsed_url.path.split('/')
             
-            # Fill out tips
-            ip.get_installations_tips_textbox().fill("Test tips from UI automation")
+            # Look for the UUID in the path
+            # UUIDs are typically 36 characters long with hyphens
+            for part in path_parts:
+                # Check if this part looks like a UUID
+                if len(part) == 36 and part.count('-') == 4:
+                    # Additional validationL try to parse as UUID
+                    try:
+                        uuid.UUID(part)  # This will raise ValueError if not a valid UUID
+                        logger.info(f"Found valid UUID in URL: {part}")
+                        return part
+                    except ValueError:
+                        logger.warning(f"Part '{part}' is not a valid UUID")
+                        continue
+                    
+            logger.warning(f"No UUID found in URL path: {parsed_url.path}")
+            return None
+        
+        except Exception as e:
+            logger.error(f"Error extracting ID from URL '{url}': {str(e)}")
+            return None
+        
+    def _verify_installation_creation(self, ip, test_installation_name):            
+        """
+        Verify that the installation was successfully created and is accessible.
+        
+        This method performs additional validation beyond just finding the installation
+        in the search results.
+        """
+        logger.info(f"Verifying installation creation for '{test_installation_name}'")
+        
+        # Chek that we're on the details page with the correct title
+        page_title = ip.page.get_by_role("heading", level=1)
+        title_text = page_title.inner_text()
+        check.is_true("Installation Details" in title_text,
+                    f"Expected title to contain 'Installation Details', got: {title_text}")
+        
+        # Verify the installation name is displayed correctly on the details page
+        try:
+            name_field = ip.get_installation_name_textbox()
+            displayed_name = name_field.input_value()
+            check.equal(displayed_name, test_installation_name,
+                        f"Installation name mismatch. Expected: '{test_installation_name}', "
+                        f"Got: '{displayed_name}'")
+            logger.info(f"Installation name verified: {displayed_name}")
+        except Exception as e:
+            logger.error(f"Error verifying installation name: {str(e)}")
             
-            # Fill out numeric fields
-            ip.get_installations_globestartlatitude_textbox().fill("0")
-            ip.get_installations_globestartlongitude_textbox().fill("0")
-            ip.get_installations_apptimerlengthseconds_textbox().fill("0")
-            ip.get_installations_idletimerlengthseconds_textbox().fill("0")
-            ip.get_installations_idletimerdelayseconds_textbox().fill("0")
+    def _cleanup_test_installation(self, installation_id, installation_name):
+        """
+        Clean up the test installation using the API.
+        
+        This method attempts to delete the installation and handles any errors gracefully.
+        Even if cleanup fails, it won't cause the test to fail.
+        """
+        logger.info(f"Starting cleanup for installation '{installation_name}' with ID {installation_id}")
+        
+        try:
+            # Get API configuration
+            api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
+            api_token = os.getenv("API_TOKEN")
             
-            # Select video catalogue
-            video_catalogue_dropdown = ip.get_installations_select_video_catalogue_dropdown()
-            video_catalogue_dropdown.click()
-            # Select the first option in the dropdown
-            ip.page.get_by_text("Test Organization Catalogue").click()
+            if not api_base_url or not api_token:
+                logger.error("API_BASE_URL or API_TOKEN not set, cannot clean up installation")
+                return
+
+            # Prepare the delete request
+            headers = {
+                "Authorization": f"Bearer {api_token}",
+                "Content-Type": "application/json"
+            }
             
-            # Click Save
-            ip.get_save_button().click()
+            delete_endpoint = f"{api_base_url}/Installations/delete?id={installation_id}"
             
-            # Wait for the page to refresh
-            ip.page.wait_for_load_state("networkidle")
+            # Attempt deletion
+            logger.info(f"Sending DELETE request to {delete_endpoint}")
+            delete_response = requests.delete(delete_endpoint, headers=headers, timeout=30)
             
-            # Verify we're back on the installations list page
-            page_title = ip.page.get_by_role("heading", level=1)
-            check.equal(page_title.inner_text(), "Installations", 
-                    "Should be back on Installations page after saving")
+            if delete_response.status_code in [200,204]:
+                logger.info(f"Successfully deleted installation '{installation_name}' with ID {installation_id}")
+            else:
+                logger.error(f"Failed to delete installation '{installation_name}' (ID: {installation_id}). "
+                            f"Status code: {delete_response.status_code}, Response: {delete_response.text}")   
+        
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout while trying to delete installation '{installation_name}' (ID: {installation_id})")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error during cleanup of installation '{installation_name}' (ID: {installation_id}): {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error during cleanup of installation '{installation_name}' (ID: {installation_id}): {str(e)}")
             
-            # Search for the new installation
-            search_box = ip.get_installation_search_text()
-            search_button = ip.get_installation_search_button()
-            
-            search_box.clear()
-            search_box.fill(test_installation_name)
-            search_button.click()
-            
-            # Wait for results to load
-            ip.page.wait_for_load_state("networkidle")
-            
-            # Verify the new installation is in the results
-            rows = ip.get_installations_table_rows()
-            found = False
-            for i in range(rows.count()):
-                name_cell = rows.nth(i).locator("td").first
-                if name_cell.inner_text() == test_installation_name:
-                    found = True
-                    break
-            
-            check.is_true(found, f"New installation '{test_installation_name}' not found after creation")
+    # Helper method to get the installation name for search testing
+    def _get_test_installation_name(self, installations_pagination_test_data):
+        """
+        Get the name of a test installation for search testing.
+        
+        This is your existing logic extracted into a helper method.
+        """
+        api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
+        api_token = os.getenv("API_TOKEN")
+        headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
+        
+        test_installation_id = installations_pagination_test_data[0]
+        
+        try:
+            response = requests.get(f"{api_base_url}/Installations/{test_installation_id}/details", headers=headers)
+            if response.status_code == 200:
+                installation_data = response.json()
+                installation_name = installation_data.get("name")
+                logger.info(f"Using test installation: {installation_name}")
+                return installation_name
+        except Exception as e:
+            logger.error(f"Failed to get installation name: {str(e)}")
+        
+        pytest.skip("Could not get test installation name for search testing")            
