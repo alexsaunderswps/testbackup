@@ -45,7 +45,7 @@ class InstallationsPage(BasePage):
         """ Get the add installation button element."""
         return self.page.get_by_role("link", name="Add")
     
-    # Instalation Table Elements
+    # Installation Table Elements
     def get_installations_table_body(self):
         """ Get the installations table body element."""
         return self.page.locator("table tbody")
