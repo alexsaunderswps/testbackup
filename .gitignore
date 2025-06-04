@@ -7,3 +7,4 @@ __pycache__/
 reports/
 /venv/
 .vscode/
+fresh_testing_env
