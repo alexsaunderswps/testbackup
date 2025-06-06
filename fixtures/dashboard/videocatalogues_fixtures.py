@@ -3,8 +3,10 @@ import os
 import pytest
 import requests
 import uuid
+from datetime import datetime
 from dotenv import load_dotenv
 from typing import List, Dict, Any
+from utilities.config import PAGE_SIZE
 from utilities.utils import logger, get_browser_name
 from page_objects.dashboard.video_catalogues_page import VideoCataloguesPage
 
@@ -50,3 +52,88 @@ def video_catalogue_page(logged_in_page):
     logger.info(f"video_catalogue_page fixture: yielding {len(video_catalogue_pages)} video catalogue page(s)")
     yield video_catalogue_pages
     logger.debug("video_catalogue_page fixture: finished")
+    
+@pytest.fixture(scope="function")
+def video_catalogue_pagination_test_data(request):
+    """
+    Fixture that creates enough video catalogue records to test pagination on the Video Catalogues page.
+
+    Returns:
+        List[str]: List of video catalogue IDs created for the test
+    """
+    logger.debug("Starting video_catalogue_pagination_test_data fixture")
+
+    # Determine the number of records to create based on the PAGE_SIZE
+    min_records_needed = PAGE_SIZE + 2
+    
+    # List to tracj created video catalogue IDs for cleanup
+    video_catalogue_ids = []
+    
+    # Header for API calls
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Create test video catalogues
+    logger.info(f"\n=== Creating {min_records_needed} test video catalogues ===")
+    
+    for i in range(min_records_needed):
+        # Generate a unique ID for the video catalogue
+        video_catalogue_id = str(uuid.uuid4())
+        test_run_id = video_catalogue_id[:8]
+        username = os.getenv("USER", "unknown")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        test_video_catalogue_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
+        
+        # Create video catalogue payload
+        payload = {
+            "description": f"Test Video Catalogue {i + 1} created by {username}",
+            "lastEditedDate": datetime.now(datetime.timezone.utc).isoformat() + 'Z',
+            "mapMarkers": [],
+            "name": test_video_catalogue_name,
+            "organizationId": organization_id,
+            "videoCatalogueId": video_catalogue_id,
+            "videos": []
+        }
+
+        # Make API call to create the video catalogue
+        try:
+            video_catalogue_endpoint = f"{api_url}/videoCatalogues/create"
+            logger.info(f"Creating video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
+            
+            # Use put (we don't use post)
+            response = requests.put(video_catalogue_endpoint, json=payload, headers=headers)
+            
+            # Since we know our API returns empty responses on success,
+            # We'll just use our generated ID if the status code indicates success
+            if response.status_code in [200, 201]:
+                video_catalogue_ids.append(video_catalogue_id)
+                logger.info(f"Successfully created video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
+            else:
+                logger.error(f"Failed to create video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}. Status code: {response.status_code}")
+                logger.error(f"Response: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception during creation: {str(e)}")
+            
+    # Log summary
+    logger.info(f"\n=== Created {len(video_catalogue_ids)} test video catalogues ===")
+    
+    # Yield the created video catalogue IDs for the test
+    yield video_catalogue_ids
+    
+    # Cleanup - delete all created installations
+    logger.info(f"\n=== Cleaning up {len(video_catalogue_ids)} test video catalogues ===")
+    for video_catalogue_id in video_catalogue_ids:
+        try:
+            delete_endpoint = f"{api_url}/videoCatalogues/delete?id={video_catalogue_id}"
+            delete_response = requests.delete(delete_endpoint, headers=headers)
+
+            if delete_response.status_code in [200, 201]:
+                logger.info(f"Successfully deleted video catalogue with ID: {video_catalogue_id}")
+            else:
+                logger.error(f"Failed to delete video catalogue with ID: {video_catalogue_id}. Status code: {response.status_code}")
+                logger.error(f"Response: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception during deletion: {str(e)}")
