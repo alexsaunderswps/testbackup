@@ -133,7 +133,6 @@ class TestInstallationsPageUI:
     @pytest.mark.installations
     @pytest.mark.pagination
     @pytest.mark.conditional_data
-    @pytest.mark.debug
     def test_installations_pagination_elements_with_sufficient_data(self, installations_page, installations_conditional_pagination_data, verify_ui_elements):
         """
         Test pagination elements when we ensure sufficient data exists.
