@@ -133,7 +133,8 @@ class TestInstallationsPageUI:
     @pytest.mark.installations
     @pytest.mark.pagination
     @pytest.mark.conditional_data
-    def test_installations_pagination_elements_with_sufficient_data(self, installations_page, conditional_pagination_data, verify_ui_elements):
+    @pytest.mark.debug
+    def test_installations_pagination_elements_with_sufficient_data(self, installations_page, installations_conditional_pagination_data, verify_ui_elements):
         """
         Test pagination elements when we ensure sufficient data exists.
         
@@ -144,11 +145,11 @@ class TestInstallationsPageUI:
         
         Args:
             installations_page: The InstallationsPage fixture
-            conditional_pagination_data: Fixture that conditionally creates test data
+            installations_conditional_pagination_data: Fixture that conditionally creates test data
             verify_ui_elements: The fixture providing UI element verification functions
         """
-        installation_ids, data_was_created = conditional_pagination_data
-        
+        installation_ids, data_was_created = installations_conditional_pagination_data
+
         if not data_was_created:
             logger.info("Test skipped - sufficient existing data for pagination testing")
             pytest.skip("Sufficient installations already exist for pagination testing")
