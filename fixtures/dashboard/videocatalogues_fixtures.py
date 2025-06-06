@@ -137,3 +137,117 @@ def video_catalogue_pagination_test_data(request):
                 logger.error(f"Response: {response.text}")
         except Exception as e:
             logger.error(f"Exception during deletion: {str(e)}")
+
+@pytest.fixture(scope="function")
+def video_catalogue_conditional_pagination_data(video_catalogue_pagination_test_data):
+    """
+    Fixture that conditionally creates test data for pagination testing.
+    
+    Logic:
+    1. Check how many installations currently exist
+    2. If insufficient for pagination, create test data
+    3. If sufficient, return empty list and skip flag
+    
+    Returns:
+        Tuple[List[str], bool]: (installation_ids, data_was_created)
+            - installation_ids: List of created installation IDs (empty if none created)
+            - data_was_created: Boolean indicating if test data was created
+    """
+    logger.info("=== Starting video_catalogue_conditional_pagination_data fixture ===")
+    
+    # Calculate the minimum records needed for pagination
+    min_records_needed_for_pagination = PAGE_SIZE + 2
+    
+    # Check the current video catalogue count
+    first_page = video_catalogue_page[0] if video_catalogue_page else None
+    if not first_page:
+        logger.error("No video catalogue page available to check current count")
+        return [], False
+    
+    # Get current pagination info
+    try:
+        first_page.page.reload()
+        first_page.page.wait_for_load_state("networkidle")
+        counts = first_page.get_pagination_counts()
+        
+        if counts:
+            current_start, current_end, total_records = counts
+            logger.info(f"Current video catalogue count: {total_records}")
+            logger.info(f"Minimum records needed for pagination: {min_records_needed_for_pagination}")
+
+            if total_records >= min_records_needed_for_pagination:
+                logger.info("Sufficient video catalogues already exist for pagination testing")
+                return [], False
+            else:
+                logger.info(f"Insufficient video catalogues for pagination testing. Current count: {total_records}")
+        else:
+            logger.warning("Could not retrieve pagination counts. Assuming insufficient data.")
+        
+    except Exception as e:
+        logger.error(f"Error checking current video catalogue count: {str(e)} - creating test data")
+        
+    # Create test data
+    logger.info("Creating test video catalogues for pagination testing")
+    
+    # Calculate how many more records we need to create
+    records_to_create = min_records_needed_for_pagination + 1 # +1 to ensure we exceed the minimum
+    
+    # Reuse the exisiting pagination test data creation logic
+    video_catalogue_ids = []
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+
+    logger.info(f"Creating {records_to_create} test video catalogues")
+    for i in range(records_to_create):
+        video_catalogue_id = str(uuid.uuid4())
+        test_run_id = video_catalogue_id[:8]
+        username = os.getenv("USER", "unknown")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        test_video_catalogue_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
+        
+        payload = {
+            "description": f"Test Video Catalogue {i + 1} created by {username}",
+            "lastEditedDate": datetime.now(datetime.timezone.utc).isoformat() + 'Z',
+            "mapMarkers": [],
+            "name": test_video_catalogue_name,
+            "organizationId": organization_id,
+            "videoCatalogueId": video_catalogue_id,
+            "videos": []
+        }
+
+        try:
+            video_catalogue_endpoint = f"{api_url}/videoCatalogues/create"
+            logger.info(f"Creating video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
+            response = requests.put(video_catalogue_endpoint, json=payload, headers=headers)
+            
+            if response.status_code in [200, 201]:
+                video_catalogue_ids.append(video_catalogue_id)
+                logger.info(f"Successfully created video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
+            else:
+                logger.error(f"Failed to create video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}. Status code: {response.status_code}")
+                logger.error(f"Response: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception during creation: {str(e)}")
+    
+    logger.info(f"Created {len(video_catalogue_ids)} test video catalogues for pagination testing")
+    
+    # Yield the created video catalogue IDs and indicate that data was created
+    yield video_catalogue_ids, True
+    
+    # Cleanup - delete all created video catalogues
+    logger.info(f"\n=== Cleaning up {len(video_catalogue_ids)} test video catalogues ===")
+    for video_catalogue_id in video_catalogue_ids:
+        try:
+            delete_endpoint = f"{api_url}/videoCatalogues/delete?id={video_catalogue_id}"
+            delete_response = requests.delete(delete_endpoint, headers=headers)
+
+            if delete_response.status_code in [200, 204]:
+                logger.info(f"Successfully deleted video catalogue with ID: {video_catalogue_id}")
+            else:
+                logger.error(f"Failed to delete video catalogue with ID: {video_catalogue_id}. Status code: {response.status_code}")
+                logger.error(f"Response: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception during deletion: {str(e)}")
