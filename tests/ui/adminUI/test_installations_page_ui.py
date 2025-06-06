@@ -2,7 +2,7 @@
 import math
 import pytest
 from datetime import datetime
-from fixtures.admin_menu.installations_fixtures import installations_page, conditional_pagination_data
+from fixtures.admin_menu.installations_fixtures import installations_page, installations_conditional_pagination_data
 from pytest_check import check
 from utilities.utils import get_browser_name,logger
     
