@@ -102,6 +102,157 @@ class VideoCataloguesPage(BasePage):
                 - total_count (int): The total number of items.
         """
         return super().get_pagination_counts()
+    
+    # Catalogues Add Wizard Elements
+    def get_next_button(self):
+        """Get the next button element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("button", name="Next")
+    
+    def get_back_button(self):
+        """Get the back button element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("button", name="Back")
+    
+    def get_add_video_catalogue_position_button(self):
+        """Get the Add Video Catalogue button element. This is also a positional display element."""
+        return self.page.get_by_role("button", name="Add Video Catalogue")
+    
+    def get_map_markers_position_button(self):
+        """Get the Map Markers button element. This is also a positional display element."""
+        return self.page.get_by_role("button", name="Map Markers")
+    
+    def get_videos_position_button(self):
+        """Get the Videos button element. This is also a positional display element."""
+        return self.page.get_by_role("button", name="Videos")
+    
+    def get_review_and_save_position_button(self):
+        """Get the Review and Save button element. This is also a positional display element."""
+        return self.page.get_by_role("button", name="Review & Save")
+    
+    # Catalogues Add Wizard Catalogue fields
+    def get_catalogue_name_label(self):
+        """Get the Catalogue Name label element in the Add Catalogue Wizard."""
+        return self.page.get_by_text("Name*", exact=True)
+    
+    def get_catalogue_name_input(self):
+        """Get the Catalogue Name input element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("textbox", name="Enter Name", exact=True)
+    
+    def get_overview_label(self):
+        """Get the Overview label element in the Add Catalogue Wizard."""
+        return self.page.get_by_text("Overview*", exact=True)
+    
+    def get_overview_input(self):
+        """Get the Overview input element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("textbox", name="Enter Overview...")
+    
+    def get_organization_label(self):
+        """Get the Organization label element in the Add Catalogue Wizard."""
+        return self.page.get_by_text("Select Organization*")
+    
+    def get_organization_dropdown(self):
+        """Get the Organization dropdown element in the Add Catalogue Wizard."""
+        return self.page.locator(".css-19bb58m").first
+
+    # Catalogues Add Wizard Map Markers checkboxes
+    def get_map_markers_tab(self):
+        """Get the Map Markers tab element in the Add Catalogue Wizard."""
+        return self.page.locator("label").filter(has_text=re.compile(r"^Map Markers$"))
+    
+    def get_custom_map_markers_tab(self):
+        """Get the Custom Map Markers tab element in the Add Catalogue Wizard."""
+        return self.page.get_by_text("Custom Map Markers")
+    
+    def get_select_all_map_markers_checkbox(self):
+        """Get the Select All Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell", name="Select All Map Markers").locator("#checkbox")
+    
+    def get_select_north_america_map_markers_checkbox(self):
+        """Get the Select North America Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="North America").locator("#checkbox")
+    
+    def get_select_africa_map_markers_checkbox(self):
+        """Get the Select Africa Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Africa").locator("#checkbox")
+    
+    def get_select_oceans_first_map_markers_checkbox(self):
+        """Get the first Select Oceans Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Oceans and Rivers").first.locator("#checkbox")
+
+    def get_select_oceans_second_map_markers_checkbox(self):
+        """Get the second Select Oceans Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Oceans and Rivers").nth(1).locator("#checkbox")
+
+    def get_select_oceans_third_map_markers_checkbox(self):
+        """Get the third Select Oceans Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Oceans and Rivers").nth(2).locator("#checkbox")
+
+    def get_select_central_america_map_markers_checkbox(self):
+        """Get the Select Central America Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Central America").locator("#checkbox")
+    
+    def get_select_south_america_map_markers_checkbox(self):
+        """Get the Select South America Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="South America").locator("#checkbox")
+    
+    def get_select_asia_map_markers_checkbox(self):
+        """Get the Select Asia Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Asia").locator("#checkbox")
+    
+    def get_select_europe_map_markers_checkbox(self):
+        """Get the Select Europe Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Europe").locator("#checkbox")
+    
+    def get_select_australia_map_markers_checkbox(self):
+        """Get the Select Australia Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Australia").locator("#checkbox")
+
+    def get_select_falkland_islands_map_markers_checkbox(self):
+        """Get the Select Falkland Islands Map Markers checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("row", name="Falkland Islands").locator("#checkbox")
+
+    # Catalogues Add Wizard Videos checkboxes
+    def get_first_video_checkbox(self):
+        """Get the first video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(5).locator("#checkbox")
+
+    def get_second_video_checkbox(self):
+        """Get the second video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(10).locator("#checkbox")
+    
+    def get_third_video_checkbox(self):
+        """Get the third video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(15).locator("#checkbox")
+    
+    def get_fourth_video_checkbox(self):
+        """Get the fourth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(20).locator("#checkbox")
+    
+    def get_fifth_video_checkbox(self):
+        """Get the fifth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(25).locator("#checkbox")
+    
+    def get_sixth_video_checkbox(self):
+        """Get the sixth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(30).locator("#checkbox")
+    
+    def get_seventh_video_checkbox(self):
+        """Get the seventh video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(35).locator("#checkbox")
+    
+    def get_eighth_video_checkbox(self):
+        """Get the eighth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(40).locator("#checkbox")
+    
+    def get_ninth_video_checkbox(self):
+        """Get the ninth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(45).locator("#checkbox")
+    
+    def get_tenth_video_checkbox(self):
+        """Get the tenth video checkbox element in the Add Catalogue Wizard."""
+        return self.page.get_by_role("cell").nth(50).locator("#checkbox")
+    
+    # Catalogues Add Wizard Review and Save elements
+    # These aren't well defined in the UI so we are skipping them for now
 
     # Check Page Element presence
     def verify_page_title_present(self) -> bool:
