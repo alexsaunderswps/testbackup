@@ -100,7 +100,7 @@ def video_catalogue_pagination_test_data(request):
 
         # Make API call to create the video catalogue
         try:
-            video_catalogue_endpoint = f"{api_url}/videoCatalogues/create"
+            video_catalogue_endpoint = f"{api_url}/videoCatalogue/create"
             logger.info(f"Creating video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
             
             # Use put (we don't use post)
@@ -127,7 +127,7 @@ def video_catalogue_pagination_test_data(request):
     logger.info(f"\n=== Cleaning up {len(video_catalogue_ids)} test video catalogues ===")
     for video_catalogue_id in video_catalogue_ids:
         try:
-            delete_endpoint = f"{api_url}/videoCatalogues/delete?id={video_catalogue_id}"
+            delete_endpoint = f"{api_url}/videoCatalogue/delete?id={video_catalogue_id}"
             delete_response = requests.delete(delete_endpoint, headers=headers)
 
             if delete_response.status_code in [200, 201]:
