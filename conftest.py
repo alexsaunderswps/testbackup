@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
 from typing import Dict, List, Tuple, Generator, Any
 from utilities.utils import logger, start_test_capture, end_test_capture, get_browser_name
+from utilities.config import PAGE_SIZE
 
 # Load and define enviromnetal variables
 load_dotenv()
@@ -445,15 +446,6 @@ def cleanup_orphaned_test_records(entity_type, headers, logger):
 def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=True):
     """
     Enhanced function to verify delete endpoint works and optionally cleanup orphaned records.
-    
-    Args:
-        entity_type (str): Key from TEST_ENTITY_CONFIGURATIONS
-        headers (dict): Headers for API requests  
-        logger: Logger instance
-        cleanup_orphaned (bool): Whether to cleanup orphaned records first
-        
-    Raises:
-        pytest.fail: If delete endpoint verification fails
     """
     if entity_type not in TEST_ENTITY_CONFIGURATIONS:
         pytest.fail(f"Unknown entity type: {entity_type}")
@@ -468,29 +460,38 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
     # Step 2: Verify delete endpoint works
     logger.info(f"\n=== Verifying delete endpoint for {entity_name} ===")
     
-    # Generate test record
+    # Generate test record with SHORTER name
     test_id = str(uuid.uuid4())
     test_run_id = test_id[:8]
     username = get_current_username()
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # Shorter timestamp format
+    timestamp = datetime.now().strftime('%m%d_%H%M')  # Shortened from '%Y%m%d_%H%M%S'
     
+    # Create name for test record here
+    base_name = f"DEL_{username}_{timestamp}_{test_run_id}"
+    # Truncate to fit within 35 characters
+    base_name = base_name[:35]
+
     # Create payload for test record
     payload = config["payload_template"].copy()
     
     # Fill in test-specific values based on entity type
     if entity_type == "installations":
         payload["installationId"] = test_id
-        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+        payload["name"] = base_name
         payload["tips"] = "Test record for delete endpoint verification"
         payload["tutorialText"] = "<b>Delete Test</b>\n\nThis record verifies delete endpoint works."
     elif entity_type == "video_catalogues":
         payload["videoCatalogueId"] = test_id
-        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+        payload["name"] = base_name
         payload["description"] = f"Test {entity_name} for delete endpoint verification"
         payload["lastEditedDate"] = datetime.now().isoformat() + 'Z'
     elif entity_type == "organizations":
         payload["organizationId"] = test_id
-        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+        payload["name"] = base_name
+
+    # DEBUG: Log the working payload and its length
+    logger.info(f"DEBUG: Delete verification payload name: '{payload['name']}' (Length: {len(payload['name'])})")
     
     test_record_created = False
     
@@ -503,6 +504,7 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
             json=payload, 
             headers=headers
         )
+        logger.info("Pausing 5 seconds - check UI now if you want to see the test record")
         
         if create_response.status_code not in [200, 201]:
             pytest.fail(
@@ -511,7 +513,7 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
             )
         
         test_record_created = True
-        logger.info(f"✓ Test {entity_name} created successfully: {test_id}")
+        logger.info(f"SUCCESS: Test {entity_name} created successfully: {test_id}")
         
         # Test delete endpoint
         delete_url = config["delete_endpoint_template"].format(id=test_id)
@@ -521,7 +523,7 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
         
         if delete_response.status_code not in [200, 204]:
             # Delete failed - we have an orphaned record
-            logger.error(f"❌ Delete endpoint failed for {entity_name}")
+            logger.error(f"FAILED: Delete endpoint failed for {entity_name}")
             logger.error(f"ORPHANED RECORD ALERT: {entity_name} ID {test_id} created but could not be deleted")
             logger.error(f"Manual cleanup required for: {payload.get('name', test_id)}")
             
@@ -532,7 +534,7 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
                 f"Cannot proceed with bulk data creation."
             )
         
-        logger.info(f"✓ Delete endpoint verification successful for {entity_name}")
+        logger.info(f"SUCCESS: Delete endpoint verification successful for {entity_name}")
         test_record_created = False  # Successfully cleaned up
         
     except requests.exceptions.RequestException as e:
@@ -549,7 +551,6 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
         logger.error(error_msg)
         pytest.fail(error_msg)
 
-
 # =============================================================================
 # HELPER FUNCTION FOR CONSISTENT TEST RECORD CREATION
 # =============================================================================
@@ -557,13 +558,7 @@ def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=
 def create_test_record_payload(entity_type, suffix=""):
     """
     Create a standardized test record payload for any entity type.
-    
-    Args:
-        entity_type (str): Key from TEST_ENTITY_CONFIGURATIONS
-        suffix (str): Optional suffix for the test name
-        
-    Returns:
-        tuple: (record_id, payload_dict)
+    Uses shortened names to fit database constraints (50 char limit).
     """
     if entity_type not in TEST_ENTITY_CONFIGURATIONS:
         raise ValueError(f"Unknown entity type: {entity_type}")
@@ -572,11 +567,29 @@ def create_test_record_payload(entity_type, suffix=""):
     
     # Generate unique identifier
     record_id = str(uuid.uuid4())
-    test_run_id = record_id[:8]
+    test_run_id = record_id[:6]  # Shortened from 8 to 6 characters
     username = get_current_username()
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # Much shorter timestamp
+    timestamp = datetime.now().strftime('%m%d_%H%M')  # Just month/day and hour/minute
     
-    test_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}{suffix}"
+    # Shortened name format: AUTO_username_mmdd_hhmm_id_suffix
+    # Target: Keep under 45 characters to be safe
+    base_name = f"AUTO_{username}_{timestamp}_{test_run_id}"
+    
+    # Add suffix but truncate if too long
+    if suffix:
+        test_name = f"{base_name}{suffix}"
+    else:
+        test_name = base_name
+    
+    # Ensure we don't exceed 45 characters (5 char buffer from 50 limit)
+    if len(test_name) > 45:
+        # Truncate suffix or base name to fit
+        available_suffix_chars = 45 - len(base_name)
+        if available_suffix_chars > 0 and suffix:
+            test_name = f"{base_name}{suffix[:available_suffix_chars]}"
+        else:
+            test_name = base_name[:45]
     
     # Create payload
     payload = config["payload_template"].copy()
@@ -594,5 +607,8 @@ def create_test_record_payload(entity_type, suffix=""):
     elif entity_type == "organizations":
         payload["organizationId"] = record_id
         payload["name"] = test_name
+    
+    # DEBUG: Log the name length
+    logger.info(f"DEBUG: Created test record name: '{test_name}' (Length: {len(test_name)})")
     
     return record_id, payload
