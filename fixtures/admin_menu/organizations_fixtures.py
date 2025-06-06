@@ -3,6 +3,7 @@ import os
 import pytest
 import requests
 import uuid
+from datetime import datetime
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
@@ -88,19 +89,23 @@ def organizations_pagination_test_data(request):
     for i in range(min_records_needed):
         # Generate unique identifier for the organization
         organization_id = str(uuid.uuid4())
-        unique_suffix = organization_id[:8]
+        test_run_id = organization_id[:8]
+        username = os.getenv("USER", "unknown")
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        test_organization_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
         
         # Create organization payload
         payload ={
-            "name": f"Test Organization {unique_suffix}",
+            "name": test_organization_name,
             "organizationId": organization_id,
         }
         
         # Make the API call to create organizations
         try:
             organization_endpoint = f"{api_url}/Organization/Create"
-            logger.info(f"Creating organization: {unique_suffix}")
-            
+            logger.info(f"Creating organization: {test_organization_name}")
+
             # Use put method for creating organizations
             response = requests.put(organization_endpoint, json=payload, headers=headers)
             
@@ -110,7 +115,7 @@ def organizations_pagination_test_data(request):
                 organization_ids.append(organization_id)
                 logger.info(f"Successfully created organization with ID: {organization_id}")
             else:
-                logger.error(f"Failed to create organization {unique_suffix}: {response.status_code} - {response.text}")
+                logger.error(f"Failed to create organization {test_organization_name}: {response.status_code} - {response.text}")
                 logger.error(f"Response: {response.text}")
         except Exception as e:
             logger.error(f"Exception during creation: {str(e)}")
