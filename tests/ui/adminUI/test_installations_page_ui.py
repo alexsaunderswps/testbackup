@@ -1,5 +1,5 @@
 #test_installations_page.py (Playwright version)
-
+import math
 import pytest
 from datetime import datetime
 from fixtures.admin_menu.installations_fixtures import installations_page
@@ -128,4 +128,57 @@ class TestInstallationsPageUI:
         for page, all_elements, missing_elements in results:
             check.is_true(all_elements, f"Missing installations pagination elements: {', '.join(missing_elements)}")
             logger.info(f"Verification Successful :: All Installations Pagination Elements found on {get_browser_name(page)}")
+    
+    @pytest.mark.UI
+    @pytest.mark.installations
+    @pytest.mark.pagination
+    @pytest.mark.conditional_data
+    def test_installations_pagination_elements_with_sufficient_data(self, installations_page, conditional_pagination_data, verify_ui_elements):
+        """
+        Test pagination elements when we ensure sufficient data exists.
+        
+        This test:
+        1. Checks if enough installations exist for pagination
+        2. Creates test data only if needed
+        3. Skips if sufficient data already exists (to avoid unnecessary data creation)
+        
+        Args:
+            installations_page: The InstallationsPage fixture
+            conditional_pagination_data: Fixture that conditionally creates test data
+            verify_ui_elements: The fixture providing UI element verification functions
+        """
+        installation_ids, data_was_created = conditional_pagination_data
+        
+        if not data_was_created:
+            logger.info("Test skipped - sufficient existing data for pagination testing")
+            pytest.skip("Sufficient installations already exist for pagination testing")
+        
+        logger.info(f"Test executed with {len(installation_ids)} newly created installations")
+        
+        # Same verification logic as the original test
+        for ip in installations_page:
+            # Refresh to ensure our test data is loaded
+            ip.page.reload()
+            ip.page.wait_for_load_state("networkidle")
             
+            # Verify pagination elements are present
+            results = verify_ui_elements.pagination_elements([ip])
+            for page, all_elements, missing_elements in results:
+                check.is_true(all_elements, 
+                            f"Missing pagination elements with test data: {', '.join(missing_elements)}")
+            
+            # Additional verification that our test data contributed to pagination
+            counts = ip.get_pagination_counts()
+            check.is_not_none(counts, "Should have pagination counts with sufficient test data")
+            
+            if counts:
+                current_start, current_end, total_records = counts
+                check.greater_equal(total_records, len(installation_ids),
+                                "Total records should include our test installations")
+                
+                # Verify we actually have pagination (more than one page)
+                page_size = current_end - current_start + 1
+                total_pages = math.ceil(total_records / page_size)
+                check.greater(total_pages, 1, "Should have multiple pages with sufficient data")
+            
+            logger.info(f"Verification Successful :: Pagination elements verified with test data on {get_browser_name(ip.page)}")
