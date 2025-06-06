@@ -139,7 +139,7 @@ def video_catalogue_pagination_test_data(request):
             logger.error(f"Exception during deletion: {str(e)}")
 
 @pytest.fixture(scope="function")
-def video_catalogue_conditional_pagination_data(video_catalogue_pagination_test_data):
+def video_catalogue_conditional_pagination_data(video_catalogue_page):
     """
     Fixture that conditionally creates test data for pagination testing.
     
@@ -205,12 +205,13 @@ def video_catalogue_conditional_pagination_data(video_catalogue_pagination_test_
         test_run_id = video_catalogue_id[:8]
         username = os.getenv("USER", "unknown")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        editedDate = f"{datetime.now().isoformat() + 'Z'}"
         
         test_video_catalogue_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
         
         payload = {
-            "description": f"Test Video Catalogue {i + 1} created by {username}",
-            "lastEditedDate": datetime.now(datetime.timezone.utc).isoformat() + 'Z',
+            "description": f"Test Video Catalogue {video_catalogue_id}",
+            "lastEditedDate": editedDate,
             "mapMarkers": [],
             "name": test_video_catalogue_name,
             "organizationId": organization_id,
@@ -219,7 +220,7 @@ def video_catalogue_conditional_pagination_data(video_catalogue_pagination_test_
         }
 
         try:
-            video_catalogue_endpoint = f"{api_url}/videoCatalogues/create"
+            video_catalogue_endpoint = f"{api_url}/videoCatalogue/create"
             logger.info(f"Creating video catalogue: {test_video_catalogue_name} with ID: {video_catalogue_id}")
             response = requests.put(video_catalogue_endpoint, json=payload, headers=headers)
             
@@ -241,7 +242,7 @@ def video_catalogue_conditional_pagination_data(video_catalogue_pagination_test_
     logger.info(f"\n=== Cleaning up {len(video_catalogue_ids)} test video catalogues ===")
     for video_catalogue_id in video_catalogue_ids:
         try:
-            delete_endpoint = f"{api_url}/videoCatalogues/delete?id={video_catalogue_id}"
+            delete_endpoint = f"{api_url}/videoCatalogue/delete?id={video_catalogue_id}"
             delete_response = requests.delete(delete_endpoint, headers=headers)
 
             if delete_response.status_code in [200, 204]:
