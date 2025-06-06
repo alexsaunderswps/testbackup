@@ -1,7 +1,11 @@
 # conftest.py (Playwright version)
 import os
 import pytest
+import requests
 import time
+import uuid
+import platform
+import pytest
 from datetime import datetime
 from dotenv import load_dotenv
 # from fixtures.admin_menu.installations_fixtures import installations_pagination_test_data
@@ -20,6 +24,11 @@ ORG_BP_PASS = os.getenv("ORG_ADMIN_BP_PASSWORD")
 ORG_DTA_USER = os.getenv("ORG_ADMIN_DTA_USERNAME")
 ORG_DTA_PASS = os.getenv("ORG_ADMIN_DTA_PASSWORD")
 QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":")
+
+api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
+api_token = os.getenv("API_TOKEN")
+organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
+video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
 # Define pytest addoption for Command Line runnig of Pytest with options
 def pytest_addoption(parser):
@@ -266,3 +275,324 @@ def verify_ui_elements():
         'definition_elements': verify_definition_elements,
         'pagination_elements': verify_pagination_elements
     })
+
+# =========================================================    
+# ENDPOINT CONFIGURATIONS FOR DELETE VERIFICATION
+# =========================================================
+
+def get_current_username():
+    """
+    Get the current username for test record naming.
+    Uses SYS_ADMIN_USER from environment variables for consistency.
+    """
+    # Use the same username that's used for login to maintain consistency
+    username = SYS_ADMIN_USER
+    if username:
+        # Clean up email format if needed (remove @domain.com part)
+        if '@' in username:
+            username = username.split('@')[0]
+        return username
+    
+    # Fallback if SYS_ADMIN_USER is not set
+    return "autotest_user"
+
+
+TEST_ENTITY_CONFIGURATIONS = {
+    "installations": {
+        "create_endpoint": f"{api_url}/Installations/create",
+        "delete_endpoint_template": f"{api_url}/Installations/delete?id={{id}}",
+        "list_endpoint": f"{api_url}/Installations",  # For cleanup search
+        "entity_name": "installation",
+        "id_field": "installationId",
+        "name_field": "name",
+        "payload_template": {
+            "installationId": "",  # Will be filled
+            "name": "",  # Will be filled
+            "videoCatalogueId": video_catalogue_id,
+            "forceOfflineMode": False,
+            "showGraphicDeath": True,
+            "showGraphicSex": True,
+            "controls": "Gaze",
+            "demoMode": True,
+            "globeStartLat": 0,
+            "globeStartLong": -10,
+            "appTimerLengthSeconds": 0,
+            "idleTimerLengthSeconds": 0,
+            "idleTimerDelaySeconds": 0,
+            "startupVideoId": None,
+            "resumeStartupVideoOnAwake": False,
+            "startupVideoLoop": False,
+            "showMenuTray": True,
+            "tips": "",  # Will be filled
+            "favorites": [],
+            "filterFavoritesByDefault": False,
+            "tutorialMode": "None",
+            "tutorialText": "",  # Will be filled
+            "organizationId": organization_id
+        }
+    },
+    "video_catalogues": {
+        "create_endpoint": f"{api_url}/videoCatalogue/create",
+        "delete_endpoint_template": f"{api_url}/videoCatalogue/delete?id={{id}}",
+        "list_endpoint": f"{api_url}/videoCatalogue",  # For cleanup search
+        "entity_name": "video catalogue",
+        "id_field": "videoCatalogueId",
+        "name_field": "name",
+        "payload_template": {
+            "description": "",  # Will be filled
+            "lastEditedDate": "",  # Will be filled
+            "mapMarkers": [],
+            "name": "",  # Will be filled
+            "organizationId": organization_id,
+            "videoCatalogueId": "",  # Will be filled
+            "videos": []
+        }
+    },
+    "organizations": {
+        "create_endpoint": f"{api_url}/Organization/Create",
+        "delete_endpoint_template": f"{api_url}/Organization/Delete?id={{id}}",
+        "list_endpoint": f"{api_url}/Organizations",  # For cleanup search
+        "entity_name": "organization",
+        "id_field": "organizationId",
+        "name_field": "name",
+        "payload_template": {
+            "name": "",  # Will be filled
+            "organizationId": "",  # Will be filled
+        }
+    }
+    # Add more entity types as needed
+}
+
+# =========================================================
+# ORPHANED RECORD CLEANUP FUNCTION
+# =========================================================
+
+def cleanup_orphaned_test_records(entity_type, headers, logger):
+    """
+    Search for and delete orphaned test records with AUTOTEST prefix.
+    
+    Args:
+        entity_type (str): Key from TEST_ENTITY_CONFIGURATIONS
+        headers (dict): Headers for API requests
+        logger: Logger instance
+    """
+    if entity_type not in TEST_ENTITY_CONFIGURATIONS:
+        logger.warning(f"Unknown entity type for cleanup: {entity_type}")
+        return
+    
+    config = TEST_ENTITY_CONFIGURATIONS[entity_type]
+    entity_name = config["entity_name"]
+    
+    logger.info(f"\n=== Cleaning up orphaned AUTOTEST {entity_name} records ===")
+    
+    try:
+        # Get list of existing records
+        list_response = requests.get(config["list_endpoint"], headers=headers)
+        
+        if list_response.status_code != 200:
+            logger.warning(f"Could not fetch {entity_name} list for cleanup: {list_response.status_code}")
+            return
+        
+        records = list_response.json()
+        if not records:
+            logger.info(f"No {entity_name} records found for cleanup")
+            return
+        
+        # Filter for AUTOTEST records
+        orphaned_records = []
+        name_field = config["name_field"]
+        id_field = config["id_field"]
+        
+        for record in records:
+            if isinstance(record, dict) and name_field in record:
+                if record[name_field] and record[name_field].startswith("AUTOTEST_"):
+                    orphaned_records.append({
+                        "id": record.get(id_field),
+                        "name": record.get(name_field)
+                    })
+        
+        if not orphaned_records:
+            logger.info(f"No orphaned AUTOTEST {entity_name} records found")
+            return
+        
+        logger.info(f"Found {len(orphaned_records)} orphaned AUTOTEST {entity_name} records")
+        
+        # Delete orphaned records
+        deleted_count = 0
+        for record in orphaned_records:
+            try:
+                delete_url = config["delete_endpoint_template"].format(id=record["id"])
+                delete_response = requests.delete(delete_url, headers=headers)
+                
+                if delete_response.status_code in [200, 204]:
+                    logger.info(f"Cleaned up orphaned {entity_name}: {record['name']} (ID: {record['id']})")
+                    deleted_count += 1
+                else:
+                    logger.warning(f"Failed to cleanup {entity_name} {record['id']}: {delete_response.status_code}")
+            except Exception as e:
+                logger.error(f"Exception cleaning up {entity_name} {record['id']}: {str(e)}")
+        
+        logger.info(f"Successfully cleaned up {deleted_count}/{len(orphaned_records)} orphaned {entity_name} records")
+        
+    except Exception as e:
+        logger.error(f"Error during orphaned {entity_name} cleanup: {str(e)}")
+
+
+# =============================================================================
+# ENHANCED DELETE ENDPOINT VERIFICATION
+# =============================================================================
+
+def verify_delete_endpoint_works(entity_type, headers, logger, cleanup_orphaned=True):
+    """
+    Enhanced function to verify delete endpoint works and optionally cleanup orphaned records.
+    
+    Args:
+        entity_type (str): Key from TEST_ENTITY_CONFIGURATIONS
+        headers (dict): Headers for API requests  
+        logger: Logger instance
+        cleanup_orphaned (bool): Whether to cleanup orphaned records first
+        
+    Raises:
+        pytest.fail: If delete endpoint verification fails
+    """
+    if entity_type not in TEST_ENTITY_CONFIGURATIONS:
+        pytest.fail(f"Unknown entity type: {entity_type}")
+    
+    config = TEST_ENTITY_CONFIGURATIONS[entity_type]
+    entity_name = config["entity_name"]
+    
+    # Step 1: Cleanup orphaned records from previous failed runs
+    if cleanup_orphaned:
+        cleanup_orphaned_test_records(entity_type, headers, logger)
+    
+    # Step 2: Verify delete endpoint works
+    logger.info(f"\n=== Verifying delete endpoint for {entity_name} ===")
+    
+    # Generate test record
+    test_id = str(uuid.uuid4())
+    test_run_id = test_id[:8]
+    username = get_current_username()
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    # Create payload for test record
+    payload = config["payload_template"].copy()
+    
+    # Fill in test-specific values based on entity type
+    if entity_type == "installations":
+        payload["installationId"] = test_id
+        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+        payload["tips"] = "Test record for delete endpoint verification"
+        payload["tutorialText"] = "<b>Delete Test</b>\n\nThis record verifies delete endpoint works."
+    elif entity_type == "video_catalogues":
+        payload["videoCatalogueId"] = test_id
+        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+        payload["description"] = f"Test {entity_name} for delete endpoint verification"
+        payload["lastEditedDate"] = datetime.now().isoformat() + 'Z'
+    elif entity_type == "organizations":
+        payload["organizationId"] = test_id
+        payload["name"] = f"DELETE_TEST_{username}_{timestamp}_{test_run_id}"
+    
+    test_record_created = False
+    
+    try:
+        # Create test record
+        logger.info(f"Creating test {entity_name} for delete verification: {test_id}")
+        
+        create_response = requests.put(
+            config["create_endpoint"], 
+            json=payload, 
+            headers=headers
+        )
+        
+        if create_response.status_code not in [200, 201]:
+            pytest.fail(
+                f"Cannot verify delete endpoint - failed to create test {entity_name}: "
+                f"{create_response.status_code} - {create_response.text}"
+            )
+        
+        test_record_created = True
+        logger.info(f"✓ Test {entity_name} created successfully: {test_id}")
+        
+        # Test delete endpoint
+        delete_url = config["delete_endpoint_template"].format(id=test_id)
+        logger.info(f"Testing delete endpoint: {delete_url}")
+        
+        delete_response = requests.delete(delete_url, headers=headers)
+        
+        if delete_response.status_code not in [200, 204]:
+            # Delete failed - we have an orphaned record
+            logger.error(f"❌ Delete endpoint failed for {entity_name}")
+            logger.error(f"ORPHANED RECORD ALERT: {entity_name} ID {test_id} created but could not be deleted")
+            logger.error(f"Manual cleanup required for: {payload.get('name', test_id)}")
+            
+            pytest.fail(
+                f"Delete endpoint verification failed for {entity_name}. "
+                f"Status: {delete_response.status_code} - {delete_response.text}. "
+                f"ORPHANED RECORD: {test_id} requires manual cleanup. "
+                f"Cannot proceed with bulk data creation."
+            )
+        
+        logger.info(f"✓ Delete endpoint verification successful for {entity_name}")
+        test_record_created = False  # Successfully cleaned up
+        
+    except requests.exceptions.RequestException as e:
+        error_msg = f"Network error during delete endpoint verification for {entity_name}: {str(e)}"
+        if test_record_created:
+            error_msg += f" ORPHANED RECORD: {test_id} may require manual cleanup."
+        logger.error(error_msg)
+        pytest.fail(error_msg)
+        
+    except Exception as e:
+        error_msg = f"Unexpected error during delete endpoint verification for {entity_name}: {str(e)}"
+        if test_record_created:
+            error_msg += f" ORPHANED RECORD: {test_id} may require manual cleanup."
+        logger.error(error_msg)
+        pytest.fail(error_msg)
+
+
+# =============================================================================
+# HELPER FUNCTION FOR CONSISTENT TEST RECORD CREATION
+# =============================================================================
+
+def create_test_record_payload(entity_type, suffix=""):
+    """
+    Create a standardized test record payload for any entity type.
+    
+    Args:
+        entity_type (str): Key from TEST_ENTITY_CONFIGURATIONS
+        suffix (str): Optional suffix for the test name
+        
+    Returns:
+        tuple: (record_id, payload_dict)
+    """
+    if entity_type not in TEST_ENTITY_CONFIGURATIONS:
+        raise ValueError(f"Unknown entity type: {entity_type}")
+    
+    config = TEST_ENTITY_CONFIGURATIONS[entity_type]
+    
+    # Generate unique identifier
+    record_id = str(uuid.uuid4())
+    test_run_id = record_id[:8]
+    username = get_current_username()
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    test_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}{suffix}"
+    
+    # Create payload
+    payload = config["payload_template"].copy()
+    
+    if entity_type == "installations":
+        payload["installationId"] = record_id
+        payload["name"] = test_name
+        payload["tips"] = "Test installation for pagination testing"
+        payload["tutorialText"] = "<b>Test Installation</b>\n\nThis is an automated test installation."
+    elif entity_type == "video_catalogues":
+        payload["videoCatalogueId"] = record_id
+        payload["name"] = test_name
+        payload["description"] = f"Test video catalogue {record_id}"
+        payload["lastEditedDate"] = datetime.now().isoformat() + 'Z'
+    elif entity_type == "organizations":
+        payload["organizationId"] = record_id
+        payload["name"] = test_name
+    
+    return record_id, payload
