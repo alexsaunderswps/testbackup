@@ -154,7 +154,7 @@ def installations_pagination_test_data(request):
             logger.error(f"Exception during deletion: {str(e)}")
 
 @pytest.fixture(scope="function")
-def conditional_pagination_data(installations_page):
+def installations_conditional_pagination_data(installations_page):
     """
     Fixture that conditionally creates test data for pagination testing.
     
