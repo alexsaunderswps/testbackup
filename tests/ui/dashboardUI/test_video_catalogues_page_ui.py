@@ -1,8 +1,9 @@
-#test_video_catalogues_page_ui.py
+#test_video_catalogues_page_ui.py (Playwright version)
 import pytest
 from pytest_check import check
 from fixtures.dashboard.videocatalogues_fixtures import video_catalogue_page
 from utilities.utils import logger, get_browser_name
+
 class TestVideoCataloguesPageUI:
     """
     Test suite for the Video Catalogues page UI elements.
@@ -94,7 +95,7 @@ class TestVideoCataloguesPageUI:
     @pytest.mark.UI
     @pytest.mark.action
     @pytest.mark.catalogue
-    def test_video_catalogue_search_elements(self, video_catalogue_page):
+    def test_video_catalogue_action_elements(self, video_catalogue_page):
         """
         Test that all video catalogue search elements are present and functional.
 
@@ -105,9 +106,9 @@ class TestVideoCataloguesPageUI:
             video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
         """
         for vcp in video_catalogue_page:
-            all_elements, missing_elements = vcp.verify_all_video_catalogues_search_elements_present()
-            check.is_true(all_elements, f"Search elements missing from Video Catalogues Page: {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: All Search elements found on Video Catalogues Page")
+            all_elements, missing_elements = vcp.verify_all_video_catalogues_action_elements_present()
+            check.is_true(all_elements, f"Action elements missing from Video Catalogues Page: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Action elements found on Video Catalogues Page")
 
     @pytest.mark.UI
     @pytest.mark.catalogue
