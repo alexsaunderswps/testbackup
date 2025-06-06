@@ -273,25 +273,25 @@ class VideoCataloguesPage(BasePage):
         """
         return super().verify_page_title("Video Catalogues", tag="h1")
 
-    def verify_all_video_catalogues_search_elements_present(self) -> Tuple[bool, List[str]]:
+    def verify_all_video_catalogues_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
-        Verify that all expected video catalogues search elements are present.
+        Verify that all expected video catalogues action elements are present.
 
         Returns:
             Tuple containing:
                 - bool: True if all elements were found, False otherwise
                 - List[str]: List of missing element names (empty if all found)
         """
-        self.logger.info("Verifying that all expected video catalogues search elements are present")
+        self.logger.info("Verifying that all expected video catalogues action elements are present")
 
         # Define elements with readable names
-        search_elements = {
+        action_elements = {
             "Search Input": self.get_video_catalogues_search_input,
             "Search Button": self.get_video_catalogues_search_button,
             "Add Video Catalogue Button": self.get_add_video_catalogue_button,
         }
-        return self.verify_page_elements_present(search_elements, "Video Catalogues Search Elements")
-    
+        return self.verify_page_elements_present(action_elements, "Video Catalogues Action Elements")
+
     def verify_all_video_catalogues_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected video catalogues table elements are present.
