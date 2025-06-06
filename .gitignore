@@ -8,3 +8,4 @@ reports/
 /venv/
 .vscode/
 fresh_testing_env
+report.html
