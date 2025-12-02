@@ -10,6 +10,7 @@ from pytest_check import check
 from page_objects.common.base_page import BasePage
 from utilities.search_mixins import SimpleSearchMixin
 from utilities.utils import logger
+from utilities.auth import get_auth_headers, get_auth_token
 from urllib.parse import urlparse
     
 class TestInstallationsPageFunctional(SimpleSearchMixin):
@@ -183,8 +184,7 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         # Get the names of our test installations
         # We'll need to query the API since the fixture only returns IDs
         api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-        api_token = os.getenv("API_TOKEN")
-        headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
+        headers = get_auth_headers()
         
         # Get an installation name to search for
         test_installation_id = installations_pagination_test_data[0]
@@ -335,8 +335,7 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         
         # Get installation details from API for comparison
         api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-        api_token = os.getenv("API_TOKEN")
-        headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
+        headers = get_auth_headers()
         expected_data = None
         
         try:
@@ -742,17 +741,13 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         try:
             # Get API configuration
             api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-            api_token = os.getenv("API_TOKEN")
-            
-            if not api_base_url or not api_token:
-                logger.error("API_BASE_URL or API_TOKEN not set, cannot clean up installation")
+
+            if not api_base_url:
+                logger.error("API_BASE_URL not set, cannot clean up installation")
                 return
 
             # Prepare the delete request
-            headers = {
-                "Authorization": f"Bearer {api_token}",
-                "Content-Type": "application/json"
-            }
+            headers = get_auth_headers()
             
             delete_endpoint = f"{api_base_url}/Installations/delete?id={installation_id}"
             
@@ -781,9 +776,8 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         This is your existing logic extracted into a helper method.
         """
         api_base_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-        api_token = os.getenv("API_TOKEN")
-        headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
-        
+        headers = get_auth_headers()
+
         test_installation_id = installations_pagination_test_data[0]
         
         try:

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
 from utilities.utils import logger, get_browser_name
+from utilities.auth import get_auth_headers
 from page_objects.admin_menu.installations_page import InstallationsPage
 
 # Load environment variables from .env file
@@ -15,7 +16,6 @@ load_dotenv()
 
 # Get API credentials and endpoints from environment variables
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
@@ -68,12 +68,9 @@ def installations_pagination_test_data(request):
     
     # List to track created installation IDs for cleanup
     installation_ids = []
-    
-    # Headers for API calls
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+
+    # Headers for API calls with dynamic token
+    headers = get_auth_headers()
     
     # Create test installations
     logger.info(f"\n=== Creating {min_records_needed} test installations ===")
@@ -209,10 +206,7 @@ def installations_conditional_pagination_data(installations_page):
     
     # Reuse the existing pagination test data creation logic
     installastions_ids = []
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+    headers = get_auth_headers()
     
     logger.info(f"Creating {records_to_create} test installations")
     

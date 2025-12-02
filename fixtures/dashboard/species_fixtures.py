@@ -6,6 +6,7 @@ import uuid
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.utils import logger, get_browser_name
+from utilities.auth import get_auth_headers
 from page_objects.dashboard.species_page import SpeciesPage
 
 # Load environment variables from .env file
@@ -13,7 +14,6 @@ load_dotenv()
 
 # Get API credentials and endpoints from environment variables
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 
 @pytest.fixture
