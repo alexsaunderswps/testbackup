@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
 from utilities.utils import logger, get_browser_name
+from utilities.auth import get_auth_headers
 from page_objects.admin_menu.installations_page import InstallationsPage
 
 # Load environment variables from .env file
@@ -21,7 +22,6 @@ load_dotenv()
 
 # Get API credentials and endpoints from environment variables
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
@@ -70,19 +70,16 @@ def installations_pagination_test_data(request):
     Returns:
         List[str]: List of installation IDs created for the test
     """
-    # Headers for API calls
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+    # Determine how many records we need for pagination
+    min_records_needed = PAGE_SIZE + 2  # At least enough to go to page 2
     
-    # Verify delete endpoint works and cleanup orphaned records
-    verify_delete_endpoint_works("installations", headers, logger)
-    
-    # Proceed with bulk creation
-    min_records_needed = PAGE_SIZE + 2
+    # List to track created installation IDs for cleanup
     installation_ids = []
+
+    # Headers for API calls with dynamic token
+    headers = get_auth_headers()
     
+    # Create test installations
     logger.info(f"\n=== Creating {min_records_needed} test installations ===")
     
     for i in range(min_records_needed):
@@ -163,8 +160,14 @@ def installations_conditional_pagination_data(installations_page):
         logger.error(f"Error checking existing data count: {str(e)} - will create test data")
     
     # Create test data
-    records_to_create = min_records_for_pagination + 1
-    installation_ids = []
+    logger.info("Creating test data for pagination")
+    
+    # Calculate how many more records we need
+    records_to_create = min_records_for_pagination + 1  # Ensure we create enough to go to at least page 2
+    
+    # Reuse the existing pagination test data creation logic
+    installastions_ids = []
+    headers = get_auth_headers()
     
     logger.info(f"Creating {records_to_create} test installations")
     

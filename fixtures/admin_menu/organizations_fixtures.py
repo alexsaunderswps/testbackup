@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
 from utilities.utils import logger, get_browser_name
+from utilities.auth import get_auth_headers
 from page_objects.admin_menu.organizations_page import OrganizationsPage
 
 # Load environment variables from .env file
@@ -21,7 +22,6 @@ load_dotenv()
 
 # Get API credentials and endpoints from environment variables
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
@@ -77,120 +77,46 @@ def organizations_pagination_test_data(request):
     Returns:
         List[Dict[str, Any]]: A list of dictionaries containing organization data
     """
-    # Headers for API calls
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+    # Determine how many records we need for pagination
+    min_records_needed = PAGE_SIZE + 2 # At least enough to go to page 2
     
-    # Verify delete endpoint works and cleanup orphaned records
-    verify_delete_endpoint_works("organizations", headers, logger)
-    
-    # Proceed with bulk creation
-    min_records_needed = PAGE_SIZE + 2
+    # List to track created organization data for cleanup
     organization_ids = []
-
+    
+    # Headers for API calls with dynamic token
+    headers = get_auth_headers()
+    
+    # Create test organizations
     logger.info(f"\n=== Creating {min_records_needed} test organizations ===")
-
+    
     for i in range(min_records_needed):
-        record_id, payload = create_test_record_payload("organizations", f"_BULK_{i}")
-
-        try:
-            config = TEST_ENTITY_CONFIGURATIONS["organizations"]
-            response = requests.put(config["create_endpoint"], json=payload, headers=headers)
-            
-            if response.status_code in [200, 201]:
-                organization_ids.append(record_id)
-                logger.info(f"Successfully created organization with ID: {record_id}")
-            else:
-                logger.error(f"Failed to create organization: {response.status_code}")
-                logger.error(f"Response: {response.text}")
-        except Exception as e:
-            logger.error(f"Exception during creation: {str(e)}")
-
-    logger.info(f"\nCreated {len(organization_ids)} test organizations")
-
-    yield organization_ids
-
-    # Cleanup
-    config = TEST_ENTITY_CONFIGURATIONS["organizations"]
-    logger.info(f"\n=== Cleaning up {len(organization_ids)} test organizations ===")
-    for organization_id in organization_ids:
-        try:
-            delete_url = config["delete_endpoint_template"].format(id=organization_id)
-            delete_response = requests.delete(delete_url, headers=headers)
-            
-            if delete_response.status_code in [200, 204]:
-                logger.info(f"Deleted organization ID: {organization_id}")
-            else:
-                logger.error(f"Failed to delete organization ID {organization_id}: {delete_response.status_code}")
-        except Exception as e:
-            logger.error(f"Exception during deletion: {str(e)}")
-
-            
-@pytest.fixture(scope="function")
-def organizations_conditional_pagination_data(organizations_page):
-    """
-    Enhanced conditional organizations fixture with delete verification and debugging.
-    """
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
-    
-    # Always verify delete endpoint and cleanup first
-    verify_delete_endpoint_works("organizations", headers, logger)
-
-    logger.info("=== Checking existing organization count for pagination test ===")
-
-    min_records_for_pagination = PAGE_SIZE + 2
-
-    # Check current organization count
-    first_page = organizations_page[0] if organizations_page else None
-    if not first_page:
-        logger.error("No organizations page object available")
-        return [], False
-
-    try:
-        first_page.page.reload()
-        first_page.page.wait_for_load_state("networkidle")
-        counts = first_page.get_pagination_counts()
+        # Generate unique identifier for the organization
+        organization_id = str(uuid.uuid4())
+        test_run_id = organization_id[:8]
+        username = os.getenv("USER", "unknown")
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        if counts:
-            current_start, current_end, total_records = counts
-            logger.info(f"Current organization count: {total_records}")
-            logger.info(f"Minimum records needed: {min_records_for_pagination}")
-            
-            if total_records >= min_records_for_pagination:
-                logger.info("Sufficient organizations exist for pagination test")
-                return [], False
-        else:
-            logger.warning("Failed to get pagination counts - will create test data")
-
-    except Exception as e:
-        logger.error(f"Error checking existing data count: {str(e)} - will create test data")
-    
-    # Create test data
-    records_to_create = min_records_for_pagination + 1
-    organization_ids = []
-
-    logger.info(f"Creating {records_to_create} test organizations")
-
-    # DEBUG: Create first record with full debugging
-    if records_to_create > 0:
-        record_id, payload = create_test_record_payload("organizations", f"_COND_0")
-        logger.info(f"DEBUG: First bulk creation payload: {payload}")
+        test_organization_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
         
+        # Create organization payload
+        payload ={
+            "name": test_organization_name,
+            "organizationId": organization_id,
+        }
+        
+        # Make the API call to create organizations
         try:
-            config = TEST_ENTITY_CONFIGURATIONS["organizations"]
-            response = requests.put(config["create_endpoint"], json=payload, headers=headers)
+            organization_endpoint = f"{api_url}/Organization/Create"
+            logger.info(f"Creating organization: {test_organization_name}")
+
+            # Use put method for creating organizations
+            response = requests.put(organization_endpoint, json=payload, headers=headers)
             
-            logger.info(f"DEBUG: First bulk creation response status: {response.status_code}")
-            logger.info(f"DEBUG: First bulk creation response text: {response.text}")
-            
-            if response.status_code in [200, 201]:
-                organization_ids.append(record_id)
-                logger.info(f"Successfully created organization with ID: {record_id}")
+            # Since we know our API returns empty responses on success,
+            # we'll just use our generated ID if the status code indicates success
+            if response.status_code in [200,201]:
+                organization_ids.append(organization_id)
+                logger.info(f"Successfully created organization with ID: {organization_id}")
             else:
                 logger.error(f"Failed to create organization: {response.status_code}")
                 logger.error(f"Response: {response.text}")
@@ -221,15 +147,15 @@ def organizations_conditional_pagination_data(organizations_page):
                 break  # Stop on first failure
         except Exception as e:
             logger.error(f"Exception during creation: {str(e)}")
-            break
-
-    logger.info(f"Created {len(organization_ids)} test organizations for pagination")
-
-    yield organization_ids, True
+            
+    # Log summary
+    logger.info(f"\nCreated {len(organization_ids)} test organizations for pagination testing")
     
-    # Cleanup
-    config = TEST_ENTITY_CONFIGURATIONS["organizations"]
-    logger.info(f"\n=== Cleaning up {len(organization_ids)} test organizations ===")
+    # Yield the created organization IDs for test use
+    yield organization_ids
+    
+    # Clean up - delete all created organizations
+    logger.info(f"\n=== Cleaning up {len(organization_ids)}created organizations ===")
     for organization_id in organization_ids:
         try:
             delete_url = config["delete_endpoint_template"].format(id=organization_id)
