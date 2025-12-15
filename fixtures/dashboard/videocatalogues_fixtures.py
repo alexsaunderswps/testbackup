@@ -131,10 +131,8 @@ def video_catalogue_conditional_pagination_data(video_catalogue_page):
             - installation_ids: List of created installation IDs (empty if none created)
             - data_was_created: Boolean indicating if test data was created
     """
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+    # Headers for API calls with dynamic token
+    headers = get_auth_headers()
     
     # Always verify delete endpoint and cleanup first
     verify_delete_endpoint_works("video_catalogues", headers, logger)

@@ -122,10 +122,8 @@ def installations_conditional_pagination_data(installations_page):
     """
     Enhanced conditional installations fixture with delete verification and debugging.
     """
-    headers = {
-        "Authorization": f"Bearer {api_token}",
-        "Content-Type": "application/json"
-    }
+    # Headers for API calls with dynamic token
+    headers = get_auth_headers()
     
     # Always verify delete endpoint and cleanup first
     verify_delete_endpoint_works("installations", headers, logger)
@@ -166,7 +164,7 @@ def installations_conditional_pagination_data(installations_page):
     records_to_create = min_records_for_pagination + 1  # Ensure we create enough to go to at least page 2
     
     # Reuse the existing pagination test data creation logic
-    installastions_ids = []
+    installation_ids = []
     headers = get_auth_headers()
     
     logger.info(f"Creating {records_to_create} test installations")

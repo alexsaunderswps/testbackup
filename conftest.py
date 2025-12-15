@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple, Generator, Any
 from utilities.utils import logger, start_test_capture, end_test_capture, get_browser_name
 from utilities.config import PAGE_SIZE
 
-# Load and define enviromnetal variables
+# Load and define environmental variables
 load_dotenv()
 SYS_ADMIN_USER = os.getenv("SYS_ADMIN_USERNAME")
 SYS_ADMIN_PASS = os.getenv("SYS_ADMIN_PASSWORD")
@@ -31,7 +31,7 @@ api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
-# Define pytest addoption for Command Line runnig of Pytest with options
+# Define pytest addoption for Command Line running of Pytest with options
 def pytest_addoption(parser):
     """
     Add custom command line options to pytest.
@@ -43,7 +43,7 @@ def pytest_addoption(parser):
         parser (argparse.Parser): The pytest command line parser.
         
     Example:
-        pytest --browser fireforx --headless False
+        pytest --browser firefox --headless False
     """
     parser.addoption(
         "--browser",
@@ -55,7 +55,7 @@ def pytest_addoption(parser):
         "--headless",
         action="store",
         default=True,
-        help="Run tests in headsless mode (True or False). Default is True." 
+        help="Run tests in headless mode (True or False). Default is True." 
     )
     parser.addoption(
         "--username",
@@ -159,7 +159,7 @@ def logged_in_page(browser_context_and_page, request):
     Fixture that provides a logged-in page(s) for tests that require pre-authentication.
 
     Args:
-        browser_context_and_page: A fixture providing brower, context, and page.
+        browser_context_and_page: A fixture providing browser, context, and page.
         request: The pytest request object.
         
     Yields:

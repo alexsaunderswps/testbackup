@@ -3,7 +3,7 @@
 Search testing mixin for consistent, robust search functionality testing.
 
 This module provides reusable components for testing search functionality across
-different pages of the application. Thie mixins focus on timing and state management
+different pages of the application. These mixins focus on timing and state management
 rather than content validation, making them robust and maintainable.
 """
 
@@ -13,7 +13,7 @@ from utilities.utils import logger
 
 class SimpleSearchMixin:
     """
-    Mixin providubg robust simple serch testing capabilities.
+    Mixin providing robust simple search testing capabilities.
     
     This mixin is designed for pages that have a simple search pattern:
     - One search input field
@@ -23,7 +23,7 @@ class SimpleSearchMixin:
     The mixin focuses on proper timing and state management rather than
     content validation, making test more reliable and maintainable.
     
-    Useage:
+    Usage:
         class TestMyPageSearch(SimpleSearchMixin):
             def test_my_search(self, my_page):
                 search_config = {
@@ -42,7 +42,7 @@ class SimpleSearchMixin:
 
         Args:
             page_object: The page object instance (e.g., InstallationsPage).
-            serch_config: Dictionary containing search element getters and selectors
+            search_config: Dictionary containing search element getters and selectors
             test_cases: List of test case dictionaries
             
         search_config format:
@@ -137,13 +137,13 @@ class SimpleSearchMixin:
         This method handles the complete lifecycle of a search:
         1. Record current state
         2. Input the search term
-        3. Execute the searach
+        3. Execute the search
         4. Wait for the completion
         5. Return result count
         """
-        logger.info(f"Executing searach for: '{search_term}'")
+        logger.info(f"Executing search for: '{search_term}'")
         
-        # Record baselline state for comparison
+        # Record baseline state for comparison
         baseline_count = self._get_results_count(search_config)
         logger.info(f"Baseline results count: {baseline_count}")
         
@@ -151,7 +151,7 @@ class SimpleSearchMixin:
         search_input = search_config['search_input_getter']()
         search_button = search_config['search_button_getter']()
         
-        # Clear any exisiting content and enter the search term
+        # Clear any existing content and enter the search term
         search_input.clear()
         page_object.page.wait_for_timeout(500)  # Ensure input is ready
         search_input.fill(search_term)
@@ -159,12 +159,12 @@ class SimpleSearchMixin:
         # Verify the search term was entered correctly
         entered_value = search_input.input_value()
         if entered_value != search_term:
-            raise Exception(f"Search term entry fialed. Expected '{search_term}', got '{entered_value}'")
+            raise Exception(f"Search term entry failed. Expected '{search_term}', got '{entered_value}'")
         
         # Execute the search
         search_button.click()
         
-        # Wait for the seaach to complete
+        # Wait for the search to complete
         self._wait_for_search_completion(page_object, search_config, baseline_count)
         
         # Get and return final result count
@@ -175,14 +175,14 @@ class SimpleSearchMixin:
 
     def _wait_for_search_completion(self, page_object, search_config, baseline_count=None):
         """
-        Wait for sarch completion using multi-layered timing strategy.
+        Wait for search completion using multi-layered timing strategy.
         
         Different web applications implement search differently.
         - Some make server requests (detected by network activity)
         - Some filter client-side (determined by DOM changes)
         - some use debouncing (requires patience)
         """
-        logger.info("Waiting for serach completion")
+        logger.info("Waiting for search completion")
         
         # Layer 1: Network activity (handles server-side searches)
         try:
@@ -201,14 +201,14 @@ class SimpleSearchMixin:
                 # Give extra time if results haven't changed yet.
                 current_count = self._get_results_count(search_config)
                 if current_count == baseline_count:
-                    logger.warning("Result count unchanged, wiating loner for search processing")
+                    logger.warning("Result count unchanged, waiting loner for search processing")
                     page_object.page.wait_for_timeout(2000)
             except Exception as e:
                 logger.warning(f"Result count check failed: {str(e)}")
                 logger.warning("Waiting longer for search processing")
                 page_object.page.wait_for_timeout(2000)
                 
-        # Layer 4: Final stabliazation
+        # Layer 4: Final stabilization
         page_object.page.wait_for_timeout(1000)
         
         logger.info("Search completion wait finished")
@@ -261,7 +261,7 @@ class SimpleSearchMixin:
             This ensures test isolation - each search test starts from
             the same clean state regardless of what previous tests did.
         """
-        logger.info("Restting search state for the next test case")
+        logger.info("Resetting search state for the next test case")
         
         # Clear the search input
         search_input = search_config['search_input_getter']()
@@ -271,10 +271,10 @@ class SimpleSearchMixin:
         search_button = search_config['search_button_getter']()
         search_button.click()
         
-        # Wait for reset to cpomplete
+        # Wait for reset to complete
         self._wait_for_search_completion(page_object, search_config)
         
-        # Verify the saerch input is acutally empty
+        # Verify the search input is actually empty
         remaining_value = search_input.input_value()
         if remaining_value:
             logger.warning(f"Search input still contains '{remaining_value}' after reset")
