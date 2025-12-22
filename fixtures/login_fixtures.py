@@ -3,13 +3,13 @@ import os
 import pytest
 from faker import Faker
 from dotenv import load_dotenv
-from pytest_check import check
+from pytest_check import check # type: ignore
 from page_objects.authentication.login_page import LoginPage
 from utilities.utils import get_browser_name, logger
 
 # Load environmental variables
 load_dotenv()
-QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":")
+QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":") # type: ignore
 SYS_ADMIN_USER = os.getenv("SYS_ADMIN_USERNAME")
 SYS_ADMIN_PASS = os.getenv("SYS_ADMIN_PASSWORD")
 ORG_WPS_USER = os.getenv("ORG_ADMIN_WPS_USERNAME")
@@ -80,7 +80,7 @@ def fresh_login_page(browser_context_and_page):
         logger.info(f"Navigating to fresh login page on {get_browser_name(page)}")
         logger.info(80 * "-")
         
-        # Clear exisiting session data if needed
+        # Clear existing session data if needed
         context.clear_cookies()
 
         # Navigate to the login page
@@ -92,7 +92,7 @@ def fresh_login_page(browser_context_and_page):
         # Verify that we're on the login page by checking for the login button
         try:
             login_button = fresh_login_page.get_login_button
-            if login_button.count() > 0:
+            if login_button.count() > 0: # type: ignore
                 fresh_login_pages.append(fresh_login_page)
                 logger.info(f"Successfully navigated to fresh login page on {get_browser_name(page)}")
             else:

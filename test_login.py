@@ -4,7 +4,7 @@ import pytest
 
 def test_successful_login(logged_in_page):
     """
-    Verify that the logged_in_page fixture is working correcly by checking for elements that should only be visible after successful login.
+    Verify that the logged_in_page fixture is working correctly by checking for elements that should only be visible after successful login.
     """
     for page in logged_in_page:
         # Check that logout button is visible (confirming that we've logged in)
