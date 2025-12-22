@@ -3,6 +3,12 @@ import os
 import pytest
 import requests
 import uuid
+from conftest import (
+    verify_delete_endpoint_works,
+    create_test_record_payload,
+    TEST_ENTITY_CONFIGURATIONS,
+    api_token
+)
 from datetime import datetime
 from dotenv import load_dotenv
 from typing import List, Dict, Any
@@ -112,8 +118,33 @@ def organizations_pagination_test_data(request):
                 organization_ids.append(organization_id)
                 logger.info(f"Successfully created organization with ID: {organization_id}")
             else:
-                logger.error(f"Failed to create organization {test_organization_name}: {response.status_code} - {response.text}")
+                logger.error(f"Failed to create organization: {response.status_code}")
                 logger.error(f"Response: {response.text}")
+                
+                # STOP HERE - don't create more if first one fails
+                logger.error("Stopping bulk creation due to first record failure")
+                yield organization_ids, True
+                return
+                
+        except Exception as e:
+            logger.error(f"Exception during first creation: {str(e)}")
+            yield organization_ids, True
+            return
+    
+    # If first record succeeded, create the rest (abbreviated for brevity)
+    for i in range(1, records_to_create):
+        record_id, payload = create_test_record_payload("organizations", f"_COND_{i}")
+        
+        try:
+            config = TEST_ENTITY_CONFIGURATIONS["organizations"]
+            response = requests.put(config["create_endpoint"], json=payload, headers=headers)
+            
+            if response.status_code in [200, 201]:
+                organization_ids.append(record_id)
+                logger.info(f"Successfully created organization with ID: {record_id}")
+            else:
+                logger.error(f"Failed to create organization: {response.status_code}")
+                break  # Stop on first failure
         except Exception as e:
             logger.error(f"Exception during creation: {str(e)}")
             
@@ -127,12 +158,12 @@ def organizations_pagination_test_data(request):
     logger.info(f"\n=== Cleaning up {len(organization_ids)}created organizations ===")
     for organization_id in organization_ids:
         try:
-            delete_endpoint = f"{api_url}/organization/delete?id={organization_id}"
-            delete_response = requests.delete(delete_endpoint, headers=headers)
-
+            delete_url = config["delete_endpoint_template"].format(id=organization_id)
+            delete_response = requests.delete(delete_url, headers=headers)
+            
             if delete_response.status_code in [200, 204]:
-                logger.info(f"Successfully deleted organization with ID: {organization_id}")
+                logger.info(f"Deleted organization ID: {organization_id}")
             else:
-                logger.error(f"Failed to delete organization {organization_id}: {delete_response.status_code} - {delete_response.text}")
+                logger.error(f"Failed to delete organization ID {organization_id}: {delete_response.status_code}")
         except Exception as e:
             logger.error(f"Exception during deletion: {str(e)}")

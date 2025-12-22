@@ -565,7 +565,7 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         # Select an organization from the dropdown
         organization_dropdown = ip.get_installation_select_organization_dropdown()
         organization_dropdown.click()
-        ip.page.get_by_text("Test Organization", exact=True).click()
+        ip.page.get_by_text("Test Organization - Used for Automation Tests", exact=True).click()
         
         # Fill out Tips
         ip.get_installations_tips_textbox().fill("Test tips from UI automation")

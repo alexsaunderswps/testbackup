@@ -153,20 +153,20 @@ class BasePage:
             self.logger.warning("Failed to navigate to the previous page: Previous page button is disabled or not found")
             return False
         
-    def navigate_foward_ellipsis(self) -> bool:
+    def navigate_forward_ellipsis(self) -> bool:
         """
-        Naigate forward by click the foward ellipsis button.
+        Navigate forward by clicking the forward ellipsis button.
 
         Returns:
-            bool: True if the foward ellipsis button was clicked successfully, False otherwise.
+            bool: True if the forward ellipsis button was clicked successfully, False otherwise.
         """
         forward_ellipsis_button = self.get_FW_break_ellipsis_button()
         if forward_ellipsis_button.count() > 0 and forward_ellipsis_button.get_attribute("aria-disabled") != "true":
-            self.logger.info("Navigating to the next page using foward ellipsis")
+            self.logger.info("Navigating to the next page using forward ellipsis")
             forward_ellipsis_button.click()
             return True
         else:
-            self.logger.warning("Failed to navigate to the next page using foward ellipsis: Foward ellipsis button is disabled or not found")
+            self.logger.warning("Failed to navigate to the next page using forward ellipsis: Forward ellipsis button is disabled or not found")
             return False
         
     def navigate_backward_ellipsis(self) -> bool:
@@ -285,7 +285,7 @@ class BasePage:
     # Check for page title (as h1) on each page
     def verify_page_title(self, expected_title: str, tag="h1") -> bool:
         """
-        Verify that the page has the epected title in an h1 tag.
+        Verify that the page has the expected title in an h1 tag.
 
         Args:
         expected_title (str): The expected title text.
