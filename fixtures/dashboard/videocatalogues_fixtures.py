@@ -6,8 +6,7 @@ import uuid
 from conftest import (
     verify_delete_endpoint_works,
     create_test_record_payload,
-    TEST_ENTITY_CONFIGURATIONS,
-    api_token
+    TEST_ENTITY_CONFIGURATIONS
 )
 from datetime import datetime
 from dotenv import load_dotenv

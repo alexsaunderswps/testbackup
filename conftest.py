@@ -27,7 +27,6 @@ ORG_DTA_PASS = os.getenv("ORG_ADMIN_DTA_PASSWORD")
 QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":")
 
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
-api_token = os.getenv("API_TOKEN")
 organization_id = os.getenv("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
 video_catalogue_id = os.getenv("TEST_VIDEO_CATALOGUE_ID", "b05980db-5833-43bd-23ca-08dc63b567ef")
 
