@@ -74,8 +74,8 @@ class TestLoginPageFunctionality:
             # Test various login failure scenarios
             for lp in login_page:
                 lp.login(username, password)
-                verifcation_func = getattr(lp, verification_method)
-                login_fails = verifcation_func()
+                verification_func = getattr(lp, verification_method)
+                login_fails = verification_func()
                 assert login_fails, expected_message
                 logger.info(f"Verification Successful :: {expected_message}")
     
