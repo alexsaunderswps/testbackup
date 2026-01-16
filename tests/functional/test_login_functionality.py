@@ -4,6 +4,7 @@ import pytest
 from faker import Faker
 from dotenv import load_dotenv
 from page_objects.authentication.login_page import LoginPage
+from fixtures.login_fixtures import login_page
 from utilities.utils import logger
 
 # Initialize Faker
@@ -16,16 +17,6 @@ SYS_ADMIN_USER = os.getenv("SYS_ADMIN_USERNAME")
 SYS_ADMIN_PASS = os.getenv("SYS_ADMIN_PASSWORD")
 VALID_USER = os.getenv("ORG_ADMIN_WPS_USERNAME")
 VALID_PASS = os.getenv("ORG_ADMIN_WPS_PASSWORD")
-
-@pytest.fixture
-def login_page(browser_context_and_page):
-    login_pages = []
-    for browser, conext, page in browser_context_and_page:
-        logger.info(f"Setting up login page on {browser.browser_type.name}")
-        page.goto(QA_LOGIN_URL)
-        login_pages.append(LoginPage(page))
-        
-    yield login_pages
     
 class TestLoginPageFunctionality:
     
