@@ -1,11 +1,11 @@
 #login_fixtures.py
 import os
 import pytest
-from faker import Faker
+from typing import List, Tuple
 from dotenv import load_dotenv
-from pytest_check import check # type: ignore
+from playwright.sync_api import BrowserContext, Page
 from page_objects.authentication.login_page import LoginPage
-from utilities.utils import get_browser_name, logger
+from utilities.utils import logger
 
 # Load environmental variables
 load_dotenv()
@@ -15,91 +15,58 @@ SYS_ADMIN_PASS = os.getenv("SYS_ADMIN_PASSWORD")
 ORG_WPS_USER = os.getenv("ORG_ADMIN_WPS_USERNAME")
 ORG_WPS_PASS = os.getenv("ORG_ADMIN_WPS_PASSWORD")
 
+
 @pytest.fixture
-def login_page(browser_context_and_page):
+def login_page(browser_instances, request) -> List[LoginPage]: # type: ignore
     """
-    Fixture that provides the Login page for each test.
+    Fixture that provides a fresh, unauthenticated Login page for each test.
     
-    This fixture creates fresh LoginPage objects for testing the login process itself.
-    Unlike other page fixtures, this uses browser_context_and_page instead of 
-    logged_in_page since we need to test the authentication process.
+    Each test gets a completely clean browser context with no cookies or 
+    stored authentication, allowing tests to exercise the login flow itself.
     
     Args:
-        browser_context_and_page: A fixture providing fresh browser instances from conftest.py
+        browser_instances: Session-scoped browsers from conftest.py
+        request: The pytest request object
         
     Yields:
-        List[LoginPage]: A list of LoginPage objects for each browser instance
+        List[LoginPage]: A list of LoginPage objects (one per browser if running "all")
     """
     logger.debug("Starting login_page fixture")
-    login_pages = []
+    contexts_and_pages: List[Tuple[BrowserContext, Page]] = []
+    login_pages: List[LoginPage] = []
     
-    for browser, context, page in browser_context_and_page:
+    for browser_type, browser in browser_instances.items():
         logger.info(80 * "-")
-        logger.info(f"Navigating to login page on {get_browser_name(page)}")
+        logger.info(f"Creating unauthenticated context for login page on {browser_type}")
         logger.info(80 * "-")
 
+        # Create fresh context with NO auth state
+        context = browser.new_context()
+        page = context.new_page()
+        
         # Navigate to the login page
         page.goto(QA_LOGIN_URL)
         
-        login_page = LoginPage(page)
+        login_page_obj = LoginPage(page)
         
         # Verify that we're on the login page by checking for the login button
         try:
-            login_button = login_page.get_login_button()
+            login_button = login_page_obj.get_login_button()
             if login_button.count() > 0:
-                logger.info(f"Successfully navigate to login page on {get_browser_name(page)}")
-                login_pages.append(login_page)
+                logger.info(f"Successfully navigated to login page on {browser_type}")
+                contexts_and_pages.append((context, page))
+                login_pages.append(login_page_obj)
             else:
-                logger.error(f"Failed to navigate to Login page on {get_browser_name(page)}")
+                logger.error(f"Failed to navigate to Login page on {browser_type}")
+                context.close()
         except Exception as e:
-            logger.error(f"Error verifying login page on {get_browser_name(page)}: {str(e)}")
+            logger.error(f"Error verifying login page on {browser_type}: {str(e)}")
+            context.close()
     
     logger.info(f"login_page fixture: yielding {len(login_pages)} login page(s)")
     yield login_pages
+    
+    # Teardown - close contexts (browsers stay alive, they're session-scoped)
+    for context, page in contexts_and_pages:
+        context.close()
     logger.debug("login_page fixture: finished")
-    
-@pytest.fixture
-def fresh_login_page(browser_context_and_page):
-    """
-    Alternative fixture for tests that need a completely fresh login page.
-    
-    This is useful for tests that might need to clear browser state or
-    test specific scenarios with clean browser sessions.
-    
-    Args:
-        browser_context_and_page: A fixture providing fresh browser instances from conftest.py
-        
-    Yields:
-        List[LoginPage]: A list of fresh LoginPage objects for each browser instance
-    """
-    logger.debug("Starting fresh_login_page fixture")
-    fresh_login_pages = []
-    
-    for browser, context, page in browser_context_and_page:
-        logger.info(80 * "-")
-        logger.info(f"Navigating to fresh login page on {get_browser_name(page)}")
-        logger.info(80 * "-")
-        
-        # Clear existing session data if needed
-        context.clear_cookies()
-
-        # Navigate to the login page
-        page.goto(QA_LOGIN_URL)
-        
-        fresh_login_page = LoginPage(page)
-        
-        
-        # Verify that we're on the login page by checking for the login button
-        try:
-            login_button = fresh_login_page.get_login_button
-            if login_button.count() > 0: # type: ignore
-                fresh_login_pages.append(fresh_login_page)
-                logger.info(f"Successfully navigated to fresh login page on {get_browser_name(page)}")
-            else:
-                logger.error(f"Failed to navigate to fresh Login page on {get_browser_name(page)}")
-        except Exception as e:
-            logger.error(f"Error verifying fresh login page on {get_browser_name(page)}: {str(e)}")
-    
-    logger.info(f"fresh_login_page fixture: yielding {len(fresh_login_pages)} fresh login page(s)")
-    yield fresh_login_pages
-    logger.debug("fresh_login_page fixture: finished")
