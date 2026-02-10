@@ -1,6 +1,7 @@
 name: Run Tests on Dispatch
 
 on:
+  workflow_dispatch: 
   repository_dispatch:
     types: [run-tests]
 
