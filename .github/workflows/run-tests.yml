@@ -44,4 +44,4 @@ jobs:
       - name: Run UI Tests
         run: |
          source venv/bin/activate
-         pytest --browser Chrome --headless True -m UI
+         pytest --browser chromium --headless True -m UI
