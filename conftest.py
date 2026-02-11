@@ -77,121 +77,202 @@ def playwright():
     """
     with sync_playwright() as playwright:
         yield playwright
-        
-def get_browser_instance(playwright, browser_name: str, headless: bool) -> Browser:
-    """
-    Get a browser instance based on the specified browser name and options.
-    
-    Args:
-        playwright (sync_playwright): The Playwright instance.
-        browser_name (str): The name of the browser to use (chromium, firefox, webkit).
-        headless (bool): Whether to run the browser in headless mode.
-        
-    Returns:
-        Browser: The browser instance.
-    """
-    logger.info(f"Launching {browser_name} browser in {'headless' if headless else 'non-headless'} mode.")
-    
-    # Convert headless to boolean
-    if isinstance(headless, str):
-        headless = headless.lower() == "true"
-    
-    if browser_name.lower() == "chromium":
-        return playwright.chromium.launch(headless=headless)
-    elif browser_name.lower() == "firefox":
-        return playwright.firefox.launch(headless=headless)
-    elif browser_name.lower() == "webkit":
-        return playwright.webkit.launch(headless=headless)
-    else:
-        raise ValueError(f"Unsupported browser {browser_name}. Supported browsers are: chromium, firefox, webkit.")
 
-@pytest.fixture(scope="function")
-def browser_context_and_page(playwright, request):
+@pytest.fixture(scope="session")
+def browser_instances(playwright, request) -> Dict[str, Browser]: # type: ignore
     """
-    Fixture that provides a browser, context, and page for each test.
+    Fixture that provides browser instances based on command line options.
     
     Args:
         playwright: The Playwright instance.
         request: The pytest request object.
-    
-    Yields:
-    tuple: A tuple containing the browser, context, and page.
+        
+    Returns:
+        Dict[str, Browser]: A dictionary of browser instances.
     """
     browser_name = request.config.getoption("--browser")
     headless = request.config.getoption("--headless")
     
-    # Handle 'all' browser option
+    #Convert headless to boolean if needed
+    if isinstance(headless, str):
+        headless = headless.lower() == "true"
+    
+    browsers = {}
+    
     if browser_name.lower() == "all":
-        browser_contexts =[]
-        for browser_type in ["chromium", "firefox", "webkit"]:
-            browser = get_browser_instance(playwright, browser_type, headless)
-            context = browser.new_context()
-            page = context.new_page()
-            start_test_capture(f"{page.browser.browser_type.name}_{request.node.name}")
-            browser_contexts.append((browser, context, page))
-            
-        yield browser_contexts
-        
-        # Teardown
-        
-        for browser, context, page in browser_contexts:
-            end_test_capture(f"{page.browser.browser_type.name}_{request.node.name}")
-            context.close()
-            browser.close()
-    
+        browser_types = ["chromium", "firefox", "webkit"]
     else:
-        # Single browser setup
-        browser = get_browser_instance(playwright, browser_name, headless)
-        context = browser.new_context()
-        page = context.new_page()
-        
-        start_test_capture(f"{browser_name}_{request.node.name}")
-        yield [(browser, context, page)]
-        
-        # Teardown
-        end_test_capture(f"{browser_name}_{request.node.name}")
-        context.close()
-        browser.close()
-
-@pytest.fixture
-def logged_in_page(browser_context_and_page, request):
-    """
-    Fixture that provides a logged-in page(s) for tests that require pre-authentication.
-
-    Args:
-        browser_context_and_page: A fixture providing browser, context, and page.
-        request: The pytest request object.
-        
-    Yields:
-    List[Page]: A list of logged-in pages.
-    """
-    logger.info("Starting logged_in_page fixture.")
-    logged_in_pages = []
+        browser_types = [browser_name.lower()]
     
+    # Launch each browser once
+    for browser_type in browser_types:
+        logger.info(f"Launching {browser_type} browser in {'headless' if headless else 'headed'} mode (session scope)")
+        
+        if browser_type == "chromium":
+            browsers[browser_type] = playwright.chromium.launch(headless=headless)
+        elif browser_type == "firefox":
+            browsers[browser_type] = playwright.firefox.launch(headless=headless)
+        elif browser_type == "webkit":
+            browsers[browser_type] = playwright.webkit.launch(headless=headless)
+        else:
+            raise ValueError(f"Unsupported browser {browser_type}. Supported browsers are: chromium, firefox, webkit.")
+    
+    logger.info(f"Launched {len(browsers)} browses(s) for test session/")
+    
+    yield browsers
+    
+    # Teardown - close all browsers at end of session
+    for browser_type, browser in browsers.items():
+        logger.info(f"Closing {browser_type} browser (session scope)")
+        browser.close()
+        
+@pytest.fixture(scope="session")
+def auth_states(browser_instances, request) -> Dict[str, str]: # type: ignore
+    """
+    Fixture that provides authentication states for each browser.
+    
+    Args:
+        browser_instances: A dictionary of browser instances.
+        request: The pytest request object.
+    """
     username = request.config.getoption("--username", default=SYS_ADMIN_USER)
     password = request.config.getoption("--password", default=SYS_ADMIN_PASS)
     
-    for browser, context, page in browser_context_and_page:
+    auth_states = {}
+    
+    for browser_type, browser in browser_instances.items():
         logger.info("="* 80)
-        logger.info(f"Logging in on {browser.browser_type.name}")
+        logger.info(f"Performing one-time login on {browser_type} to capture auth state")
         logger.info("=" * 80)
         
-        # Navigate to the login page
-        page.goto(QA_LOGIN_URL)
+        # Create temporary context just for login
+        context = browser.new_context()
+        page = context.new_page()
         
-        # Login process
+        # Perform actual login
+        page.goto(QA_LOGIN_URL)
         page.get_by_role("textbox", name="Username").fill(username)
         page.get_by_role("textbox", name="Password").fill(password)
         page.get_by_role("button", name="Log In").click()
-        
-        # Wait for login to complete - adjust the selector as needed
         page.get_by_role("button", name="LOG OUT").wait_for(state="visible")
         
-        logged_in_pages.append(page)
+        # Capture the authentication state (cookies, local storage)
+        storage_state = context.storage_state()
+        auth_states[browser_type] = storage_state
         
-    logger.debug(f"logged_in_page fixture: yielding {len(logged_in_pages)} logged-in page(s).")
-    yield logged_in_pages
-    logger.debug("logged_in_page fixture: finished.")
+        logger.info(f"Captured auth state for {browser_type} browser")
+        
+    # Close this temporary context - we only needed it to get the auth state
+    context.close()        
+    
+    yield auth_states
+
+# @pytest.fixture(scope="function")
+# def browser_context_and_page(playwright, request):
+#     """
+#     Fixture that provides a browser, context, and page for each test.
+    
+#     Args:
+#         playwright: The Playwright instance.
+#         request: The pytest request object.
+    
+#     Yields:
+#     tuple: A tuple containing the browser, context, and page.
+#     """
+#     browser_name = request.config.getoption("--browser")
+#     headless = request.config.getoption("--headless")
+    
+#     # Handle 'all' browser option
+#     if browser_name.lower() == "all":
+#         browser_contexts =[]
+#         for browser_type in ["chromium", "firefox", "webkit"]:
+#             browser = get_browser_instance(playwright, browser_type, headless)
+#             context = browser.new_context()
+#             page = context.new_page()
+#             start_test_capture(f"{page.browser.browser_type.name}_{request.node.name}")
+#             browser_contexts.append((browser, context, page))
+            
+#         yield browser_contexts
+        
+#         # Teardown
+        
+#         for browser, context, page in browser_contexts:
+#             end_test_capture(f"{page.browser.browser_type.name}_{request.node.name}")
+#             context.close()
+#             browser.close()
+    
+#     else:
+#         # Single browser setup
+#         browser = get_browser_instance(playwright, browser_name, headless)
+#         context = browser.new_context()
+#         page = context.new_page()
+        
+#         start_test_capture(f"{browser_name}_{request.node.name}")
+#         yield [(browser, context, page)]
+        
+#         # Teardown
+#         end_test_capture(f"{browser_name}_{request.node.name}")
+#         context.close()
+#         browser.close()
+
+@pytest.fixture(scope="function")
+def logged_in_page(browser_instances, auth_states, request) -> List[Page]: # type: ignore
+    """
+    Function-scoped fixture that provides fresh, isolated, pre-authenticated pages.
+    
+    Each test gets:
+    - A NEW context (isolation - clean cookies, cache, etc.)
+    - Pre-loaded auth state (no login flow needed)
+    - The same long-lived browser (no launch overhead)
+    
+    Args:
+        browser_instances: Session-scoped browsers
+        auth_states: Session-scoped authentication states
+        request: The pytest request object
+        
+    Yields:
+        List[Page]: List of logged-in pages (one per browser if running "all")
+    """
+    logger.info("Starting logged_in_page fixture.")
+    contexts_and_pages : List[Tuple[BrowserContext, Page]] = []
+    pages: List[Page] = []
+    
+    for browser_type, browser in browser_instances.items():
+        logger.info("=" * 80)
+        logger.info(f"Creating new context and page in {browser_type} browser for test: {request.node.name} with saved auth state")
+        logger.info("=" * 80)
+        
+        
+        # Create new context with stored auth state
+        storage_state = auth_states[browser_type]
+        context = browser.new_context(storage_state=storage_state)
+        page = context.new_page()
+        
+        # Navigate to the app - we should already by authenticated
+        page.goto(QA_LOGIN_URL)
+        
+        # Verify we are logged in by checking for LOG OUT button
+        page.get_by_role("button", name="LOG OUT").wait_for(state="visible")
+        
+        # Optional: state any test capture you need
+        start_test_capture(f"{browser_type}_{request.node.name}")
+        
+        contexts_and_pages.append((context, page))
+        pages.append(page)
+        
+    logger.info(f"Prepared logged-in page in {browser_type} browser for test: {request.node.name}")
+        
+    yield pages
+
+    # Teardown - close contexts (but NOT browsers - they are session-scoped)
+    for context, page in contexts_and_pages:
+        logger.info(f"Tearing down context in {browser.browser_type.name} browser for test: {request.node.name}")
+        browser_type = page.context.browser.browser_type.name
+        end_test_capture(f"{browser_type}_{request.node.name}")
+        context.close()
+        logger.debug(f"Closed context in {browser_type} browser for test: {request.node.name}")
+    logger.debug("Completed logged_in_page fixture teardown.")
+        
 
 @pytest.fixture
 def verify_ui_elements():
