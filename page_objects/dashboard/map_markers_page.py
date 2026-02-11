@@ -36,11 +36,11 @@ class MapMarkersPage(BasePage):
     # Tab Elements
     def get_map_markers_core_tab(self):
         """Get the core map markers tab element."""
-        return self.page.locator("label").filter(has_text=re.compile(r"^Map Markers$"))
+        return self.page.get_by_role("button", name="Map Markers", exact=True)
     
     def get_map_markers_custom_tab(self):
         """Get the custom map markers tab element."""
-        return self.page.get_by_text("Custom Map Markers")
+        return self.page.get_by_role("button", name="Custom Map Markers", exact=True)
     
     def get_add_map_marker_button(self):
         """Get the add map marker button element."""
