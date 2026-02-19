@@ -159,12 +159,14 @@ def auth_states(browser_instances, request) -> Dict[str, str]: # type: ignore
         # Capture the authentication state (cookies, local storage)
         storage_state = context.storage_state()
         auth_states[browser_type] = storage_state
-        
+
         logger.info(f"Captured auth state for {browser_type} browser")
-        
-    # Close this temporary context - we only needed it to get the auth state
-    context.close()        
-    
+
+        # Close this temporary context immediately — we only needed it to capture
+        # the auth state. Previously this close() call was outside the loop, so
+        # only the last browser's context was ever closed when running --browser all.
+        context.close()
+
     yield auth_states
 
 # @pytest.fixture(scope="function")
