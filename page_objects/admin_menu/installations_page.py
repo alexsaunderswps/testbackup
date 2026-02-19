@@ -188,13 +188,30 @@ class InstallationsPage(BasePage):
         """ Get the installations globe start longitude textbox element."""
         return self.page.locator("input[name=\"globeStartLong\"]")
     
+    def get_installations_select_panel_collection_label(self):
+        """Get the installations select panel collection label element."""
+        return self.page.get_by_text("Select Panel Collection")
+
+    def get_installations_select_panel_collection_dropdown(self):
+        """Get the installations select panel collection dropdown element."""
+        return self.page.locator(
+            "div:has(> input[name='panelCollectionId']) .css-19bb58m"
+        )
+
     def get_installations_select_video_catalogue_label(self):
         """ Get the installations select video catalogue label element."""
-        return self.page.get_by_text("Select Video Catalogue")  
-    
+        return self.page.get_by_text("Select Video Catalogue")
+
     def get_installations_select_video_catalogue_dropdown(self):
-        """ Get the installations select video catalogue dropdown element."""
-        return self.page.locator(".css-19bb58m").nth(2)
+        """Get the installations select video catalogue dropdown element.
+
+        Previously used .nth(2) which broke when panelCollectionId was added to
+        the form between tutorialMode and videoCatalogueId, shifting the index.
+        Now anchored to the hidden input name so index changes cannot affect it.
+        """
+        return self.page.locator(
+            "div:has(> input[name='videoCatalogueId']) .css-19bb58m"
+        )
     
     def get_installations_show_graphic_death_checkbox(self):
         """ Get the installations show graphic death checkbox element."""
