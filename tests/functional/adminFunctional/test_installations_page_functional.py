@@ -513,12 +513,13 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         """
         logger.info("Starting installation creation test")
         
-        # Generate a unique identifier for this test run
-        test_run_id = str(uuid.uuid4())[:8]  # Short UUID for readability
-        username = os.getenv("USER", "unknown")  # Get current user
+        # Generate a unique identifier for this test run.
+        # Format: AUTOTEST_UI_{YYYYMMDD_HHMMSS}_{8-char UUID} = 36 chars max.
+        # Username was previously included but caused 500 errors because the
+        # Installation.Name column is capped at 50 characters in the database.
+        test_run_id = str(uuid.uuid4())[:8]
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-
-        test_installation_name = f"AUTOTEST_UI_{username}_{timestamp}_{test_run_id}"
+        test_installation_name = f"AUTOTEST_UI_{timestamp}_{test_run_id}"
         
         created_installation_id = None  # To store the ID of the created installation
         
@@ -581,10 +582,17 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         video_catalogue_dropdown = ip.get_installations_select_video_catalogue_dropdown()
         video_catalogue_dropdown.click()
         ip.page.get_by_text("Test Organization Catalogue").click()
-        
+
+        # Select automatic download mode
+        # The mode names are seeded reference data so we select the first available
+        # option rather than hardcoding a name that might differ across environments.
+        automatic_download_dropdown = ip.get_installations_select_automatic_download_mode_dropdown()
+        automatic_download_dropdown.click()
+        ip.page.locator("[id$='-option-0']").first.click()
+
         # Click Save
         ip.get_save_button().click()
-        
+
         # Wait for the page to refresh
         ip.page.wait_for_load_state("networkidle")
         

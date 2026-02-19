@@ -188,13 +188,30 @@ class InstallationsPage(BasePage):
         """ Get the installations globe start longitude textbox element."""
         return self.page.locator("input[name=\"globeStartLong\"]")
     
+    def get_installations_select_panel_collection_label(self):
+        """Get the installations select panel collection label element."""
+        return self.page.get_by_text("Select Panel Collection")
+
+    def get_installations_select_panel_collection_dropdown(self):
+        """Get the installations select panel collection dropdown element."""
+        return self.page.locator(
+            "div:has(> input[name='panelCollectionId']) .css-19bb58m"
+        )
+
     def get_installations_select_video_catalogue_label(self):
         """ Get the installations select video catalogue label element."""
-        return self.page.get_by_text("Select Video Catalogue")  
-    
+        return self.page.get_by_text("Select Video Catalogue")
+
     def get_installations_select_video_catalogue_dropdown(self):
-        """ Get the installations select video catalogue dropdown element."""
-        return self.page.locator(".css-19bb58m").nth(2)
+        """Get the installations select video catalogue dropdown element.
+
+        Previously used .nth(2) which broke when panelCollectionId was added to
+        the form between tutorialMode and videoCatalogueId, shifting the index.
+        Now anchored to the hidden input name so index changes cannot affect it.
+        """
+        return self.page.locator(
+            "div:has(> input[name='videoCatalogueId']) .css-19bb58m"
+        )
     
     def get_installations_show_graphic_death_checkbox(self):
         """ Get the installations show graphic death checkbox element."""
@@ -215,7 +232,27 @@ class InstallationsPage(BasePage):
     def get_installations_select_startup_video_label(self):
         """ Get the installations select startup video label element."""
         return self.page.get_by_text("Select Startup Video")
-    
+
+    def get_installations_select_automatic_download_mode_label(self):
+        """Get the installations select automatic download mode label element.
+
+        This label is rendered as a <span> element outside the SelectInput component
+        (alongside a tooltip), so it is located by its visible text content.
+        """
+        return self.page.get_by_text("Select Automatic Download Mode")
+
+    def get_installations_select_automatic_download_mode_dropdown(self):
+        """Get the installations select automatic download mode dropdown element.
+
+        Uses the hidden input's name attribute to scope the locator to the correct
+        React Select container. This avoids the fragile nth() positional approach used
+        by other dropdowns on this form, which breaks when conditional elements
+        (e.g. startup video, favorites) appear or disappear and shift the index.
+        """
+        return self.page.locator(
+            "div:has(> input[name='automaticDownloadModeID']) .css-19bb58m"
+        )
+
     # Need to plan and finish adding the add installation modal elements
     # there are some issues regarding select dropdowns because
     # of the way they are hidden and then appear at some points
