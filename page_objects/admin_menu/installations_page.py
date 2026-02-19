@@ -215,7 +215,27 @@ class InstallationsPage(BasePage):
     def get_installations_select_startup_video_label(self):
         """ Get the installations select startup video label element."""
         return self.page.get_by_text("Select Startup Video")
-    
+
+    def get_installations_select_automatic_download_mode_label(self):
+        """Get the installations select automatic download mode label element.
+
+        This label is rendered as a <span> element outside the SelectInput component
+        (alongside a tooltip), so it is located by its visible text content.
+        """
+        return self.page.get_by_text("Select Automatic Download Mode")
+
+    def get_installations_select_automatic_download_mode_dropdown(self):
+        """Get the installations select automatic download mode dropdown element.
+
+        Uses the hidden input's name attribute to scope the locator to the correct
+        React Select container. This avoids the fragile nth() positional approach used
+        by other dropdowns on this form, which breaks when conditional elements
+        (e.g. startup video, favorites) appear or disappear and shift the index.
+        """
+        return self.page.locator(
+            "div:has(> input[name='automaticDownloadModeID']) .css-19bb58m"
+        )
+
     # Need to plan and finish adding the add installation modal elements
     # there are some issues regarding select dropdowns because
     # of the way they are hidden and then appear at some points
