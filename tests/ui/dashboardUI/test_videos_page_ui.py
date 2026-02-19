@@ -8,11 +8,15 @@ class TestVideoPageUI:
     """
     Test suite for the Videos page UI elements.
 
+    The Videos page renders a responsive grid of video cards. Each card contains
+    a thumbnail image, video name (h2), overview text, organization name, and
+    country name. There is no table structure on this page.
+
     This class follows the established pattern for Playwright-based UI testing,
     using the modern fixture-based approach and the verify_ui_elements pattern
     for consistent element verification across different browsers.
     """
-    
+
     @pytest.mark.UI
     @pytest.mark.video
     def test_video_page_title(self, videos_page):
@@ -22,7 +26,7 @@ class TestVideoPageUI:
         This test verifies that when users navigate to the Videos page,
         they see the correct page title, which is essential for user orientation
         and navigation feedback.
-        
+
         Args:
             videos_page: The VideosPage fixture providing page objects for each browser
         """
@@ -31,7 +35,7 @@ class TestVideoPageUI:
             title = vp.verify_page_title_present()
             check.is_true(title, "Videos title does not match")
             logger.info("Verification Successful :: Videos Page Title found")
-    
+
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.navigation
@@ -99,8 +103,8 @@ class TestVideoPageUI:
         """
         Test that all video action elements are present and functional.
 
-        This test ensures that the search button, clear search button, and Add Video Button
-        are all present and properly labeled for user interaction.
+        This test ensures that the Search button, Clear search button, and Add Video
+        link are all present and properly labeled for user interaction.
 
         Args:
             videos_page: The VideosPage fixture providing page objects for each browser
@@ -112,48 +116,64 @@ class TestVideoPageUI:
 
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.table 
-    def test_video_table_elements(self, videos_page):
+    @pytest.mark.grid
+    def test_video_grid_elements(self, videos_page):
         """
-        Test that all videos table elements are present and properly structured.
+        Test that all video grid and card elements are present and properly structured.
 
-        The videos table is the primary interface for viewing video information.
-        This test verifies that all expected columns (Thumbnail, Name, Organization, Decription,
-        Country) are present, ensuring users can access all relevant video data.
+        The Videos page renders a responsive grid of video cards rather than a table.
+        This test verifies that the grid container, individual video cards, and the
+        expected card content elements (thumbnails, names, overviews, organizations,
+        countries) are all present and rendered correctly.
 
         Args:
             videos_page: The VideosPage fixture providing page objects for each browser
         """
-        logger.info("Starting test_video_table_elements")
+        logger.info("Starting test_video_grid_elements")
         for vp in videos_page:
             vp.page.wait_for_timeout(2000)
-            all_elements, missing_elements = vp.verify_all_video_table_elements_present()
-            check.is_true(all_elements, f"Table elements missing from Videos Page: {', '.join(missing_elements)}")
-            logger.info("Verification Successful :: All Video Table Elements found on Videos Page")
+            all_elements, missing_elements = vp.verify_all_video_grid_elements_present()
+            check.is_true(all_elements, f"Grid elements missing from Videos Page: {', '.join(missing_elements)}")
+            logger.info("Verification Successful :: All Video Grid Elements found on Videos Page")
 
     @pytest.mark.UI
     @pytest.mark.video
-    @pytest.mark.table
-    def test_video_table_rows(self, videos_page):
-        """_summary_
+    @pytest.mark.grid
+    def test_video_card_count(self, videos_page):
+        """
+        Test that video cards are rendered in the grid and can be counted.
+
+        Verifies that at least one video card is present in the grid after the
+        page has loaded, confirming that video data is being fetched and rendered.
 
         Args:
-            videos_page (_type_): _description_
+            videos_page: The VideosPage fixture providing page objects for each browser
         """
         for vp in videos_page:
             vp.page.wait_for_timeout(2000)
-            row_count = vp.count_table_rows()
-            logger.info(f"Verification Successful :: Able to count all table rows. {row_count} Rows found")
+            card_count = vp.count_video_cards()
+            check.greater(card_count, 0, "Expected at least one video card in the grid")
+            logger.info(f"Verification Successful :: Found {card_count} video cards in the grid")
 
     @pytest.mark.video
-    @pytest.mark.table
-    #@pytest.mark.debug
-    def test_video_name_retreval(self, videos_page):
+    @pytest.mark.grid
+    def test_video_name_retrieval(self, videos_page):
+        """
+        Test that video names can be retrieved from the card grid.
+
+        Reads the h2 title element from each visible video card and confirms
+        that a non-empty list of names is returned, validating that card name
+        elements are accessible and populated with data.
+
+        Args:
+            videos_page: The VideosPage fixture providing page objects for each browser
+        """
         for vp in videos_page:
             vp.page.wait_for_timeout(2000)
-            vp.get_video_name_values()
-            
-            
+            video_names = vp.get_video_name_values()
+            check.greater(len(video_names), 0, "Expected to retrieve at least one video name from the grid")
+            logger.info(f"Verification Successful :: Retrieved {len(video_names)} video names from the grid")
+
     @pytest.mark.UI
     @pytest.mark.video
     @pytest.mark.pagination
@@ -174,5 +194,8 @@ class TestVideoPageUI:
             check.is_true(all_elements, f"Missing videos pagination elements: {', '.join(missing_elements)}")
             logger.info(f"Verification Successful :: All Videos Pagination Elements found on {get_browser_name(page)}")
 
-# TODO - check videos_page.py for Todo items before writing tests here
-
+# TODO - with names, check sort functionality
+# TODO - check if published column should be populated
+# TODO - gather other card data if needed (overview, org, country values)
+# TODO - with card names, verify sort order changes when sort buttons are clicked
+# TODO - Check search functionality - modal window interaction
