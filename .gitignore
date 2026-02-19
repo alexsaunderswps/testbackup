@@ -11,3 +11,4 @@ fresh_testing_env
 report.html
 reference/
 AIsummaries/
+.DS_Store
