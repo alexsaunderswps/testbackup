@@ -40,9 +40,9 @@ jobs:
       - name: Run API Tests
         run: |
           source venv/bin/activate
-          pytest -m api
+          pytest -m api -n auto --dist=loadfile
 
       - name: Run UI Tests
         run: |
-         source venv/bin/activate
-         pytest --browser chromium --headless True -m UI
+          source venv/bin/activate
+          pytest --browser chromium --headless True -m UI -n auto --dist=loadfile
