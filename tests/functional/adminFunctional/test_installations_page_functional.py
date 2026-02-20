@@ -583,6 +583,11 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
         video_catalogue_dropdown.click()
         ip.page.get_by_text("Test Organization Catalogue").click()
 
+        # Select panel collection (WILDXR-1868)
+        panel_collection_dropdown = ip.get_installations_select_panel_collection_dropdown()
+        panel_collection_dropdown.click()
+        ip.page.get_by_text("Test Panel Collection - Used for Automation Tests", exact=True).click()
+
         # Select automatic download mode
         # The mode names are seeded reference data so we select the first available
         # option rather than hardcoding a name that might differ across environments.

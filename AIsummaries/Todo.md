@@ -12,7 +12,7 @@ Items are grouped by area and roughly ordered by priority within each section. "
 
 These pages exist in the frontend but have zero page object coverage. Nothing else below can move forward for these areas without them.
 
-- [ ] **Create `PanelsPage` page object** — `panels/` component has `ManagePanelsPage`, `AddEditPanel`, `PanelsList`; no page object or tests exist
+- [x] ~~**Create `PanelsPage` page object** — `panels/` component has `ManagePanelsPage`, `AddEditPanel`, `PanelsList`; no page object or tests exist~~ ✅ Completed 2026-02-20: `page_objects/admin_menu/panels_page.py` created (WILDXR-1870)
 - [ ] **Create `PanelCollectionsPage` page object** — `panelCollections/` has `ManagePanelCollectionsPage`, `AddEditPanelCollection`; no page object or tests exist
 
 > **Note:** SpeciesCategory, VideoFormat, VideoResolution, VideoStatus, ContentType, VisualType, and Roles are backend lookup tables that populate dropdown menus on other pages but are not served as navigable pages in the web portal. They do not need page objects or UI tests. They are covered at the API level in Section 5.
@@ -23,7 +23,7 @@ These pages exist in the frontend but have zero page object coverage. Nothing el
 
 For each page below, follow the existing pattern: page title, nav elements, admin/definitions dropdowns, table columns, action buttons, pagination.
 
-- [ ] **`test_panels_page_ui.py`** — page title, nav, admin dropdown, definitions dropdown, table elements (Name, Description columns per component), pagination, Add button
+- [x] ~~**`test_panels_page_ui.py`** — page title, nav, admin dropdown, definitions dropdown, table elements (Name, Description columns per component), pagination, Add button~~ ✅ Completed 2026-02-20: `tests/ui/test_panels_page.py` — 15 tests covering page title, nav elements, admin/definitions dropdowns, list controls, all 7 table columns, pagination, Add Panel form elements, Save disabled state, View Sample Panel modal, required field validation, Cancel navigation, Edit form navigation, and search filter (WILDXR-1870)
 - [ ] **`test_panel_collections_page_ui.py`** — same structure; also verify the panels sub-list within a collection
 
 ---
@@ -212,6 +212,7 @@ Currently only Video GET edge cases are tested. Every resource needs systematic 
 - [ ] **Concurrent update conflict** — `RowVersion` on MapMarker and Device; stale update should return 409
 - [ ] **Cascade behavior** — delete an org that has installations/devices; document and test the behavior
 - [ ] **Panels known bug (WILDXR-1907)** — add a regression test for the `Math.Abs(count / pageSize) + 1` pagination formula; test should fail with current code and pass after fix is deployed
+  - *Note: `tests/api/test_api_panels.py` was completed 2026-02-20 — covers GET list (pagination envelope), search (match and no-match), and single panel details with required field verification (WILDXR-1864). CREATE/UPDATE deferred until DELETE endpoint exists.*
 
 ---
 

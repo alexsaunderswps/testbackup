@@ -253,11 +253,69 @@ class InstallationsPage(BasePage):
             "div:has(> input[name='automaticDownloadModeID']) .css-19bb58m"
         )
 
-    # Need to plan and finish adding the add installation modal elements
-    # there are some issues regarding select dropdowns because
-    # of the way they are hidden and then appear at some points
-    # so that nth() selectors change depending on what is visible 
-        
+    # -------------------------------------------------------------------------
+    # Add / Edit Installation Form — Page Titles & Navigation
+    # -------------------------------------------------------------------------
+
+    def get_add_installation_page_title(self):
+        """Get the 'Add Installation' h1 heading on the add form."""
+        return self.page.locator("h1", has_text="Add Installation")
+
+    def get_edit_installation_page_title(self):
+        """Get the 'Installation Details' h1 heading on the edit form."""
+        return self.page.locator("h1", has_text="Installation Details")
+
+    def navigate_to_first_installation_edit(self) -> None:
+        """Click the first installation row and wait for the Installation Details heading.
+
+        React Router navigation is client-side, so this waits for the h1 heading
+        to become visible rather than relying on wait_for_load_state("networkidle").
+        """
+        self.logger.info("Navigating to first installation edit form and waiting for heading")
+        self.get_installations_table_rows().first.click()
+        self.get_edit_installation_page_title().wait_for(state="visible")
+
+    # -------------------------------------------------------------------------
+    # Panel Collection Field — Display Value
+    # -------------------------------------------------------------------------
+
+    def get_panel_collection_selected_value_text(self):
+        """Get the visible displayed text of the currently selected panel collection.
+
+        React Select renders the chosen option in a child element whose class
+        contains 'singleValue'. Using a partial class match avoids breakage if
+        React Select's generated class names change between library versions.
+        """
+        return self.page.locator(
+            "div:has(> input[name='panelCollectionId'])"
+        ).locator("[class*='singleValue']")
+
+    # -------------------------------------------------------------------------
+    # Verification Methods
+    # -------------------------------------------------------------------------
+
+    def verify_panel_collection_field_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that the Panel Collection label and dropdown are both present
+        on the Add/Edit Installation form.
+
+        This check supports WILDXR-1868 — the panel collection selector was
+        added to the installation form as the frontend counterpart to the
+        API changes in WILDXR-1867.
+
+        Returns:
+            Tuple containing:
+                - bool: True if both elements were found, False otherwise.
+                - List[str]: List of missing element names (empty if all found).
+        """
+        self.logger.info("Verifying panel collection field is present on Installation form")
+
+        field_elements = {
+            "Panel Collection Label": self.get_installations_select_panel_collection_label,
+            "Panel Collection Dropdown": self.get_installations_select_panel_collection_dropdown,
+        }
+        return self.verify_page_elements_present(field_elements, "Panel Collection Field")
+
     # Check Page Element presence
     def verify_page_title_present(self) -> bool:
         """ Verify that the page title is present.

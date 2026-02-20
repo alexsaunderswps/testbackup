@@ -182,3 +182,97 @@ class TestInstallationsPageUI:
                 check.greater(total_pages, 1, "Should have multiple pages with sufficient data")
             
             logger.info(f"Verification Successful :: Pagination elements verified with test data on {get_browser_name(ip.page)}")
+
+    # =========================================================================
+    # WILDXR-1868 — Panel Collection Field on Installation Edit Form
+    # =========================================================================
+
+    @pytest.mark.UI
+    @pytest.mark.installations
+    def test_installation_edit_form_panel_collection_field_present(self, installations_page):
+        """
+        Verify that the Panel Collection label and dropdown are present on the
+        Installation Details (edit) form — the frontend change introduced by
+        WILDXR-1868.
+
+        Navigates to the first installation row and checks that both the
+        'Select Panel Collection' label and its React Select dropdown are
+        visible. If no installations exist in the QA environment the test is
+        skipped rather than failed, since that is a data condition.
+
+        Args:
+            installations_page: List of authenticated InstallationsPage instances.
+        """
+        for ip in installations_page:
+            browser_name = get_browser_name(ip.page)
+            logger.info(f"Verifying panel collection field on Installation edit form on {browser_name}")
+
+            row_count = ip.get_installations_table_rows().count()
+            if row_count == 0:
+                pytest.skip(
+                    f"No installation rows in the QA environment on {browser_name} — "
+                    "cannot test Installation Details form."
+                )
+
+            ip.navigate_to_first_installation_edit()
+
+            all_present, missing = ip.verify_panel_collection_field_present()
+
+            check.is_true(
+                all_present,
+                f"Panel collection field missing on Installation edit form on {browser_name}: {missing}"
+            )
+            if all_present:
+                logger.info(
+                    f"Verification Successful :: Panel collection field present on "
+                    f"Installation edit form on {browser_name}"
+                )
+
+    @pytest.mark.UI
+    @pytest.mark.installations
+    def test_installation_edit_form_panel_collection_has_selected_value(self, installations_page):
+        """
+        Verify that an existing installation's panel collection dropdown
+        shows a selected value — confirming the default assignment introduced
+        by WILDXR-1868 is populated for existing records.
+
+        The ticket states installations should default to 'WildXR Panels'.
+        This test verifies a value is displayed (non-empty) rather than
+        asserting the exact name, since QA installations may have been
+        updated to a different collection after initial deployment.
+
+        If no installations exist in the QA environment the test is skipped.
+
+        Args:
+            installations_page: List of authenticated InstallationsPage instances.
+        """
+        for ip in installations_page:
+            browser_name = get_browser_name(ip.page)
+            logger.info(
+                f"Verifying panel collection has a selected value on "
+                f"Installation edit form on {browser_name}"
+            )
+
+            row_count = ip.get_installations_table_rows().count()
+            if row_count == 0:
+                pytest.skip(
+                    f"No installation rows in the QA environment on {browser_name} — "
+                    "cannot test Installation Details form."
+                )
+
+            ip.navigate_to_first_installation_edit()
+
+            selected_value = ip.get_panel_collection_selected_value_text()
+
+            check.is_true(
+                selected_value.is_visible(),
+                f"Expected panel collection dropdown to show a selected value on "
+                f"{browser_name} — field appears empty. "
+                f"WILDXR-1868 states installations should default to 'WildXR Panels'."
+            )
+            if selected_value.is_visible():
+                value_text = selected_value.inner_text()
+                logger.info(
+                    f"Verification Successful :: Panel collection shows selected value "
+                    f"'{value_text}' on {browser_name}"
+                )
