@@ -364,7 +364,33 @@ def verify_ui_elements():
         'pagination_elements': verify_pagination_elements
     })
 
-# =========================================================    
+@pytest.fixture(scope="function")
+def panels_page(logged_in_page):
+    """
+    Function-scoped fixture that provides an authenticated PanelsPage for each browser.
+
+    Navigates directly to /panels and wraps each Playwright page in a PanelsPage
+    object. Navigation is done via URL rather than clicking a nav link so the
+    fixture works regardless of whether a 'Panels' nav entry is present.
+
+    Args:
+        logged_in_page: List of authenticated Playwright pages from the base fixture.
+
+    Yields:
+        List[PanelsPage]: One PanelsPage instance per configured browser.
+    """
+    from page_objects.admin_menu.panels_page import PanelsPage
+
+    panels_pages = []
+    for page in logged_in_page:
+        page.goto(f"{QA_WEB_BASE_URL}/panels")
+        page.wait_for_load_state("networkidle")
+        panels_pages.append(PanelsPage(page))
+
+    yield panels_pages
+
+
+# =========================================================
 # ENDPOINT CONFIGURATIONS FOR DELETE VERIFICATION
 # =========================================================
 
