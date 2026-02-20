@@ -439,7 +439,7 @@ TEST_ENTITY_CONFIGURATIONS = {
     "organizations": {
         "create_endpoint": f"{api_url}/Organization/Create",
         "delete_endpoint_template": f"{api_url}/Organization/Delete?id={{id}}",
-        "list_endpoint": f"{api_url}/Organizations",  # For cleanup search
+        "list_endpoint": f"{api_url}/Organization",  # For cleanup search (/Organizations returns 404)
         "entity_name": "organization",
         "id_field": "organizationId",
         "name_field": "name",
@@ -474,8 +474,13 @@ def cleanup_orphaned_test_records(entity_type, headers, logger):
     logger.info(f"\n=== Cleaning up orphaned AUTOTEST {entity_name} records ===")
     
     try:
-        # Get list of existing records
-        list_response = requests.get(config["list_endpoint"], headers=headers)
+        # pageNumber and pageSize are required — without them the API returns only 1 record.
+        # 500 is large enough to catch all test records without multiple requests.
+        list_response = requests.get(
+            config["list_endpoint"],
+            params={"pageNumber": 1, "pageSize": 500},
+            headers=headers,
+        )
         
         if list_response.status_code != 200:
             logger.warning(f"Could not fetch {entity_name} list for cleanup: {list_response.status_code}")
@@ -659,9 +664,10 @@ def create_test_record_payload(entity_type, suffix=""):
     # Much shorter timestamp
     timestamp = datetime.now().strftime('%m%d_%H%M')  # Just month/day and hour/minute
     
-    # Shortened name format: AUTO_username_mmdd_hhmm_id_suffix
-    # Target: Keep under 45 characters to be safe
-    base_name = f"AUTO_{username}_{timestamp}_{test_run_id}"
+    # Name format: AUTOTEST_username_mmdd_hhmm_id_suffix
+    # AUTOTEST_ matches the prefix checked by cleanup_orphaned_test_records.
+    # Target: Keep under 45 characters to be safe.
+    base_name = f"AUTOTEST_{username}_{timestamp}_{test_run_id}"
     
     # Add suffix but truncate if too long
     if suffix:
