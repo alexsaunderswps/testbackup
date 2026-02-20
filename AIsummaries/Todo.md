@@ -43,6 +43,7 @@ These pages have UI tests but are missing important element checks.
 - [ ] **Videos page** — add filter/sort UI element checks (the `VideoSearchModal` component exists; verify its trigger button is present)
 - [ ] **Video Catalogues page** — add search functionality test (similar to Countries search test)
 - [ ] **Installations page** — `test_installations_pagination_elements_with_sufficient_data` creates test data; verify that test cleans up properly via `AUTOTEST_` prefix
+- [x] ~~**Installations page** — missing panel collection field checks on the Installation Details (edit) form~~ ✅ Completed 2026-02-20: Added `test_installation_edit_form_panel_collection_field_present` and `test_installation_edit_form_panel_collection_has_selected_value` to `tests/ui/adminUI/test_installations_page_ui.py` (WILDXR-1868)
 - [ ] **Species page** — verify the search field clears correctly (test the clear/reset behavior)
 
 ---
@@ -228,6 +229,7 @@ Only Installations (add) and Organizations (add) have functional tests. Everythi
 
 ### 8b. Installations
 
+- [x] ~~**Add installation** — fill form via UI, verify in table, clean up via API~~ ✅ Completed (prior session): `test_add_installation` in `test_installations_page_functional.py`; updated 2026-02-20 to explicitly select panel collection via `_create_installation_via_ui` helper (WILDXR-1868)
 - [ ] **Edit installation** — create via API, navigate to UI, edit name, verify change
 - [ ] **Delete installation** — create via API, delete via UI, verify removed
 - [ ] **Search clears** — search for a term, then clear search, verify all results return

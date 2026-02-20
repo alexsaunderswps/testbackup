@@ -390,6 +390,33 @@ def panels_page(logged_in_page):
     yield panels_pages
 
 
+@pytest.fixture(scope="function")
+def panel_collections_page(logged_in_page):
+    """
+    Function-scoped fixture that provides an authenticated PanelCollectionsPage
+    for each browser.
+
+    Navigates directly to /panelCollections and wraps each Playwright page in a
+    PanelCollectionsPage object. Navigation is done via URL rather than clicking
+    a nav link so the fixture works regardless of nav structure.
+
+    Args:
+        logged_in_page: List of authenticated Playwright pages from the base fixture.
+
+    Yields:
+        List[PanelCollectionsPage]: One PanelCollectionsPage instance per configured browser.
+    """
+    from page_objects.admin_menu.panel_collections_page import PanelCollectionsPage
+
+    panel_collection_pages = []
+    for page in logged_in_page:
+        page.goto(f"{QA_WEB_BASE_URL}/panelCollections")
+        page.wait_for_load_state("networkidle")
+        panel_collection_pages.append(PanelCollectionsPage(page))
+
+    yield panel_collection_pages
+
+
 # =========================================================
 # ENDPOINT CONFIGURATIONS FOR DELETE VERIFICATION
 # =========================================================
