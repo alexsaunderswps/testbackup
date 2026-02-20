@@ -136,21 +136,23 @@ def installations_conditional_pagination_data(installations_page):
     first_page = installations_page[0] if installations_page else None
     if not first_page:
         logger.error("No installations page object available")
-        return [], False
-    
+        yield [], False
+        return
+
     try:
         first_page.page.reload()
         first_page.page.wait_for_load_state("networkidle")
         counts = first_page.get_pagination_counts()
-        
+
         if counts:
             current_start, current_end, total_records = counts
             logger.info(f"Current installation count: {total_records}")
             logger.info(f"Minimum records needed: {min_records_for_pagination}")
-            
+
             if total_records >= min_records_for_pagination:
                 logger.info("Sufficient installations exist for pagination test")
-                return [], False
+                yield [], False
+                return
         else:
             logger.warning("Failed to get pagination counts - will create test data")
 

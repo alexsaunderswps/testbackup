@@ -146,21 +146,23 @@ def video_catalogue_conditional_pagination_data(video_catalogue_page):
     first_page = video_catalogue_page[0] if video_catalogue_page else None
     if not first_page:
         logger.error("No video catalogues page object available")
-        return [], False
-    
+        yield [], False
+        return
+
     try:
         first_page.page.reload()
         first_page.page.wait_for_load_state("networkidle")
         counts = first_page.get_pagination_counts()
-        
+
         if counts:
             current_start, current_end, total_records = counts
             logger.info(f"Current video catalogue count: {total_records}")
             logger.info(f"Minimum records needed: {min_records_for_pagination}")
-            
+
             if total_records >= min_records_for_pagination:
                 logger.info("Sufficient video catalogues exist for pagination test")
-                return [], False
+                yield [], False
+                return
         else:
             logger.warning("Failed to get pagination counts - will create test data")
 
