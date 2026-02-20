@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:wildxr-web-qa.azurewebsites.net)"
+      "WebFetch(domain:wildxr-web-qa.azurewebsites.net)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   },
