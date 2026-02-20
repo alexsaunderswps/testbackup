@@ -7,7 +7,8 @@ from conftest import (
     verify_delete_endpoint_works,
     create_test_record_payload,
     TEST_ENTITY_CONFIGURATIONS,
-    api_token
+    api_token,
+    QA_WEB_BASE_URL,
 )
 from datetime import datetime
 from dotenv import load_dotenv
@@ -43,9 +44,8 @@ def installations_page(logged_in_page):
         logger.info(f"Navigating to Installations page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        #Navigate to Installations page
-        page.get_by_role("button", name="Admin").click()
-        page.get_by_role("link", name="Installations").click()
+        # Navigate directly to Installations page
+        page.goto(QA_WEB_BASE_URL + "/installations")
         
         # Create the page object
         installations_page = InstallationsPage(page)

@@ -2,6 +2,7 @@
 import pytest
 from utilities.utils import logger, get_browser_name
 from page_objects.admin_menu.devices_page import DevicesPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def devices_page(logged_in_page):
@@ -26,9 +27,8 @@ def devices_page(logged_in_page):
         logger.info(f"Navigating to Devices page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        # Navigate to Devices page through the Admin menu
-        page.get_by_role("button", name="Admin").click()
-        page.get_by_role("link", name="Devices").click()
+        # Navigate directly to Devices page
+        page.goto(QA_WEB_BASE_URL + "/devices")
         
         # Create the page object
         devices_page = DevicesPage(page)

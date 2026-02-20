@@ -7,7 +7,8 @@ from conftest import (
     verify_delete_endpoint_works,
     create_test_record_payload,
     TEST_ENTITY_CONFIGURATIONS,
-    api_token
+    api_token,
+    QA_WEB_BASE_URL,
 )
 from datetime import datetime
 from dotenv import load_dotenv
@@ -42,8 +43,8 @@ def video_catalogue_page(logged_in_page):
         logger.info(f"Navigating to Video Catalogues page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate to Video Catalogues page
-        page.get_by_role("link", name="Video Catalogues").click()
+    # Navigate directly to Video Catalogues page
+        page.goto(QA_WEB_BASE_URL + "/videoCatalogues")
         
     # Create the page object
         video_catalogue_page = VideoCataloguesPage(page)

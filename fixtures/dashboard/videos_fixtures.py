@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from utilities.utils import logger, get_browser_name
 from utilities.auth import get_auth_headers
 from page_objects.dashboard.videos_page import VideosPage
+from conftest import QA_WEB_BASE_URL
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,8 +35,8 @@ def videos_page(logged_in_page):
         logger.info(f"Navigating to Videos page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate to Videos page
-        page.get_by_role("link", name="Videos").click()
+    # Navigate directly to Videos page
+        page.goto(QA_WEB_BASE_URL + "/videos")
         
     # Create the page object
         videos_page = VideosPage(page)

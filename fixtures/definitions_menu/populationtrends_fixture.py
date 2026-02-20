@@ -2,6 +2,7 @@
 import pytest
 from utilities.utils import logger, get_browser_name
 from page_objects.definitions_menu.population_trend_page import PopulationTrendPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def population_trend_page(logged_in_page):
@@ -26,9 +27,8 @@ def population_trend_page(logged_in_page):
         logger.info(f"Navigating to Population Trend page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        # Navigate to Population Trend page through the Definitions menu
-        page.get_by_role("button", name="Definitions").click()
-        page.get_by_role("link", name="Population Trend").click()
+        # Navigate directly to Population Trend page
+        page.goto(QA_WEB_BASE_URL + "/populationTrend")
         
         # Create the page object
         population_trend_page = PopulationTrendPage(page)

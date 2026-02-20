@@ -25,6 +25,7 @@ ORG_BP_PASS = os.getenv("ORG_ADMIN_BP_PASSWORD")
 ORG_DTA_USER = os.getenv("ORG_ADMIN_DTA_USERNAME")
 ORG_DTA_PASS = os.getenv("ORG_ADMIN_DTA_PASSWORD")
 QA_LOGIN_URL = os.getenv("QA_LOGIN_URL").replace("\\x3a", ":")
+QA_WEB_BASE_URL = QA_LOGIN_URL.replace("/login", "")  # e.g. https://wildxr-web-qa.azurewebsites.net
 
 api_url = os.getenv("API_BASE_URL").replace("\\x3a", ":")
 api_token = os.getenv("API_TOKEN")
@@ -221,44 +222,47 @@ def auth_states(browser_instances, request) -> Dict[str, str]: # type: ignore
 def logged_in_page(browser_instances, auth_states, request) -> List[Page]: # type: ignore
     """
     Function-scoped fixture that provides fresh, isolated, pre-authenticated pages.
-    
+
     Each test gets:
-    - A NEW context (isolation - clean cookies, cache, etc.)
+    - A NEW context (isolation — clean cookies, cache, etc.)
     - Pre-loaded auth state (no login flow needed)
     - The same long-lived browser (no launch overhead)
-    
+    - A blank page ready for the page fixture to navigate to its target
+
+    No navigation happens here. Each page fixture is responsible for navigating
+    to its own target page. This means every test makes exactly ONE network
+    round-trip before the test body starts, rather than two (previously this
+    fixture navigated to QA_LOGIN_URL and waited for LOG OUT, then the page
+    fixture navigated again to the actual target page).
+
+    Auth failure is still detected: if the stored auth state is expired, the
+    app will redirect to the login page when the page fixture navigates, and
+    the fixture's page-title verification will fail with a clear error.
+
     Args:
         browser_instances: Session-scoped browsers
         auth_states: Session-scoped authentication states
         request: The pytest request object
-        
+
     Yields:
-        List[Page]: List of logged-in pages (one per browser if running "all")
+        List[Page]: List of authenticated pages (one per browser if running "all")
     """
     logger.info("Starting logged_in_page fixture.")
     contexts_and_pages : List[Tuple[BrowserContext, Page]] = []
     pages: List[Page] = []
-    
+
     for browser_type, browser in browser_instances.items():
         logger.info("=" * 80)
         logger.info(f"Creating new context and page in {browser_type} browser for test: {request.node.name} with saved auth state")
         logger.info("=" * 80)
-        
-        
+
         # Create new context with stored auth state
         storage_state = auth_states[browser_type]
         context = browser.new_context(storage_state=storage_state)
         page = context.new_page()
-        
-        # Navigate to the app - we should already by authenticated
-        page.goto(QA_LOGIN_URL)
-        
-        # Verify we are logged in by checking for LOG OUT button
-        page.get_by_role("button", name="LOG OUT").wait_for(state="visible")
-        
-        # Optional: state any test capture you need
+
         start_test_capture(f"{browser_type}_{request.node.name}")
-        
+
         contexts_and_pages.append((context, page))
         pages.append(page)
         

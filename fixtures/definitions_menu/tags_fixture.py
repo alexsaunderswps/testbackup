@@ -2,6 +2,7 @@
 import pytest
 from utilities.utils import logger, get_browser_name
 from page_objects.definitions_menu.tags_page import TagsPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def tags_page(logged_in_page):
@@ -26,10 +27,8 @@ def tags_page(logged_in_page):
         logger.info(f"Navigating to Tags page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        # Navigate to Tags page through the Definitions menu
-        page.get_by_role("button", name="Definitions").click()
-        page.get_by_role("link", name="Tags").click()
-        page.wait_for_timeout(1000)  # Wait for the page to load
+        # Navigate directly to Tags (development notice) page
+        page.goto(QA_WEB_BASE_URL + "/developmentNotice")
         
         # Create the page object
         tags_page = TagsPage(page)

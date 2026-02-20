@@ -2,6 +2,7 @@
 import pytest
 from utilities.utils import logger, get_browser_name
 from page_objects.definitions_menu.countries_page import CountriesPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def countries_page(logged_in_page):
@@ -26,9 +27,8 @@ def countries_page(logged_in_page):
         logger.info(f"Navigating to Countries page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        # Navigate to Countries page through the Definitions menu
-        page.get_by_role("button", name="Definitions").click()
-        page.get_by_role("link", name="Countries").click()
+        # Navigate directly to Countries page
+        page.goto(QA_WEB_BASE_URL + "/countries")
         
         # Create the page object
         countries_page = CountriesPage(page)

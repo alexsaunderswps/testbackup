@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from utilities.utils import logger, get_browser_name
 from utilities.auth import get_auth_headers
 from page_objects.dashboard.map_markers_page import MapMarkersPage
+from conftest import QA_WEB_BASE_URL
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,8 +35,8 @@ def map_markers_page(logged_in_page):
         logger.info(f"Navigating to Map Markers page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate to Map Markers page
-        page.get_by_role("link", name="Map Markers").click()
+    # Navigate directly to Map Markers page
+        page.goto(QA_WEB_BASE_URL + "/mapMarkers")
         
     # Create the page object
         map_markers_page = MapMarkersPage(page)

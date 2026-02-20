@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from utilities.config import PAGE_SIZE
 from utilities.utils import logger, get_browser_name
 from page_objects.admin_menu.users_page import UsersPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def users_page(logged_in_page):
@@ -27,9 +28,8 @@ def users_page(logged_in_page):
         logger.info(f"Navigating to Users page on {get_browser_name(page)}")
         logger.info("=" * 80)
 
-        # Navigate to Users page
-        page.get_by_role("button", name="Admin").click()
-        page.get_by_role("link", name="Users").click()
+        # Navigate directly to Users page
+        page.goto(QA_WEB_BASE_URL + "/users")
         
         # Create the page object
         users_page = UsersPage(page)

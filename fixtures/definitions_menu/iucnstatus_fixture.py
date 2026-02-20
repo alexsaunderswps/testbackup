@@ -2,6 +2,7 @@
 import pytest
 from utilities.utils import logger, get_browser_name
 from page_objects.definitions_menu.iucn_status_page import IUCNStatusPage
+from conftest import QA_WEB_BASE_URL
 
 @pytest.fixture
 def iucn_status_page(logged_in_page):
@@ -26,9 +27,8 @@ def iucn_status_page(logged_in_page):
         logger.info(f"Navigating to IUCN Status page on {get_browser_name(page)}")
         logger.info("=" * 80)
         
-        # Navigate to IUCN Status page through the Definitions menu
-        page.get_by_role("button", name="Definitions").click()
-        page.get_by_role("link", name="IUCN Status").click()
+        # Navigate directly to IUCN Status page
+        page.goto(QA_WEB_BASE_URL + "/iucnStatus")
         
         # Create the page object
         iucn_status_page = IUCNStatusPage(page)

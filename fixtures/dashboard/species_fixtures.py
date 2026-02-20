@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from utilities.utils import logger, get_browser_name
 from utilities.auth import get_auth_headers
 from page_objects.dashboard.species_page import SpeciesPage
+from conftest import QA_WEB_BASE_URL
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,8 +35,8 @@ def species_page(logged_in_page):
         logger.info(f"Navigating to Species page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate to Species page
-        page.get_by_role("link", name="Species").click()
+    # Navigate directly to Species page
+        page.goto(QA_WEB_BASE_URL + "/species")
         
     # Create the page object
         species_page = SpeciesPage(page)
