@@ -8,6 +8,8 @@ from fixtures.admin_menu.organizations_fixtures import organizations_page, organ
 from pytest_check import check
 from page_objects.common.base_page import BasePage
 from utilities.utils import logger
+from utilities.auth import get_auth_headers
+from conftest import api_url
 
 class TestOrganizationsPageFunctional:
     
@@ -161,67 +163,108 @@ class TestOrganizationsPageFunctional:
     def test_add_organization(self, organizations_page):
         """
         Test creating a new organization through the UI.
-        
+
         This test verifies:
         1. Clicking the Add button opens the creation form
         2. Filling out the form and submitting creates a new organization
         3. The new organization appears in the list
+
+        Teardown: the created organization is deleted via API after the test
+        so it does not accumulate as orphaned test data in QA.
 
         Args:
             organizations_page: The OrganizationsPage fixture
         """
         logger.info("Starting organization creation test")
 
-        # Generate a unique name for the test organization
-        test_organization_name = f"Test Organization UI {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        # AUTOTEST_ prefix ensures cleanup_orphaned_test_records catches this record
+        # if teardown fails for any reason.
+        test_organization_name = f"AUTOTEST_Org_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         logger.info(f"Test organization name: {test_organization_name}")
-        
-        for op in organizations_page:
-            # Click the Add button
-            add_button = op.get_add_organization_button()
-            add_button.click()
-            
-            # Wait for the form to appear
-            op.page.wait_for_selector("input[name=\"name\"]")
-            
-            # Fill out the form
-            op.get_add_organization_textbox().fill(test_organization_name)
-            
-            # Click Save
-            op.get_save_button().click()
-            
-            # Wait for the page to refresh
-            op.page.wait_for_load_state("networkidle")
-            
-            # Navigate back to Organizations page
-            # Hopefully this can be removed once bug is fixed
-            op.page.get_by_role("button", name="Admin").click()
-            op.page.get_by_role("link", name="Organizations").click()
 
-            # Verify we're back on the organizations list page
-            page_title = op.page.get_by_role("heading", level=1)
-            check.equal(page_title.inner_text(), "Organizations", 
-                    "Should be back on Organizations page after saving")
+        created_org_id = None
 
-            # Search for the new organization
-            # Search not implemented in this test, but could be added later
-            # search_box = op.get_organization_search_text()
-            # search_button = op.get_organization_search_button()
+        try:
+            for op in organizations_page:
+                # Click the Add button
+                add_button = op.get_add_organization_button()
+                add_button.click()
 
-            # search_box.clear()
-            # search_box.fill(test_organization_name)
-            # search_button.click()
-            
-            # Wait for results to load
-            op.page.wait_for_load_state("networkidle")
+                # Wait for the form to appear
+                op.page.wait_for_selector("input[name=\"name\"]")
 
-            # Verify the new organization is in the results
-            rows = op.get_organization_table_rows()
-            found = False
-            for i in range(rows.count()):
-                name_cell = rows.nth(i).locator("td").first
-                if name_cell.inner_text() == test_organization_name:
-                    found = True
-                    break
+                # Fill out the form
+                op.get_add_organization_textbox().fill(test_organization_name)
 
-            check.is_true(found, f"New organization '{test_organization_name}' not found after creation")
+                # Click Save
+                op.get_save_button().click()
+
+                # Wait for the page to refresh
+                op.page.wait_for_load_state("networkidle")
+
+                # Navigate back to Organizations page
+                # Hopefully this can be removed once bug is fixed
+                op.page.get_by_role("button", name="Admin").click()
+                op.page.get_by_role("link", name="Organizations").click()
+
+                # Verify we're back on the organizations list page
+                page_title = op.page.get_by_role("heading", level=1)
+                check.equal(page_title.inner_text(), "Organizations",
+                        "Should be back on Organizations page after saving")
+
+                # Wait for results to load
+                op.page.wait_for_load_state("networkidle")
+
+                # Verify the new organization is in the results
+                rows = op.get_organization_table_rows()
+                found = False
+                for i in range(rows.count()):
+                    name_cell = rows.nth(i).locator("td").first
+                    if name_cell.inner_text() == test_organization_name:
+                        found = True
+                        break
+
+                check.is_true(found, f"New organization '{test_organization_name}' not found after creation")
+
+            # Locate the created org via the search API so we can clean it up.
+            # This runs once after all browser iterations complete.
+            headers = get_auth_headers()
+            search_resp = requests.get(
+                f"{api_url}/Organization/search",
+                params={"pageNumber": 1, "pageSize": 10, "name": test_organization_name},
+                headers=headers,
+                timeout=30,
+            )
+            if search_resp.status_code == 200:
+                for org in search_resp.json().get("results", []):
+                    if org.get("name") == test_organization_name:
+                        created_org_id = org.get("organizationId")
+                        break
+            else:
+                logger.warning(
+                    f"Could not search for created org (status {search_resp.status_code}) — "
+                    "will rely on AUTOTEST_ prefix cleanup"
+                )
+
+        finally:
+            # Delete the test organization so it does not linger in QA.
+            if created_org_id:
+                headers = get_auth_headers()
+                del_resp = requests.delete(
+                    f"{api_url}/Organization/Delete",
+                    params={"id": created_org_id},
+                    headers=headers,
+                    timeout=30,
+                )
+                if del_resp.status_code in (200, 204):
+                    logger.info(f"Cleaned up test organization '{test_organization_name}' (ID: {created_org_id})")
+                else:
+                    logger.warning(
+                        f"Failed to delete test organization '{test_organization_name}' "
+                        f"(ID: {created_org_id}): {del_resp.status_code}"
+                    )
+            else:
+                logger.warning(
+                    f"No ID found for test organization '{test_organization_name}' — "
+                    "record may need manual cleanup or will be caught by AUTOTEST_ prefix cleanup"
+                )
