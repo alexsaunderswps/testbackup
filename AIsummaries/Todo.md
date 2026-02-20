@@ -14,13 +14,8 @@ These pages exist in the frontend but have zero page object coverage. Nothing el
 
 - [ ] **Create `PanelsPage` page object** — `panels/` component has `ManagePanelsPage`, `AddEditPanel`, `PanelsList`; no page object or tests exist
 - [ ] **Create `PanelCollectionsPage` page object** — `panelCollections/` has `ManagePanelCollectionsPage`, `AddEditPanelCollection`; no page object or tests exist
-- [ ] **Create `SpeciesCategoryPage` page object** — definitions menu item backed by `SpeciesCategoryController`
-- [ ] **Create `VideoFormatPage` page object** — definitions menu; backed by `VideoFormatController`
-- [ ] **Create `VideoResolutionPage` page object** — definitions menu; backed by `VideoResolutionController`
-- [ ] **Create `VideoStatusPage` page object** — definitions menu; backed by `VideoStatusController`
-- [ ] **Create `ContentTypePage` page object** — definitions menu; backed by `ContentTypeController`
-- [ ] **Create `VisualTypePage` page object** — definitions menu; backed by `VisualTypeController`
-- [ ] **Create `RolesPage` page object** — admin menu; backed by `RoleController`
+
+> **Note:** SpeciesCategory, VideoFormat, VideoResolution, VideoStatus, ContentType, VisualType, and Roles are backend lookup tables that populate dropdown menus on other pages but are not served as navigable pages in the web portal. They do not need page objects or UI tests. They are covered at the API level in Section 5.
 
 ---
 
@@ -30,13 +25,6 @@ For each page below, follow the existing pattern: page title, nav elements, admi
 
 - [ ] **`test_panels_page_ui.py`** — page title, nav, admin dropdown, definitions dropdown, table elements (Name, Description columns per component), pagination, Add button
 - [ ] **`test_panel_collections_page_ui.py`** — same structure; also verify the panels sub-list within a collection
-- [ ] **`test_species_category_page_ui.py`** — definitions page; table columns, data presence
-- [ ] **`test_video_format_page_ui.py`** — definitions page; table and data
-- [ ] **`test_video_resolution_page_ui.py`** — definitions page; table and data
-- [ ] **`test_video_status_page_ui.py`** — definitions page; table and data
-- [ ] **`test_content_type_page_ui.py`** — definitions page; table and data
-- [ ] **`test_visual_type_page_ui.py`** — definitions page; table and data
-- [ ] **`test_roles_page_ui.py`** — admin page; roles table, data presence
 
 ---
 
@@ -369,12 +357,12 @@ Currently only the login page has these tests. Consider expanding:
 
 | Priority | Area | Items |
 |---|---|---|
-| **High** | Missing page objects (blockers for 9 pages) | 9 |
+| **High** | Missing page objects (blockers for 2 pages) | 2 |
 | **High** | API CRUD for core resources (no write tests exist) | ~60 |
 | **High** | Authorization tests (entirely missing) | 9 |
 | **Medium** | Functional tests — CRUD workflows | ~35 |
 | **Medium** | Schema validation for all resources | 15 |
-| **Medium** | UI tests for missing pages | 9 |
+| **Medium** | UI tests for missing pages | 2 |
 | **Medium** | API error handling and validation | 11 |
 | **Lower** | UI test improvements to existing pages | 12 |
 | **Lower** | End-to-end workflow tests | 7 |
