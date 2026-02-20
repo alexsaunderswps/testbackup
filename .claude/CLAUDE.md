@@ -156,6 +156,7 @@ Before writing a new API test:
 1. Open the controller in `reference/wildxr.api/WildXR.Api/Controllers/` to confirm the route, HTTP method, and any authorization requirements
 2. Open the corresponding DTO in `WildXR.Api/Dto/` to see exact request field names and types — this drives what goes into test payloads and schema files
 3. Open the entity model in `WildXR.Data/Models/` to understand which fields are nullable (optional) vs required and what relationships exist
+4. **Do NOT copy C# property names directly as JSON keys.** ASP.NET Core serializes PascalCase C# properties to camelCase JSON automatically (e.g., `VideoCatalogueId` → `videoCatalogueId`). Always verify actual key casing against a real API response before writing field assertions.
 
 ## Architecture and Design Patterns
 
