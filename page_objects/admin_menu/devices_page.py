@@ -28,11 +28,11 @@ class DevicesPage(BasePage):
     # Element locators - Using method-based approach for consistency
     def get_page_title(self):
         """Get the page title for the Devices page/"""
-        return self.page.get_by_role("heading", name="Devices")
-    
+        return self.page.locator("h1", has_text="Devices")
+
     def get_page_title_text(self):
         """Get the page title text for the Devices page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
+        return self.page.locator("h1").first().inner_text()
     
     def get_devices_search_text(self):
         """Get the devices search text element."""

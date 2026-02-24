@@ -35,11 +35,11 @@ class VideosPage(BasePage):
 
     def get_page_title(self):
         """Get the page title for the Videos page."""
-        return self.page.get_by_role("heading", name="Videos")
+        return self.page.locator("h1", has_text="Videos")
 
     def get_page_title_text(self):
         """Get the text of the page title for the Videos page."""
-        return self.get_by_role("heading", level=1).inner_text()
+        return self.page.locator("h1").inner_text()
 
     # -------------------------------------------------------------------------
     # Action Button Elements (Search, Clear, Add)

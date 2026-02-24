@@ -27,11 +27,11 @@ class IUCNStatusPage(BasePage):
     # Element locators - Using method-based approach for consistency
     def get_page_title(self):
         """Get the page title for the IUCN Status page."""
-        return self.page.get_by_role("heading", name="IUCN Status")
-    
+        return self.page.locator("h1", has_text="IUCN Status")
+
     def get_page_title_text(self):
         """Get the page title text for the IUCN Status page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
+        return self.page.locator("h1").first().inner_text()
     
     # IUCN Status Table elements
     def get_iucn_status_table_body(self):

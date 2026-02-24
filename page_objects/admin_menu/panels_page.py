@@ -46,7 +46,7 @@ class PanelsPage(BasePage):
 
     def get_page_title(self):
         """Get the 'Panels' h1 heading on the list page."""
-        return self.page.get_by_role("heading", name="Panels")
+        return self.page.locator("h1", has_text="Panels")
 
     def get_search_input(self):
         """Get the name filter text input (placeholder: 'Filter by name')."""

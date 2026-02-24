@@ -28,11 +28,11 @@ class SpeciesPage(BasePage):
     # Element locators
     def get_page_title(self):
         """Get the page title for the Species page."""
-        return self.page.get_by_role("heading", name="Species")
-    
+        return self.page.locator("h1", has_text="Species")
+
     def get_page_title_text(self):
         """Get the text of the page title for the Species page."""
-        return self.get_by_role("heading", level=1).inner_text()
+        return self.page.locator("h1").inner_text()
     
     def get_species_search_input(self):
         """Get the species search input element."""

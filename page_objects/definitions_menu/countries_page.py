@@ -27,11 +27,11 @@ class CountriesPage(BasePage):
     # Element locators
     def get_page_title(self):
         """Get the page title for the Countries page."""
-        return self.page.get_by_role("heading", name="Countries")
-    
+        return self.page.locator("h1", has_text="Countries")
+
     def get_page_title_text(self):
         """Get the page title text for the Countries page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
+        return self.page.locator("h1").first().inner_text()
     
     def get_countries_search_text(self):
         """Get the countries search text element."""

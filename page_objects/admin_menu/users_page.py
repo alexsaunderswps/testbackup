@@ -27,11 +27,11 @@ class UsersPage(BasePage):
     # Element locators
     def get_page_title(self):
         """ Get the page title for the Users page."""
-        return self.page.get_by_role("heading", name="Users")
-    
+        return self.page.locator("h1", has_text="Users")
+
     def get_page_title_text(self):
         """ Get the page title text for the Users page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
+        return self.page.locator("h1").first().inner_text()
         
     def get_user_add_button(self):
         """ Get the add user button element."""
