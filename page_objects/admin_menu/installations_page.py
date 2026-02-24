@@ -271,6 +271,16 @@ class InstallationsPage(BasePage):
         self.get_installations_table_rows().first.click()
         self.get_edit_installation_page_title().wait_for(state="visible")
 
+    def navigate_to_add_installation(self) -> None:
+        """Click the Add button and wait for the Add Installation heading.
+
+        React Router navigation is client-side, so this waits for the h1 heading
+        to become visible rather than relying on wait_for_load_state("networkidle").
+        """
+        self.logger.info("Navigating to Add Installation form and waiting for heading")
+        self.get_installation_add_button().click()
+        self.get_add_installation_page_title().wait_for(state="visible")
+
     # -------------------------------------------------------------------------
     # Panel Collection Field — Display Value
     # -------------------------------------------------------------------------
