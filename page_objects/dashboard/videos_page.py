@@ -316,6 +316,132 @@ class VideosPage(BasePage):
         return self.page.get_by_role("cell", name="Organization")
 
     # -------------------------------------------------------------------------
+    # VideoSearchModal Elements
+    #
+    # The VideoSearchModal renders as a fixed-position full-screen overlay
+    # (div.fixed.inset-0) that is completely removed from the DOM when closed
+    # (the component returns null when isOpen is false). All locators below are
+    # scoped to that container so they cannot accidentally match nav elements
+    # (e.g. the "Species" nav link) that are present on the same page.
+    #
+    # Source component: VideoSearchModal.tsx
+    # -------------------------------------------------------------------------
+
+    def _get_search_modal_container(self):
+        """
+        Get the VideoSearchModal overlay container.
+
+        This element only exists in the DOM while the modal is open — the
+        component returns null when isOpen is false. Used to scope all other
+        modal locators so they cannot match elements behind the overlay.
+        """
+        return self.page.locator("div.fixed.inset-0")
+
+    def get_search_modal_heading(self):
+        """Get the 'Filter Videos' h2 heading inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_role(
+            "heading", name="Filter Videos"
+        )
+
+    def get_search_modal_close_button(self):
+        """Get the × close button in the VideoSearchModal header."""
+        return self._get_search_modal_container().get_by_role("button", name="×")
+
+    def get_search_modal_name_input(self):
+        """Get the Name text input inside the modal (placeholder: 'Search by name')."""
+        return self._get_search_modal_container().get_by_placeholder("Search by name")
+
+    def get_search_modal_overview_input(self):
+        """Get the Overview text input inside the modal (placeholder: 'Search by overview')."""
+        return self._get_search_modal_container().get_by_placeholder(
+            "Search by overview"
+        )
+
+    def get_search_modal_country_label(self):
+        """Get the 'Country' dropdown label inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_text("Country", exact=True)
+
+    def get_search_modal_resolution_label(self):
+        """Get the 'Resolution' dropdown label inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_text("Resolution", exact=True)
+
+    def get_search_modal_species_label(self):
+        """Get the 'Species' dropdown label inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_text("Species", exact=True)
+
+    def get_search_modal_tags_label(self):
+        """Get the 'Tags' dropdown label inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_text("Tags", exact=True)
+
+    def get_search_modal_status_label(self):
+        """Get the 'Statuses' dropdown label inside the VideoSearchModal."""
+        return self._get_search_modal_container().get_by_text("Statuses", exact=True)
+
+    def get_search_modal_reset_button(self):
+        """Get the Reset button in the VideoSearchModal footer."""
+        return self._get_search_modal_container().get_by_role("button", name="Reset")
+
+    def get_search_modal_apply_button(self):
+        """Get the Apply button in the VideoSearchModal footer."""
+        return self._get_search_modal_container().get_by_role("button", name="Apply")
+
+    def open_search_modal(self) -> None:
+        """
+        Click the Search button to open the VideoSearchModal, then wait for
+        the 'Filter Videos' heading to become visible.
+
+        The modal renders as a React overlay and does not trigger a network
+        request, so this method waits for the heading element rather than
+        relying on wait_for_load_state("networkidle").
+        """
+        self.logger.info("Opening VideoSearchModal by clicking the Search button")
+        self.get_videos_search_button().click()
+        self.get_search_modal_heading().wait_for(state="visible")
+
+    def close_search_modal(self) -> None:
+        """
+        Click the × close button to dismiss the VideoSearchModal, then wait
+        for the 'Filter Videos' heading to be removed from the DOM.
+        """
+        self.logger.info("Closing VideoSearchModal by clicking the × button")
+        self.get_search_modal_close_button().click()
+        self.get_search_modal_heading().wait_for(state="hidden")
+
+    def verify_all_search_modal_elements_present(self) -> Tuple[bool, List[str]]:
+        """
+        Verify that all expected elements are visible inside the VideoSearchModal.
+
+        Checks the heading, two text inputs, five filter dropdown labels,
+        the Reset button, the Apply button, and the × close button.
+        The modal must be open before calling this method.
+
+        Filter fields (from VideoSearchModal.tsx):
+          Name, Overview, Country, Resolution, Species, Tags, Statuses
+
+        Returns:
+            Tuple containing:
+                - bool: True if all elements were found, False otherwise.
+                - List[str]: List of missing element names (empty if all found).
+        """
+        self.logger.info("Verifying all expected VideoSearchModal elements are present")
+        modal_elements = {
+            "Modal Heading": self.get_search_modal_heading,
+            "Name Input": self.get_search_modal_name_input,
+            "Overview Input": self.get_search_modal_overview_input,
+            "Country Label": self.get_search_modal_country_label,
+            "Resolution Label": self.get_search_modal_resolution_label,
+            "Species Label": self.get_search_modal_species_label,
+            "Tags Label": self.get_search_modal_tags_label,
+            "Statuses Label": self.get_search_modal_status_label,
+            "Reset Button": self.get_search_modal_reset_button,
+            "Apply Button": self.get_search_modal_apply_button,
+            "Close Button": self.get_search_modal_close_button,
+        }
+        return self.verify_page_elements_present(
+            modal_elements, "VideoSearchModal Elements"
+        )
+
+    # -------------------------------------------------------------------------
     # Verification Methods
     # -------------------------------------------------------------------------
 

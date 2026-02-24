@@ -315,6 +315,25 @@ class VideoCataloguesPage(BasePage):
         }
         return self.verify_page_elements_present(table_elements, "Video Catalogues Table Elements")
 
+    def search_catalogues(self, name: str) -> None:
+        """
+        Type a search term into the filter input, click Search, and wait for
+        the API response before returning.
+
+        Sets up the response listener before clicking to avoid a race condition
+        where wait_for_load_state("networkidle") could resolve before the
+        search request is even initiated.
+
+        Args:
+            name (str): The catalogue name string to filter by.
+        """
+        self.logger.info(f"Searching video catalogues with filter: '{name}'")
+        self.get_video_catalogues_search_input().fill(name)
+        with self.page.expect_response(
+            lambda r: "videocatalogue" in r.url.lower() and r.status == 200
+        ):
+            self.get_video_catalogues_search_button().click()
+
     def count_table_rows(self) -> int:
         """
         Count the number of rows in the Video Catalogues Table.
