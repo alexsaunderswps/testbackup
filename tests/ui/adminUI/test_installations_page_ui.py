@@ -270,3 +270,8 @@ class TestInstallationsPageUI:
                     f"Verification Successful :: Add Installation form defaults panel "
                     f"collection to '{value_text}' on {browser_name}"
                 )
+
+            # Cancel unconditionally — we never want to save a blank installation.
+            # This runs even if a check above failed (pytest-check is a soft assertion).
+            ip.get_cancel_button().click()
+            ip.get_page_title().wait_for(state="visible")
