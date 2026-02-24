@@ -10,6 +10,15 @@ from utilities.data_handling import DataLoader
 # Create module level dataloader instance for fixtures
 data_loader = DataLoader()
 
+# Videos whose names start with "#" are intentional QA test-data fixtures that
+# deliberately violate production data-integrity rules (e.g., "#01 Test No Species"
+# has no species entries by design). These are excluded from _validate_video_content.
+#
+# Using a name-prefix check rather than UUIDs because UUIDs are regenerated if a
+# video is deleted and recreated, which would silently break a UUID-based exclusion.
+# The "#" prefix convention is stable across recreation.
+INTEGRITY_CHECK_EXCLUDED_NAME_PREFIX = "#"
+
 @pytest.fixture(scope="session")
 def random_video_data():
     return data_loader.get_random_video()
@@ -534,7 +543,15 @@ class TestAPIVideos:
         """
         errors = []
         video_id = video.get('videoId', 'unknown')
-        
+        video_name = video.get('name', '')
+
+        if video_name.startswith(INTEGRITY_CHECK_EXCLUDED_NAME_PREFIX):
+            logger.debug(
+                f"Skipping integrity validation for QA test video "
+                f"'{video_name}' ({video_id})"
+            )
+            return []
+
         logger.debug(f"\nValidating video content for ID: {video_id}")
 
         # Required Fields Validation
