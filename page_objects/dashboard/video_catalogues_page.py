@@ -314,11 +314,16 @@ class VideoCataloguesPage(BasePage):
     def search_catalogues(self, name: str) -> None:
         """
         Type a search term into the filter input, click Search, and wait for
-        the API response before returning.
+        the page to fully update before returning.
 
-        Sets up the response listener before clicking to avoid a race condition
-        where wait_for_load_state("networkidle") could resolve before the
-        search request is even initiated.
+        Uses two waits in sequence:
+        1. expect_response — starts listening before the click so we capture the
+           search request specifically (not a prior in-flight request). The with
+           block exits as soon as the HTTP response arrives.
+        2. wait_for_load_state("networkidle") — waits for React to finish
+           processing the response and re-rendering the table. The HTTP response
+           arriving and the DOM updating are two separate events; without this
+           second wait, count_table_rows() can see stale DOM content.
 
         Args:
             name (str): The catalogue name string to filter by.
@@ -329,6 +334,7 @@ class VideoCataloguesPage(BasePage):
             lambda r: "videocatalogue" in r.url.lower() and r.status == 200
         ):
             self.get_video_catalogues_search_button().click()
+        self.page.wait_for_load_state("networkidle")
 
     def count_table_rows(self) -> int:
         """
