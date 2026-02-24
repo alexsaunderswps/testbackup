@@ -12,10 +12,20 @@ load_dotenv()
 API_BASE_URL = os.getenv("API_BASE_URL")
 
 class APIBase:
-    def __init__(self):
+    def __init__(self, token: str = None):
+        """
+        Initialize APIBase with an optional pre-fetched authentication token.
+
+        Args:
+            token: A JWT token string. If provided, it is used directly for all
+                   requests instead of calling get_auth_token(). Pass this when
+                   you need to authenticate as a specific user account (e.g., an
+                   org-admin in authorization tests). If None, the shared system
+                   admin token is used (see utilities/auth.py get_auth_token()).
+        """
         self.base_url = API_BASE_URL
         self.context = APITestContext()
-        self.token = get_auth_token()  # Use shared auth utility
+        self.token = token if token is not None else get_auth_token()
         logger.html_logger.set_context(self.context)
         
     def get_headers(self, auth_type='valid'):
