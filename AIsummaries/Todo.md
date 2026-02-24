@@ -196,17 +196,22 @@ These have connectivity tests only. Need full read coverage and schema validatio
 
 ## 6. API Tests — Authorization (Role-Based Access)
 
-This is entirely untested. The app has multi-tenant filtering by `OrganizationId` and role-based access control.
+> **Key facts discovered 2026-02-24 (Session C):**
+> - Authorization uses `[Authorize]` at class level on all controllers — missing/invalid token → 401 before any controller logic runs
+> - Org filtering is via `AuthorizationManager.CanAccessResource(user, OrganizationAction)` — non-sysadmins see only their own org(s) plus the `AlwaysAccessibleId` WPS internal org
+> - Cross-org resource access returns 403 (`Forbid()`), not 404
+> - `AlwaysAccessibleId = "B1DF7F5A-5ED7-4AE9-97DC-E78B9137A0B3"` — the WildXR internal org; resources with this org ID visible to all authenticated users
+> - Org-admin tokens acquired via `get_token_for_user(username, password)` in `utilities/auth.py`; `APIBase(token=...)` accepts a pre-fetched token
 
-- [ ] **No token — all endpoints** — request without `Authorization` header returns 401 for all protected endpoints
-- [ ] **Invalid/expired token** — request with malformed JWT returns 401
-- [ ] **Org Admin sees only their org's data** — log in as an org admin; verify that organizations, installations, devices, map markers, videos, video catalogues only return records for their org
-- [ ] **Org Admin cannot see system-wide data** — verify org admin GET `/api/Organization` does not return orgs they don't belong to
-- [ ] **Org Admin cannot create resources for another org** — POST with a different `OrganizationId`; expect 403
-- [ ] **System Admin can see all orgs** — log in as system admin; verify full list returned
+- [x] ~~**No token — all endpoints** — request without `Authorization` header returns 401 for all protected endpoints~~ ✅ Completed 2026-02-24 (Session C): `TestAPIUnauthenticated.test_get_without_token_returns_401` parametrized across 6 endpoints; plus PUT and DELETE variants
+- [x] ~~**Invalid/expired token** — request with malformed JWT returns 401~~ ✅ Completed 2026-02-24 (Session C): `test_invalid_token_returns_401`
+- [x] ~~**Org Admin sees only their org's data** — log in as an org admin; verify that organizations and installations only return records for their org~~ ✅ Completed 2026-02-24 (Session C): `test_bp_admin_search_excludes_dta_org`, `test_dta_admin_search_excludes_bp_org`, installation access sanity checks
+- [x] ~~**Org Admin cannot see system-wide data** — verify org admin GET `/api/Organization` does not return orgs they don't belong to~~ ✅ Completed 2026-02-24 (Session C): `test_bp_admin_search_excludes_dta_org` and `test_dta_admin_search_excludes_bp_org`
+- [ ] **Org Admin cannot create resources for another org** — POST with a different `OrganizationId`; expect 403 (controllers currently have no explicit auth check on Create — potential gap to document)
+- [x] ~~**System Admin can see all orgs** — log in as system admin; verify full list returned~~ ✅ Completed 2026-02-24 (Session C): `test_sysadmin_search_returns_both_bp_and_dta_orgs`, `test_sysadmin_sees_more_orgs_than_bp_admin`
 - [ ] **System Admin can create resources in any org**
 - [ ] **AlwaysAccessibleId (WPS org) resources visible to all orgs** — verify map markers/videos from the WPS org appear for non-WPS org admin users
-- [ ] **Unauthenticated create/update/delete** — POST/PUT/DELETE without token returns 401, not 500
+- [x] ~~**Unauthenticated create/update/delete** — POST/PUT/DELETE without token returns 401, not 500~~ ✅ Completed 2026-02-24 (Session C): `test_write_without_token_returns_401` (PUT) and `test_delete_without_token_returns_401` (DELETE)
 
 ---
 
@@ -360,6 +365,7 @@ Currently only the login page has these tests. Consider expanding:
 ## 12. Test Infrastructure Improvements
 
 - [ ] **API test for token refresh / expiry** — 30-day JWT lifetime is a known concern; document and test what happens when a token expires mid-session
+- [x] ~~**Reduce xdist auth calls from N to 1** — with `-n auto`, each worker made its own `/Users/Authenticate` call; wasted tokens and added startup latency~~ ✅ Completed 2026-02-24 (Session C): Added `pytest_configure_node` hook + `_seed_token_cache` autouse fixture to `conftest.py`; controller fetches token once via singleton, injects into all workers via `workerinput`; serial runs unaffected
 - [ ] **Parallel test isolation** — verify that `pytest-xdist` workers don't conflict on shared test data (e.g., two workers both creating `AUTOTEST_` records with the same name)
 - [x] ~~**Fix pytest-xdist collection divergence** — `test_login_functionality.py` used unseeded `Faker` at module level for `@pytest.mark.parametrize`, causing different test IDs across workers and a "Different tests were collected" crash~~ ✅ Completed 2026-02-24: Added `Faker.seed(0)` immediately after `fake = Faker()`
 - [ ] **Add `AUTOTEST_` cleanup to more entities** — currently conftest only cleans up installations, video catalogues, and organizations; extend cleanup to devices, users, map markers, species, tags, panels, panel collections
