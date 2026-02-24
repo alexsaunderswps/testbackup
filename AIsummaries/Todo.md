@@ -56,17 +56,27 @@ The biggest gap: only Videos has meaningful API tests. Every resource below need
 
 ### 4a. Organizations API (`/api/Organization`)
 
-- [ ] **`test_api_organizations.py`** — GET list: status 200, response structure matches `ResponseDto`, pagination fields present
-- [ ] **GET list pagination** — page 1 vs page 2 return different records; `TotalCount` consistent across pages
-- [ ] **GET search** — filter by name; verify results contain search term
-- [ ] **GET details by ID** — valid GUID returns org; verify `OrganizationId`, `Name` fields
-- [ ] **GET details — not found** — nonexistent GUID returns 400/404
-- [ ] **POST create** — valid payload (`Name` field) returns new org with GUID; use `AUTOTEST_` prefix
-- [ ] **POST create — missing required field** — omit `Name`; expect 400
-- [ ] **POST create — name too long** — `Name` beyond max length; expect 400
-- [ ] **PUT update** — update `Name` of existing org; verify change persists
-- [ ] **DELETE** — delete `AUTOTEST_` org; verify it no longer appears in list
-- [ ] **Schema validation** — validate GET list response and GET detail against JSON schemas
+> **Key API facts (discovered 2026-02-24 Session B):**
+> - `GET /api/Organization` returns a plain array, NOT a `ResponseDto` wrapper — unique among all resources
+> - `PUT /api/Organization/Create` returns 200 with empty body; search by name to retrieve the created org's ID
+> - Not-found returns 400 (not 404) — consistent with all other controllers
+> - `Organization.Name` is `VARCHAR(50)` — AUTOTEST names must be ≤ 50 chars
+
+- [x] ~~**`test_api_organizations.py`** — GET list: status 200, response is a plain array~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET list items have required fields** — each item has `organizationId` and `name`~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET list pageSize param limits results** — `pageSize=1` returns exactly 1 item~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET search** — filter by name; verify results contain search term; pagination envelope present~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET search — no match** — no-match returns 200 with empty results list (not 404)~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET details by ID** — valid GUID returns org; verify `organizationId`, `name` fields~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**GET details — not found** — nonexistent GUID returns 400~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**PUT create** — valid payload (`name` field) returns 200; org appears in search~~ ✅ Completed 2026-02-24 (Session B): Note — Create uses PUT (not POST); returns empty body
+- [x] ~~**PUT create — missing required field** — omit `name`; expect 400~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**POST update** — update `name` of existing org; verify change persists in /Details~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**POST update — missing ID** — omit `organizationId`; expect 400 "Id is required"~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**DELETE** — delete `AUTOTEST_` org; verify it no longer appears in search~~ ✅ Completed 2026-02-24 (Session B)
+- [x] ~~**DELETE — not found** — delete nonexistent GUID returns 400~~ ✅ Completed 2026-02-24 (Session B)
+- [ ] **GET list pagination** — page 1 vs page 2 return different records; verify count is consistent (deferred: needs sufficient org count in QA)
+- [ ] **Schema validation** — validate GET list and GET detail responses against JSON schema files
 
 ### 4b. Installations API (`/api/Installations`)
 
@@ -360,6 +370,10 @@ Currently only the login page has these tests. Consider expanding:
 - [x] ~~**Remove dead `get_page_title_text()` methods** — method defined in 11 page objects but never called; title checks go through `BasePage.verify_page_title()` directly~~ ✅ Completed 2026-02-24: Removed from all 11 page objects
 - [x] ~~**Fix search URL matcher race condition** — `devices_page.py` and `species_page.py` used broad matchers (`"device" in url`) that could capture the page-load response instead of the search response, causing stale row counts in tests~~ ✅ Completed 2026-02-24: Narrowed to `/Device/search` and `/species/search`; added 500ms post-response wait for React re-render
 - [x] ~~**Handle intentional QA test data in video integrity checks** — video "#01 Test No Species" intentionally has no species, causing `test_video_data_integrity` to fail non-deterministically when that video is randomly selected~~ ✅ Completed 2026-02-24: Added `INTEGRITY_CHECK_EXCLUDED_NAME_PREFIX = "#"` constant; `_validate_video_content` skips any video whose name starts with `#`
+- [x] ~~**Fix `find_tags_link()` typo in base_page.py** — `find_tags_link()` called `get_tages_link()` (typo), a method that doesn't exist; would raise `AttributeError` on any test using that method~~ ✅ Completed 2026-02-24 (Session B): Changed to `get_tags_link()`
+- [x] ~~**Add `put()` and `delete()` methods to `APIBase`** — prerequisite for all CRUD API tests in Section 4; only `get()` and `post()` existed; tests would have to call `requests` directly, bypassing the abstraction~~ ✅ Completed 2026-02-24 (Session B): Added `put()` and `delete()` with full docstrings explaining unconventional verb usage (PUT=create, DELETE takes query params)
+- [x] ~~**Fix flaky `test_installations_pagination_navigation`** — compared exact set of page-1 record names before and after a page-2 round-trip; failed when API returned records in different order on the second call (sort instability at the page boundary)~~ ✅ Completed 2026-02-24 (Session B): Replaced set equality with pagination-state check (back_start, back_total, row count)
+- [x] ~~**Remove duplicate `github` marker from pytest.ini`** — marker was defined twice (lines 29 and 60)~~ ✅ Completed 2026-02-24 (Session B)
 
 ---
 
