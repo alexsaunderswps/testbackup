@@ -163,6 +163,39 @@ class TestVideoCataloguesPageUI:
             
     @pytest.mark.UI
     @pytest.mark.catalogue
+    @pytest.mark.search
+    def test_video_catalogue_search_with_no_match_shows_empty_table(self, video_catalogue_page):
+        """
+        Verify that searching for a name that matches no catalogues results in an
+        empty table rather than an error.
+
+        Uses a deliberately unmatchable search term so the test is not coupled
+        to any specific catalogue that may or may not exist in the QA environment.
+
+        Args:
+            video_catalogue_page: The VideoCataloguesPage fixture providing page objects for each browser
+        """
+        no_match_name = "ZZZZZ_WILDXR_TEST_NO_MATCH_ZZZZZ"
+
+        logger.info("Starting test_video_catalogue_search_with_no_match_shows_empty_table")
+        for vcp in video_catalogue_page:
+            vcp.search_catalogues(no_match_name)
+
+            row_count = vcp.count_table_rows()
+            check.equal(
+                row_count,
+                0,
+                f"Expected 0 rows for no-match search on {get_browser_name(vcp.page)}, "
+                f"got {row_count}"
+            )
+            if row_count == 0:
+                logger.info(
+                    f"Verification Successful :: No-match search returns empty table "
+                    f"on {get_browser_name(vcp.page)}"
+                )
+
+    @pytest.mark.UI
+    @pytest.mark.catalogue
     @pytest.mark.pagination
     def test_video_catalogue_pagination_elements(self, video_catalogue_page, verify_ui_elements):
         """

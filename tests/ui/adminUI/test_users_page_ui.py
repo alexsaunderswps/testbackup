@@ -98,7 +98,7 @@ class TestUsersPageUI:
     def test_users_page_table_elements(self, users_page):
         """
         Test that all table elements are present on the Users page.
-        
+
         Args:
             users_page: The UsersPage fixture
         """
@@ -107,3 +107,32 @@ class TestUsersPageUI:
             all_elements, missing_elements = up.verify_all_users_table_elements_present()
             check.is_true(all_elements, f"Missing Users Table Elements: {', '.join(missing_elements)}")
             logger.info("Verification Successful :: Users Table Elements found")
+
+    @pytest.mark.UI
+    @pytest.mark.users
+    @pytest.mark.table
+    def test_users_table_data_presence(self, users_page):
+        """
+        Verify that the Users table contains at least one row of data.
+
+        Checks that the table is not just structurally present (which is covered
+        by test_users_page_table_elements) but also populated with user records.
+        This catches scenarios where the table renders correctly but the API
+        fails to return data.
+
+        Args:
+            users_page: The UsersPage fixture
+        """
+        logger.debug("Starting test_users_table_data_presence")
+        for up in users_page:
+            row_count = up.count_table_rows()
+            check.greater(
+                row_count,
+                0,
+                f"Users table should contain data, found {row_count} rows "
+                f"on {get_browser_name(up.page)}"
+            )
+            logger.info(
+                f"Verification Successful :: Users table has {row_count} rows "
+                f"on {get_browser_name(up.page)}"
+            )

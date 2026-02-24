@@ -3,7 +3,11 @@ import pytest
 from pytest_check import check
 from fixtures.admin_menu.devices_fixtures import devices_page
 from utilities.utils import logger, get_browser_name
-    
+
+# A device known to exist in the QA environment. Update here if the device is
+# renamed or replaced.
+KNOWN_DEVICE_NAME = "Alex's QA Headset - F7V07HK - Managed"
+
 class TestDevicesPageUI:
     """
     Test suite for the Devices page UI elements.
@@ -133,6 +137,145 @@ class TestDevicesPageUI:
             logger.info("Verification Successful :: All Device Table Elements found")
     
     
+    @pytest.mark.UI
+    @pytest.mark.devices
+    @pytest.mark.table
+    def test_devices_table_data_presence(self, devices_page):
+        """
+        Verify that the Devices table contains at least one row of data.
+
+        Checks that the table is not just structurally present (covered by
+        test_devices_table_elements) but also populated with device records.
+        This catches scenarios where the table renders correctly but the API
+        fails to return data.
+
+        Args:
+            devices_page: The DevicesPage fixture providing page objects for each browser
+        """
+        logger.info("Starting test_devices_table_data_presence")
+        for dp in devices_page:
+            row_count = dp.count_table_rows()
+            check.greater(
+                row_count,
+                0,
+                f"Devices table should contain data, found {row_count} rows "
+                f"on {get_browser_name(dp.page)}"
+            )
+            logger.info(
+                f"Verification Successful :: Devices table has {row_count} rows "
+                f"on {get_browser_name(dp.page)}"
+            )
+
+    @pytest.mark.UI
+    @pytest.mark.devices
+    @pytest.mark.search
+    def test_devices_search_with_no_match_shows_empty_table(self, devices_page):
+        """
+        Verify that searching for a name that matches no devices results in an
+        empty table rather than an error.
+
+        Uses a deliberately unmatchable search term so the test is not coupled
+        to any specific device that may or may not exist in the QA environment.
+
+        Args:
+            devices_page: The DevicesPage fixture providing page objects for each browser
+        """
+        no_match_name = "ZZZZZ_WILDXR_TEST_NO_MATCH_ZZZZZ"
+
+        logger.info("Starting test_devices_search_with_no_match_shows_empty_table")
+        for dp in devices_page:
+            dp.search_devices(no_match_name)
+
+            row_count = dp.count_table_rows()
+            check.equal(
+                row_count,
+                0,
+                f"Expected 0 rows for no-match search on {get_browser_name(dp.page)}, "
+                f"got {row_count}"
+            )
+            if row_count == 0:
+                logger.info(
+                    f"Verification Successful :: No-match search returns empty table "
+                    f"on {get_browser_name(dp.page)}"
+                )
+
+    @pytest.mark.UI
+    @pytest.mark.devices
+    @pytest.mark.search
+    def test_devices_search_clears_to_show_results(self, devices_page):
+        """
+        Verify that clearing the search input and re-searching returns data
+        after a no-match search has emptied the table.
+
+        This confirms that the search state resets correctly — a bug in the
+        search implementation could leave the table empty even after the filter
+        is cleared.
+
+        Args:
+            devices_page: The DevicesPage fixture providing page objects for each browser
+        """
+        no_match_name = "ZZZZZ_WILDXR_TEST_NO_MATCH_ZZZZZ"
+
+        logger.info("Starting test_devices_search_clears_to_show_results")
+        for dp in devices_page:
+            # Step 1: Search for a no-match term to empty the table.
+            dp.search_devices(no_match_name)
+            check.equal(
+                dp.count_table_rows(),
+                0,
+                f"Expected 0 rows after no-match search on {get_browser_name(dp.page)}"
+            )
+
+            # Step 2: Clear the filter and search again to restore results.
+            dp.search_devices("")
+
+            row_count = dp.count_table_rows()
+            check.greater(
+                row_count,
+                0,
+                f"Expected rows to return after clearing search on "
+                f"{get_browser_name(dp.page)}, got {row_count}"
+            )
+            if row_count > 0:
+                logger.info(
+                    f"Verification Successful :: Clearing search restores "
+                    f"{row_count} rows on {get_browser_name(dp.page)}"
+                )
+
+    @pytest.mark.UI
+    @pytest.mark.devices
+    @pytest.mark.search
+    def test_devices_search_returns_matching_result(self, devices_page):
+        """
+        Verify that searching for a known device name returns at least one result.
+
+        Complements test_devices_search_with_no_match_shows_empty_table by
+        confirming the positive case: a valid search term actually filters the
+        table down to matching rows rather than returning everything or nothing.
+
+        The device name is defined as KNOWN_DEVICE_NAME at the top of this module.
+        Update that constant if the device is renamed or replaced in the QA environment.
+
+        Args:
+            devices_page: The DevicesPage fixture providing page objects for each browser
+        """
+        logger.info("Starting test_devices_search_returns_matching_result")
+        for dp in devices_page:
+            dp.search_devices(KNOWN_DEVICE_NAME)
+
+            row_count = dp.count_table_rows()
+            check.greater(
+                row_count,
+                0,
+                f"Expected at least 1 row when searching for '{KNOWN_DEVICE_NAME}' "
+                f"on {get_browser_name(dp.page)}, got {row_count}"
+            )
+            if row_count > 0:
+                logger.info(
+                    f"Verification Successful :: Search for known device returned "
+                    f"{row_count} row(s) on {get_browser_name(dp.page)}"
+                )
+
     @pytest.mark.UI
     @pytest.mark.devices
     @pytest.mark.pagination

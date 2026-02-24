@@ -27,12 +27,8 @@ class OrganizationsPage(BasePage):
     # Element locators    
     def get_page_title(self):
         """ Get the page title for the Organizations page."""
-        return self.page.get_by_role("heading", name="Organizations")
-    
-    def get_page_title_text(self):
-        """ Get the page title text for the Organizations page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
-    
+        return self.page.locator("h1", has_text="Organizations")
+
     def get_search_text_box(self):
         """ Get the search text box element."""
         return self.page.get_by_role("textbox", name="Filter by name")

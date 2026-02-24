@@ -27,12 +27,8 @@ class InstallationsPage(BasePage):
     # Element locators
     def get_page_title(self):
         """ Get the page title for the Installations page."""
-        return self.page.get_by_role("heading", name="Installations")
-    
-    def get_page_title_text(self):
-        """ Get the page title text for the Installations page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
-    
+        return self.page.locator("h1", has_text="Installations")
+
     def get_installation_search_text(self):
         """ Get the installation search text element."""
         return self.page.get_by_role("textbox", name="Filter by name")
@@ -274,6 +270,16 @@ class InstallationsPage(BasePage):
         self.logger.info("Navigating to first installation edit form and waiting for heading")
         self.get_installations_table_rows().first.click()
         self.get_edit_installation_page_title().wait_for(state="visible")
+
+    def navigate_to_add_installation(self) -> None:
+        """Click the Add button and wait for the Add Installation heading.
+
+        React Router navigation is client-side, so this waits for the h1 heading
+        to become visible rather than relying on wait_for_load_state("networkidle").
+        """
+        self.logger.info("Navigating to Add Installation form and waiting for heading")
+        self.get_installation_add_button().click()
+        self.get_add_installation_page_title().wait_for(state="visible")
 
     # -------------------------------------------------------------------------
     # Panel Collection Field — Display Value

@@ -27,12 +27,8 @@ class MapMarkersPage(BasePage):
     # Element locators
     def get_page_title(self):
         """Get the page title for the Map Markers page."""
-        return self.page.get_by_role("heading", name="Map Marker Admin")
-    
-    def get_page_title_text(self):
-        """Get the text of the page title for the Map Markers page."""
-        return self.page.get_by_role("heading", level=1).inner_text()
-    
+        return self.page.locator("h1", has_text="Map Marker Admin")
+
     # Tab Elements
     def get_map_markers_core_tab(self):
         """Get the core map markers tab element."""

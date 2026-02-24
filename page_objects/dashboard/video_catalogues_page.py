@@ -27,12 +27,8 @@ class VideoCataloguesPage(BasePage):
     # Element locators
     def get_page_title(self):
         """Get the page title for the Video Catalogues page."""
-        return self.page.get_by_role("heading", name="Video Catalogues")
-    
-    def get_page_title_text(self):
-        """Get the text of the page title for the Video Catalogues page."""
-        return self.get_by_role("heading", level=1).inner_text()
-    
+        return self.page.locator("h1", has_text="Video Catalogues")
+
     def get_video_catalogues_search_input(self):
         """Get the video catalogues search input element."""
         return self.page.get_by_placeholder("Filter by name")
@@ -314,6 +310,25 @@ class VideoCataloguesPage(BasePage):
             # "Sort by Name Arrows": self.get_video_catalogues_table_sort_by_name_arrows,
         }
         return self.verify_page_elements_present(table_elements, "Video Catalogues Table Elements")
+
+    def search_catalogues(self, name: str) -> None:
+        """
+        Type a search term into the filter input, click Search, and wait for
+        the API response before returning.
+
+        Sets up the response listener before clicking to avoid a race condition
+        where wait_for_load_state("networkidle") could resolve before the
+        search request is even initiated.
+
+        Args:
+            name (str): The catalogue name string to filter by.
+        """
+        self.logger.info(f"Searching video catalogues with filter: '{name}'")
+        self.get_video_catalogues_search_input().fill(name)
+        with self.page.expect_response(
+            lambda r: "videocatalogue" in r.url.lower() and r.status == 200
+        ):
+            self.get_video_catalogues_search_button().click()
 
     def count_table_rows(self) -> int:
         """

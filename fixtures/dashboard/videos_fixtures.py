@@ -35,12 +35,16 @@ def videos_page(logged_in_page):
         logger.info(f"Navigating to Videos page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate directly to Videos page
-        page.goto(QA_WEB_BASE_URL + "/videos")
-        
+    # Navigate to the Videos page (root URL — VideoManagementPage is mounted at
+    # path "/" in App.tsx, not "/videos"; the "Videos" nav link is href="/").
+    # Then wait for networkidle as a separate call so it catches the React
+    # useEffect API calls that fire after the bundle loads.
+        page.goto(QA_WEB_BASE_URL + "/")
+        page.wait_for_load_state("networkidle", timeout=60000)
+
     # Create the page object
         videos_page = VideosPage(page)
-        
+
     # Verify that we're on the Videos page
         if videos_page.verify_page_title_present():
             logger.info("Successfully navigated to Videos page")

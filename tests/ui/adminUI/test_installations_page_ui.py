@@ -230,18 +230,14 @@ class TestInstallationsPageUI:
 
     @pytest.mark.UI
     @pytest.mark.installations
-    def test_installation_edit_form_panel_collection_has_selected_value(self, installations_page):
+    def test_add_installation_form_panel_collection_defaults_to_wildxr_panels(self, installations_page):
         """
-        Verify that an existing installation's panel collection dropdown
-        shows a selected value — confirming the default assignment introduced
-        by WILDXR-1868 is populated for existing records.
+        Verify that the Add Installation form pre-selects 'WildXR Panels' as
+        the default panel collection — the behavior introduced by WILDXR-1868.
 
-        The ticket states installations should default to 'WildXR Panels'.
-        This test verifies a value is displayed (non-empty) rather than
-        asserting the exact name, since QA installations may have been
-        updated to a different collection after initial deployment.
-
-        If no installations exist in the QA environment the test is skipped.
+        The default only applies to the Add form. Existing installations may
+        have any collection (or none) depending on when they were created, so
+        this check is intentionally scoped to the creation path.
 
         Args:
             installations_page: List of authenticated InstallationsPage instances.
@@ -249,30 +245,33 @@ class TestInstallationsPageUI:
         for ip in installations_page:
             browser_name = get_browser_name(ip.page)
             logger.info(
-                f"Verifying panel collection has a selected value on "
-                f"Installation edit form on {browser_name}"
+                f"Verifying Add Installation form defaults panel collection to "
+                f"'WildXR Panels' on {browser_name}"
             )
 
-            row_count = ip.get_installations_table_rows().count()
-            if row_count == 0:
-                pytest.skip(
-                    f"No installation rows in the QA environment on {browser_name} — "
-                    "cannot test Installation Details form."
-                )
-
-            ip.navigate_to_first_installation_edit()
+            ip.navigate_to_add_installation()
 
             selected_value = ip.get_panel_collection_selected_value_text()
 
             check.is_true(
                 selected_value.is_visible(),
-                f"Expected panel collection dropdown to show a selected value on "
-                f"{browser_name} — field appears empty. "
-                f"WILDXR-1868 states installations should default to 'WildXR Panels'."
+                f"Expected panel collection dropdown to show 'WildXR Panels' by default "
+                f"on the Add Installation form on {browser_name} — field appears empty."
             )
             if selected_value.is_visible():
                 value_text = selected_value.inner_text()
-                logger.info(
-                    f"Verification Successful :: Panel collection shows selected value "
-                    f"'{value_text}' on {browser_name}"
+                check.equal(
+                    value_text,
+                    "WildXR Panels",
+                    f"Expected default panel collection 'WildXR Panels' on {browser_name}, "
+                    f"got '{value_text}'"
                 )
+                logger.info(
+                    f"Verification Successful :: Add Installation form defaults panel "
+                    f"collection to '{value_text}' on {browser_name}"
+                )
+
+            # Cancel unconditionally — we never want to save a blank installation.
+            # This runs even if a check above failed (pytest-check is a soft assertion).
+            ip.get_cancel_button().click()
+            ip.get_page_title().wait_for(state="visible")

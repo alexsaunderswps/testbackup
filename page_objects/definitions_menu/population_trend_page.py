@@ -26,11 +26,7 @@ class PopulationTrendPage(BasePage):
     # Element locators - Using method-based approach for consistency
     def get_page_title(self):
         """Get the page title for the Population Trend page."""
-        return self.page.get_by_role("heading", name="Population Trend")
-
-    def get_page_title_text(self):
-        """Get the page title text for the Population Trend page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
+        return self.page.locator("h1", has_text="Population Trend")
 
     # Population Trend Table elements
     def get_population_trend_table_body(self):

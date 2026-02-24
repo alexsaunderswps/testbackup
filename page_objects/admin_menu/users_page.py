@@ -27,12 +27,8 @@ class UsersPage(BasePage):
     # Element locators
     def get_page_title(self):
         """ Get the page title for the Users page."""
-        return self.page.get_by_role("heading", name="Users")
-    
-    def get_page_title_text(self):
-        """ Get the page title text for the Users page."""
-        return self.page.get_by_role("heading", level=1).first().inner_text()
-        
+        return self.page.locator("h1", has_text="Users")
+
     def get_user_add_button(self):
         """ Get the add user button element."""
         return self.page.get_by_role("link", name="Add")
@@ -106,6 +102,22 @@ class UsersPage(BasePage):
         }
         return self.verify_page_elements_present(action_elements, "Add User Button")
     
+    def count_table_rows(self) -> int:
+        """
+        Count the number of rows in the Users table.
+
+        Returns:
+            int: The number of visible user rows, or 0 if an error occurs.
+        """
+        self.logger.info("Counting the number of rows in the Users table")
+        try:
+            row_count = self.get_users_table_rows().count()
+            self.logger.info(f"Found {row_count} rows in the Users table")
+            return row_count
+        except Exception as e:
+            self.logger.error(f"Error counting Users table rows: {str(e)}")
+            return 0
+
     def verify_all_users_table_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected user table elements are present.

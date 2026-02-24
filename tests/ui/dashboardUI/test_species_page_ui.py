@@ -162,6 +162,49 @@ class TestSpeciesPageUI:
             
     @pytest.mark.UI
     @pytest.mark.species
+    @pytest.mark.search
+    def test_species_search_clears_to_show_results(self, species_page):
+        """
+        Verify that clearing the search input and re-searching returns data
+        after a no-match search has emptied the table.
+
+        This confirms that the search state resets correctly — a bug in the
+        search implementation could leave the table empty even after the filter
+        is cleared.
+
+        Args:
+            species_page: The SpeciesPage fixture providing page objects for each browser
+        """
+        no_match_name = "ZZZZZ_WILDXR_TEST_NO_MATCH_ZZZZZ"
+
+        logger.info("Starting test_species_search_clears_to_show_results")
+        for sp in species_page:
+            # Step 1: Search for a no-match term to empty the table.
+            sp.search_species(no_match_name)
+            check.equal(
+                sp.count_table_rows(),
+                0,
+                f"Expected 0 rows after no-match search on {get_browser_name(sp.page)}"
+            )
+
+            # Step 2: Clear the filter and search again to restore results.
+            sp.search_species("")
+
+            row_count = sp.count_table_rows()
+            check.greater(
+                row_count,
+                0,
+                f"Expected rows to return after clearing search on "
+                f"{get_browser_name(sp.page)}, got {row_count}"
+            )
+            if row_count > 0:
+                logger.info(
+                    f"Verification Successful :: Clearing search restores "
+                    f"{row_count} rows on {get_browser_name(sp.page)}"
+                )
+
+    @pytest.mark.UI
+    @pytest.mark.species
     @pytest.mark.pagination
     def test_species_pagination_elements(self, species_page, verify_ui_elements):
         """
