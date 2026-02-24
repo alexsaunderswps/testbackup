@@ -35,12 +35,17 @@ def videos_page(logged_in_page):
         logger.info(f"Navigating to Videos page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate directly to Videos page
-        page.goto(QA_WEB_BASE_URL + "/videos")
-        
+    # Navigate to the Videos page and wait for the initial API call to complete.
+    # VideoManagementPage.tsx renders a MoonLoader spinner (hiding the entire UI,
+    # including the h1 "Videos") until pageLoaded is true, which only flips after
+    # searchVideos() resolves. Using wait_until="networkidle" ensures the API
+    # response has arrived before we look for the h1. A longer timeout (60s)
+    # accounts for QA environment slowness when concurrent API tests are running.
+        page.goto(QA_WEB_BASE_URL + "/videos", wait_until="networkidle", timeout=60000)
+
     # Create the page object
         videos_page = VideosPage(page)
-        
+
     # Verify that we're on the Videos page
         if videos_page.verify_page_title_present():
             logger.info("Successfully navigated to Videos page")
