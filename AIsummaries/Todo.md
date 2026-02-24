@@ -13,7 +13,7 @@ Items are grouped by area and roughly ordered by priority within each section. "
 These pages exist in the frontend but have zero page object coverage. Nothing else below can move forward for these areas without them.
 
 - [x] ~~**Create `PanelsPage` page object** — `panels/` component has `ManagePanelsPage`, `AddEditPanel`, `PanelsList`; no page object or tests exist~~ ✅ Completed 2026-02-20: `page_objects/admin_menu/panels_page.py` created (WILDXR-1870)
-- [ ] **Create `PanelCollectionsPage` page object** — `panelCollections/` has `ManagePanelCollectionsPage`, `AddEditPanelCollection`; no page object or tests exist
+- [x] ~~**Create `PanelCollectionsPage` page object** — `panelCollections/` has `ManagePanelCollectionsPage`, `AddEditPanelCollection`; no page object or tests exist~~ ✅ Completed 2026-02-20: `page_objects/admin_menu/panel_collections_page.py` created (404 lines; list page, Add/Edit form, verification methods, action methods)
 
 > **Note:** SpeciesCategory, VideoFormat, VideoResolution, VideoStatus, ContentType, VisualType, and Roles are backend lookup tables that populate dropdown menus on other pages but are not served as navigable pages in the web portal. They do not need page objects or UI tests. They are covered at the API level in Section 5.
 
@@ -24,7 +24,7 @@ These pages exist in the frontend but have zero page object coverage. Nothing el
 For each page below, follow the existing pattern: page title, nav elements, admin/definitions dropdowns, table columns, action buttons, pagination.
 
 - [x] ~~**`test_panels_page_ui.py`** — page title, nav, admin dropdown, definitions dropdown, table elements (Name, Description columns per component), pagination, Add button~~ ✅ Completed 2026-02-20: `tests/ui/test_panels_page.py` — 15 tests covering page title, nav elements, admin/definitions dropdowns, list controls, all 7 table columns, pagination, Add Panel form elements, Save disabled state, View Sample Panel modal, required field validation, Cancel navigation, Edit form navigation, and search filter (WILDXR-1870)
-- [ ] **`test_panel_collections_page_ui.py`** — same structure; also verify the panels sub-list within a collection
+- [x] ~~**`test_panel_collections_page_ui.py`** — same structure; also verify the panels sub-list within a collection~~ ✅ Completed 2026-02-20: `tests/ui/test_panel_collections_page_ui.py` — 14 tests covering page title, nav elements, admin/definitions dropdowns, list controls, all 5 table columns, pagination, Add Panel Collection form elements, Save disabled state, required field validation, Cancel navigation, Edit form navigation, and search filter
 
 ---
 
@@ -34,17 +34,17 @@ These pages have UI tests but are missing important element checks.
 
 - [ ] **Tags page** — `test_tags_page_ui.py` only checks the "development notice"; once Tags is fully live, add table elements, action buttons, pagination, and data retrieval tests (currently a placeholder)
 - [ ] **Users page** — missing pagination test (page object likely supports it); add `test_users_pagination_elements()`
-- [ ] **Users page** — missing table row data presence check (similar to `test_countries_table_data_presence`)
-- [ ] **Devices page** — missing search element and search functionality tests (component has search; countries page is the model)
-- [ ] **Devices page** — missing table row data check
-- [ ] **Organizations page** — missing search tests (organizations list is searchable per the API)
+- [x] ~~**Users page** — missing table row data presence check (similar to `test_countries_table_data_presence`)~~ ✅ Completed 2026-02-24: Added `test_users_table_data_presence` to `tests/ui/adminUI/test_users_page_ui.py`; added `count_table_rows()` to `UsersPage`
+- [x] ~~**Devices page** — missing search element and search functionality tests (component has search; countries page is the model)~~ ✅ Completed 2026-02-24: Added `test_devices_search_with_no_match_shows_empty_table` and `test_devices_search_clears_to_show_results` to `tests/ui/adminUI/test_devices_page_ui.py`; added `search_devices()` to `DevicesPage`
+- [x] ~~**Devices page** — missing table row data check~~ ✅ Completed 2026-02-24: Added `test_devices_table_data_presence` to `tests/ui/adminUI/test_devices_page_ui.py`; added `count_table_rows()` to `DevicesPage`
+- [ ] **Organizations page** — missing search tests (organizations list is searchable per the API; search UI is not currently functional — skip until UI is updated)
 - [ ] **Map Markers page** — missing pagination tests (`MapMarkersPage` has pagination controls but no pagination test)
-- [ ] **Video page** — verify card-level data: video name, thumbnail presence, and any status badges visible on grid cards
-- [ ] **Videos page** — add filter/sort UI element checks (the `VideoSearchModal` component exists; verify its trigger button is present)
-- [ ] **Video Catalogues page** — add search functionality test (similar to Countries search test)
+- [x] ~~**Video page** — verify card-level data: video name, thumbnail presence, and any status badges visible on grid cards~~ ✅ Covered by existing `test_video_grid_elements` and `test_video_name_retrieval` — no status badges exist in the current component
+- [x] ~~**Videos page** — add filter/sort UI element checks (the `VideoSearchModal` component exists; verify its trigger button is present)~~ ✅ Completed 2026-02-24: Added `test_video_search_modal_opens_and_shows_filter_fields` to `tests/ui/dashboardUI/test_videos_page_ui.py`; added full `VideoSearchModal` locator and action methods to `VideosPage`
+- [x] ~~**Video Catalogues page** — add search functionality test (similar to Countries search test)~~ ✅ Completed 2026-02-24: Added `test_video_catalogue_search_with_no_match_shows_empty_table` to `tests/ui/dashboardUI/test_video_catalogues_page_ui.py`; added `search_catalogues()` to `VideoCataloguesPage`
 - [ ] **Installations page** — `test_installations_pagination_elements_with_sufficient_data` creates test data; verify that test cleans up properly via `AUTOTEST_` prefix
 - [x] ~~**Installations page** — missing panel collection field checks on the Installation Details (edit) form~~ ✅ Completed 2026-02-20: Added `test_installation_edit_form_panel_collection_field_present` and `test_installation_edit_form_panel_collection_has_selected_value` to `tests/ui/adminUI/test_installations_page_ui.py` (WILDXR-1868)
-- [ ] **Species page** — verify the search field clears correctly (test the clear/reset behavior)
+- [x] ~~**Species page** — verify the search field clears correctly (test the clear/reset behavior)~~ ✅ Completed 2026-02-24: Added `test_species_search_clears_to_show_results` to `tests/ui/dashboardUI/test_species_page_ui.py`; added `search_species()` to `SpeciesPage`
 
 ---
 
