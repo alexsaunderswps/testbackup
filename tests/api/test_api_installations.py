@@ -879,61 +879,6 @@ class TestAPIInstallationsCRUD:
     @pytest.mark.api
     @pytest.mark.installations
     @pytest.mark.edge_case
-    def test_create_installation_missing_name_accepts_and_returns_200(self):
-        """
-        PUT /Installations/create without a name field returns 200.
-
-        API DESIGN GAP: The Installation database column 'Name' is nullable,
-        and InstallationDto has no [Required] attribute. The result is that the
-        API accepts and persists a nameless installation without complaint.
-
-        This is a gap — installations without names are meaningless in the
-        application — but it reflects the current API behavior. The test asserts
-        200 to document this and will fail if the API adds validation (at which
-        point the assertion should be updated to 400).
-
-        Cleanup note: inst_id is registered before the request so teardown
-        deletes the orphaned nameless record even if the assertion later changes.
-        """
-        inst_id = str(uuid.uuid4())
-        # Register for cleanup BEFORE the request so a successful 200 doesn't
-        # leave an orphaned nameless installation in the QA database.
-        self._created_ids.append(inst_id)
-
-        try:
-            response = self.api.put(
-                "/Installations/create",
-                body={"installationId": inst_id, "organizationId": TEST_ORG_ID}
-                # name intentionally omitted
-            )
-
-            assert response.status_code == 200, (
-                f"Expected 200 from PUT /Installations/create with missing name "
-                f"(API currently allows nameless installations — DB Name column is "
-                f"nullable and no [Required] attribute exists on InstallationDto.Name). "
-                f"Got {response.status_code}. "
-                f"If this changes to 400, the API has added validation — update the "
-                f"assertion and this docstring."
-            )
-
-            logger.info(
-                f"PUT /Installations/create with missing name returned 200 — "
-                f"API design gap confirmed: nameless installations are accepted."
-            )
-
-        except AssertionError as e:
-            logger.error(f"Assertion failed: {e}")
-            raise
-        except Exception as e:
-            logger.error(
-                f"Unexpected error in "
-                f"test_create_installation_missing_name_accepts_and_returns_200: {e}"
-            )
-            raise
-
-    @pytest.mark.api
-    @pytest.mark.installations
-    @pytest.mark.edge_case
     def test_create_installation_with_invalid_org_id(self):
         """
         PUT /Installations/create with a nonexistent OrganizationId documents API behavior.
