@@ -37,10 +37,6 @@ class VideosPage(BasePage):
         """Get the page title for the Videos page."""
         return self.page.locator("h1", has_text="Videos")
 
-    def get_page_title_text(self):
-        """Get the text of the page title for the Videos page."""
-        return self.page.locator("h1").inner_text()
-
     # -------------------------------------------------------------------------
     # Action Button Elements (Search, Clear, Add)
     # -------------------------------------------------------------------------

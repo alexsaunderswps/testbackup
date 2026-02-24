@@ -29,10 +29,6 @@ class VideoCataloguesPage(BasePage):
         """Get the page title for the Video Catalogues page."""
         return self.page.locator("h1", has_text="Video Catalogues")
 
-    def get_page_title_text(self):
-        """Get the text of the page title for the Video Catalogues page."""
-        return self.page.locator("h1").inner_text()
-    
     def get_video_catalogues_search_input(self):
         """Get the video catalogues search input element."""
         return self.page.get_by_placeholder("Filter by name")

@@ -29,10 +29,6 @@ class InstallationsPage(BasePage):
         """ Get the page title for the Installations page."""
         return self.page.locator("h1", has_text="Installations")
 
-    def get_page_title_text(self):
-        """ Get the page title text for the Installations page."""
-        return self.page.locator("h1").first().inner_text()
-    
     def get_installation_search_text(self):
         """ Get the installation search text element."""
         return self.page.get_by_role("textbox", name="Filter by name")

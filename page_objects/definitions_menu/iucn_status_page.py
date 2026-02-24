@@ -29,10 +29,6 @@ class IUCNStatusPage(BasePage):
         """Get the page title for the IUCN Status page."""
         return self.page.locator("h1", has_text="IUCN Status")
 
-    def get_page_title_text(self):
-        """Get the page title text for the IUCN Status page."""
-        return self.page.locator("h1").first().inner_text()
-    
     # IUCN Status Table elements
     def get_iucn_status_table_body(self):
         """Get the IUCN Status table body element."""

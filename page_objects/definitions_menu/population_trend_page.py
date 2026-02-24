@@ -28,10 +28,6 @@ class PopulationTrendPage(BasePage):
         """Get the page title for the Population Trend page."""
         return self.page.locator("h1", has_text="Population Trend")
 
-    def get_page_title_text(self):
-        """Get the page title text for the Population Trend page."""
-        return self.page.locator("h1").first().inner_text()
-
     # Population Trend Table elements
     def get_population_trend_table_body(self):
         """Get the Population Trend table body element."""

@@ -29,10 +29,6 @@ class CountriesPage(BasePage):
         """Get the page title for the Countries page."""
         return self.page.locator("h1", has_text="Countries")
 
-    def get_page_title_text(self):
-        """Get the page title text for the Countries page."""
-        return self.page.locator("h1").first().inner_text()
-    
     def get_countries_search_text(self):
         """Get the countries search text element."""
         return self.page.get_by_role("textbox", name="Search...")
