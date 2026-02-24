@@ -35,16 +35,11 @@ def videos_page(logged_in_page):
         logger.info(f"Navigating to Videos page on {get_browser_name(page)}")
         logger.info(80 * "-")
     
-    # Navigate to the Videos page, then explicitly wait for network idle.
-    # VideoManagementPage.tsx renders a MoonLoader spinner (hiding the entire UI,
-    # including the h1 "Videos") until pageLoaded is true, which only flips after
-    # searchVideos() resolves. The React useEffect that fires searchVideos() runs
-    # AFTER the JS bundle loads, so wait_until="networkidle" on goto() exits too
-    # early (it only catches the bundle load). Calling wait_for_load_state() as a
-    # separate step after goto() catches the second wave of network activity — the
-    # actual searchVideos() API call initiated by useEffect. A longer timeout (60s)
-    # accounts for QA environment slowness when concurrent API tests are running.
-        page.goto(QA_WEB_BASE_URL + "/videos")
+    # Navigate to the Videos page (root URL — VideoManagementPage is mounted at
+    # path "/" in App.tsx, not "/videos"; the "Videos" nav link is href="/").
+    # Then wait for networkidle as a separate call so it catches the React
+    # useEffect API calls that fire after the bundle loads.
+        page.goto(QA_WEB_BASE_URL + "/")
         page.wait_for_load_state("networkidle", timeout=60000)
 
     # Create the page object
