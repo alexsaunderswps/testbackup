@@ -160,3 +160,53 @@ def clear_token_cache():
     """
     cache = TokenCache()
     cache.clear_token()
+
+
+def get_token_for_user(username: str, password: str) -> str:
+    """
+    Fetch a fresh authentication token for the given username and password.
+
+    Unlike get_auth_token(), this function does NOT use the singleton cache.
+    Use it when you need a token for a non-default user account — for example,
+    org-admin accounts in authorization tests.
+
+    Args:
+        username: The user's login username.
+        password: The user's login password.
+
+    Returns:
+        str: A valid JWT authentication token.
+
+    Raises:
+        Exception: If authentication fails (wrong credentials, network error, etc.)
+
+    Example:
+        >>> bp_token = get_token_for_user("QAOrgBPADMIN", "secret")
+        >>> bp_api = APIBase(token=bp_token)
+    """
+    auth_endpoint = f"{API_BASE_URL}/Users/Authenticate"
+    auth_data = {"username": username, "password": password}
+
+    try:
+        logger.debug(f"Fetching authentication token for user '{username}'")
+        response = requests.post(
+            auth_endpoint,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(auth_data),
+            timeout=30
+        )
+        response.raise_for_status()
+        token = response.json().get("token")
+
+        if not token:
+            raise ValueError(
+                f"No token returned for user '{username}'. "
+                f"Response body: {response.text[:200]}"
+            )
+
+        logger.info(f"Successfully obtained token for user '{username}'")
+        return token
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Failed to obtain token for user '{username}': {str(e)}")
+        raise Exception(f"Authentication failed for '{username}': {str(e)}")
