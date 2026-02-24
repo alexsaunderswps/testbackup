@@ -7,8 +7,12 @@ from page_objects.authentication.login_page import LoginPage
 from fixtures.login_fixtures import login_page
 from utilities.utils import logger
 
-# Initialize Faker
+# Initialize Faker with a fixed seed so that all pytest-xdist workers generate
+# identical parametrize test IDs. Without a seed each worker independently
+# randomises the credential values, causing "Different tests were collected"
+# errors at startup.
 fake = Faker()
+Faker.seed(0)
 
 # Load environment variables
 load_dotenv()
