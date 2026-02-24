@@ -44,6 +44,8 @@ These pages have UI tests but are missing important element checks.
 - [x] ~~**Video Catalogues page** — add search functionality test (similar to Countries search test)~~ ✅ Completed 2026-02-24: Added `test_video_catalogue_search_with_no_match_shows_empty_table` to `tests/ui/dashboardUI/test_video_catalogues_page_ui.py`; added `search_catalogues()` to `VideoCataloguesPage`
 - [ ] **Installations page** — `test_installations_pagination_elements_with_sufficient_data` creates test data; verify that test cleans up properly via `AUTOTEST_` prefix
 - [x] ~~**Installations page** — missing panel collection field checks on the Installation Details (edit) form~~ ✅ Completed 2026-02-20: Added `test_installation_edit_form_panel_collection_field_present` and `test_installation_edit_form_panel_collection_has_selected_value` to `tests/ui/adminUI/test_installations_page_ui.py` (WILDXR-1868)
+- [x] ~~**Installations page** — corrected WILDXR-1868 panel collection test: `test_installation_edit_form_panel_collection_has_selected_value` was failing because WILDXR-1868's 'WildXR Panels' default only applies to the Add form, not existing records~~ ✅ Completed 2026-02-24: Renamed to `test_add_installation_form_panel_collection_defaults_to_wildxr_panels`; now navigates to the Add form and asserts the exact 'WildXR Panels' default; added unconditional Cancel to prevent accidental record creation; added `navigate_to_add_installation()` to `InstallationsPage`
+- [x] ~~**Devices page** — add positive search test with known device name~~ ✅ Completed 2026-02-24: Added `test_devices_search_returns_matching_result` with `KNOWN_DEVICE_NAME = "Alex's QA Headset - F7V07HK - Managed"` constant to `tests/ui/adminUI/test_devices_page_ui.py`
 - [x] ~~**Species page** — verify the search field clears correctly (test the clear/reset behavior)~~ ✅ Completed 2026-02-24: Added `test_species_search_clears_to_show_results` to `tests/ui/dashboardUI/test_species_page_ui.py`; added `search_species()` to `SpeciesPage`
 
 ---
@@ -349,10 +351,15 @@ Currently only the login page has these tests. Consider expanding:
 
 - [ ] **API test for token refresh / expiry** — 30-day JWT lifetime is a known concern; document and test what happens when a token expires mid-session
 - [ ] **Parallel test isolation** — verify that `pytest-xdist` workers don't conflict on shared test data (e.g., two workers both creating `AUTOTEST_` records with the same name)
+- [x] ~~**Fix pytest-xdist collection divergence** — `test_login_functionality.py` used unseeded `Faker` at module level for `@pytest.mark.parametrize`, causing different test IDs across workers and a "Different tests were collected" crash~~ ✅ Completed 2026-02-24: Added `Faker.seed(0)` immediately after `fake = Faker()`
 - [ ] **Add `AUTOTEST_` cleanup to more entities** — currently conftest only cleans up installations, video catalogues, and organizations; extend cleanup to devices, users, map markers, species, tags, panels, panel collections
 - [ ] **CI marker filter** — audit which tests are tagged `@pytest.mark.github` for CI and ensure all stable, non-slow tests are included
 - [ ] **Flaky test detection** — add `pytest-rerunfailures` for known-flaky UI tests (e.g., pagination tests that depend on QA data state)
 - [ ] **Response time baselines** — `APIBase` measures response times; add assertions for acceptable thresholds (e.g., list endpoints < 3s)
+- [x] ~~**Fix page title locators across all page objects** — `get_by_role("heading", name="...")` was unreliable and broken in 3 files where `self.get_by_role(...)` was called instead of `self.page.get_by_role(...)`~~ ✅ Completed 2026-02-24: Replaced all 13 affected page objects with `page.locator("h1", has_text="...")`
+- [x] ~~**Remove dead `get_page_title_text()` methods** — method defined in 11 page objects but never called; title checks go through `BasePage.verify_page_title()` directly~~ ✅ Completed 2026-02-24: Removed from all 11 page objects
+- [x] ~~**Fix search URL matcher race condition** — `devices_page.py` and `species_page.py` used broad matchers (`"device" in url`) that could capture the page-load response instead of the search response, causing stale row counts in tests~~ ✅ Completed 2026-02-24: Narrowed to `/Device/search` and `/species/search`; added 500ms post-response wait for React re-render
+- [x] ~~**Handle intentional QA test data in video integrity checks** — video "#01 Test No Species" intentionally has no species, causing `test_video_data_integrity` to fail non-deterministically when that video is randomly selected~~ ✅ Completed 2026-02-24: Added `INTEGRITY_CHECK_EXCLUDED_NAME_PREFIX = "#"` constant; `_validate_video_content` skips any video whose name starts with `#`
 
 ---
 
