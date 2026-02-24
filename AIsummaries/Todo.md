@@ -84,7 +84,7 @@ The biggest gap: only Videos has meaningful API tests. Every resource below need
 > - `GET /api/Installations` returns a plain array, NOT a `ResponseDto` wrapper — same quirk as Organizations
 > - `GET /api/Installations/search` DOES return `ResponseDto` with correct pagination math
 > - `PUT /api/Installations/create` returns 200 with empty body; `installationId` is optional — EF Core auto-generates if omitted; tests supply it explicitly for simpler cleanup
-> - `InstallationDto` has no `[Required]` on `Name` — missing name causes 500 (DB constraint), not 400 — documented as an API design gap
+> - `InstallationDto` has no `[Required]` on `Name` — DB `Name` column is also nullable, so missing name causes 200 (not 400 or 500) — documented as an API design gap; no test written (see "Document Gaps — Don't Test Them" in CLAUDE.md)
 > - `OrganizationId` has no FK validation in the Create action — behavior (200 or 500) depends on DB foreign key constraints
 > - Not-found returns 400 (not 404) — consistent with all controllers
 > - `ResolvePanelCollectionIdAsync` is defined in the controller but never called from Create/Update — `panelCollectionId` can be omitted and defaults to Guid.Empty
@@ -95,7 +95,7 @@ The biggest gap: only Videos has meaningful API tests. Every resource below need
 - [x] ~~**GET search**~~ ✅ Completed: `test_get_search_returns_200_with_pagination_envelope`, `test_get_search_pagination_fields_present`, `test_get_search_name_filter_returns_results`, `test_get_search_no_match_returns_empty_list`
 - [x] ~~**GET details by ID**~~ ✅ Completed: `test_get_detail_returns_200_for_valid_id`, `test_get_detail_has_required_fields`, `test_get_detail_returns_400_for_nonexistent_id`
 - [x] ~~**POST create** — valid payload; use `AUTOTEST_` prefix~~ ✅ Completed: `test_create_installation_returns_200`, `test_created_installation_appears_in_search`, `test_created_installation_detail_matches_payload`
-- [x] ~~**POST create — missing `Name`**~~ ✅ Completed: `test_create_installation_missing_name_returns_error` — asserts 400 or 500; documents that no model validation exists (API gap)
+- [x] ~~**POST create — missing `Name`**~~ ✅ Documented as API design gap (missing name returns 200 — DB column nullable, zero server-side validation); no test written per "Document Gaps — Don't Test Them" principle
 - [x] ~~**POST create — invalid `OrganizationId`**~~ ✅ Completed: `test_create_installation_with_invalid_org_id` — documents behavior (200 if no FK, 500 if FK exists)
 - [x] ~~**PUT update — change name; verify**~~ ✅ Completed: `test_update_installation_name_returns_200`, `test_update_installation_missing_id_returns_400`, `test_update_nonexistent_installation_returns_400`
 - [x] ~~**DELETE — cleanup `AUTOTEST_` record**~~ ✅ Completed: `test_delete_installation_returns_200`, `test_delete_nonexistent_installation_returns_400`

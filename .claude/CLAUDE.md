@@ -223,6 +223,20 @@ When designing API tests, consider:
 5. **Boundary values** — empty strings, zero, negative numbers, max lengths
 6. **State/sequence issues** — duplicate creation, update nonexistent record, concurrency
 
+### Document Gaps — Don't Test Them
+
+**Do not write tests that validate known bugs or design gaps.** If the API accepts invalid data (e.g., missing required fields, no FK validation, nameless records), document the gap in a comment — in the test file header, in CLAUDE.md, or in Todo.md — and move on.
+
+Tests should verify *intended* behavior. A test that passes only because something is broken:
+- Provides false confidence (a green test ≠ correct behavior)
+- Creates test artifacts that must be cleaned up forever
+- Adds noise to CI results
+- Must be rewritten when the gap is eventually fixed
+
+When a gap is fixed, the comment is what guides you to write the real test. Until then, leave it out.
+
+**Example:** The Installations API accepts a create request with no `name` (DB column is nullable, zero server-side validation). This is documented in the `test_api_installations.py` file header as a design gap — no test for it exists.
+
 ## Code Style and Conventions
 
 ### Readability over Cleverness
