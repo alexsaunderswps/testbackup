@@ -176,6 +176,43 @@ class TestVideoPageUI:
 
     @pytest.mark.UI
     @pytest.mark.video
+    @pytest.mark.search
+    def test_video_search_modal_opens_and_shows_filter_fields(self, videos_page):
+        """
+        Verify that clicking the Search button opens the VideoSearchModal overlay
+        and that all expected filter fields are present inside it.
+
+        The VideoSearchModal is a React overlay that is completely removed from the
+        DOM when closed. This test confirms that the modal mounts correctly and
+        exposes all 11 expected elements: the heading, name and overview text inputs,
+        five filter-category labels (Country, Resolution, Species, Tags, Statuses),
+        the Reset and Apply action buttons, and the × close button.
+
+        After verification the modal is closed so subsequent tests start from a clean state.
+
+        Args:
+            videos_page: The VideosPage fixture providing page objects for each browser
+        """
+        logger.info("Starting test_video_search_modal_opens_and_shows_filter_fields")
+        for vp in videos_page:
+            vp.open_search_modal()
+
+            all_elements, missing_elements = vp.verify_all_search_modal_elements_present()
+            check.is_true(
+                all_elements,
+                f"Missing VideoSearchModal elements on {get_browser_name(vp.page)}: "
+                f"{', '.join(missing_elements)}"
+            )
+            if all_elements:
+                logger.info(
+                    f"Verification Successful :: All VideoSearchModal elements found "
+                    f"on {get_browser_name(vp.page)}"
+                )
+
+            vp.close_search_modal()
+
+    @pytest.mark.UI
+    @pytest.mark.video
     @pytest.mark.pagination
     def test_videos_pagination_elements(self, videos_page, verify_ui_elements):
         """
