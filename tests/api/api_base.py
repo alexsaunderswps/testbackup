@@ -74,6 +74,64 @@ class APIBase:
         
         return response
         
+    def put(self, endpoint, auth_type='valid', params=None, body=None):
+        """
+        Send a PUT request to the given endpoint.
+
+        NOTE: The WildXR API uses PUT (not POST) for resource creation. This is an
+        unconventional but consistent design choice across all controllers — PUT maps to
+        "create" and POST maps to "update" throughout this API. Use this method when
+        calling any /Create endpoint (e.g., /api/Device/Create, /api/Installations/create).
+
+        Args:
+            endpoint (str): The API endpoint path (e.g., '/api/Device/Create').
+            auth_type (str, optional): Authentication type ('valid', 'invalid', 'none'). Defaults to 'valid'.
+            params (dict, optional): Query string parameters. Defaults to None.
+            body (dict, optional): Request body as a dict; serialized to JSON. Defaults to None.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
+        url = f"{self.base_url}{endpoint}"
+        headers = self.get_headers(auth_type)
+        self.context.set_current_request("PUT", url, headers, params=params, body=body)
+        logger.info(f"Sending PUT request to {url}")
+
+        response = requests.put(url, headers=headers, params=params, json=body)
+
+        self.context.set_current_response(response.status_code, response.headers, response.text)
+        logger.info(f"Received response with status code {response.status_code}")
+
+        return response
+
+    def delete(self, endpoint, auth_type='valid', params=None):
+        """
+        Send a DELETE request to the given endpoint.
+
+        This API passes the record ID as a query parameter rather than in the URL path
+        (e.g., DELETE /api/Installations/delete?id=<guid>), so use the params argument
+        rather than embedding the ID in the endpoint string.
+
+        Args:
+            endpoint (str): The API endpoint path (e.g., '/api/Installations/delete').
+            auth_type (str, optional): Authentication type ('valid', 'invalid', 'none'). Defaults to 'valid'.
+            params (dict, optional): Query string parameters, typically {'id': '<guid>'}. Defaults to None.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
+        url = f"{self.base_url}{endpoint}"
+        headers = self.get_headers(auth_type)
+        self.context.set_current_request("DELETE", url, headers, params=params)
+        logger.info(f"Sending DELETE request to {url}")
+
+        response = requests.delete(url, headers=headers, params=params)
+
+        self.context.set_current_response(response.status_code, response.headers, response.text)
+        logger.info(f"Received response with status code {response.status_code}")
+
+        return response
+
     def measure_response_time(self, response):
         return response.elapsed.total_seconds()
     

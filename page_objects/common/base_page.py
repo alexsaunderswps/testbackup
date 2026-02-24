@@ -932,7 +932,7 @@ class BasePage:
         Returns:
             bool: True if the Tags link is present, False otherwise.
         """
-        return self.get_tages_link().count() > 0
+        return self.get_tags_link().count() > 0
 
     def go_tags_page(self) -> None:
         """
