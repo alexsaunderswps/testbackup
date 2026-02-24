@@ -175,6 +175,29 @@ class SpeciesPage(BasePage):
         }
         return self.verify_page_elements_present(table_elements, "Species Table Elements")
 
+    def search_species(self, name: str) -> None:
+        """
+        Type a search term into the filter input, click Search, and wait for
+        the API response before returning.
+
+        Sets up the response listener before clicking to avoid a race condition
+        where wait_for_load_state("networkidle") could resolve before the
+        search request is even initiated.
+
+        Args:
+            name (str): The species name string to filter by.
+        """
+        self.logger.info(f"Searching species with filter: '{name}'")
+        self.get_species_search_input().fill(name)
+        with self.page.expect_response(
+            lambda r: "/species/search" in r.url.lower() and r.status == 200
+        ):
+            self.get_species_search_button().click()
+        # Wait for React to process the search results and re-render the table.
+        # expect_response exits as soon as the HTTP response is received, but
+        # the DOM update is async — without this wait the row count is stale.
+        self.page.wait_for_timeout(500)
+
     def count_table_rows(self) -> int:
         """
         Count the number of rows in the Species Table.

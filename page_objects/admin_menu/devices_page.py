@@ -16,7 +16,7 @@ class DevicesPage(BasePage):
     Page object for the Devices page using Playwright.
     
     This class provides methods to interact with elements on the Devices page,
-    follwing the established pattern of method-based element getters that return
+    following the established pattern of method-based element getters that return
     Playwright locators for reliable element interaction.
     """
     
@@ -130,6 +130,45 @@ class DevicesPage(BasePage):
         """
         return super().verify_page_title("Devices", tag="h1")
     
+    def count_table_rows(self) -> int:
+        """
+        Count the number of rows in the Devices table.
+
+        Returns:
+            int: The number of visible device rows, or 0 if an error occurs.
+        """
+        self.logger.info("Counting the number of rows in the Devices table")
+        try:
+            row_count = self.get_devices_table_rows().count()
+            self.logger.info(f"Found {row_count} rows in the Devices table")
+            return row_count
+        except Exception as e:
+            self.logger.error(f"Error counting Devices table rows: {str(e)}")
+            return 0
+
+    def search_devices(self, name: str) -> None:
+        """
+        Type a search term into the filter input, click Search, and wait for
+        the API response before returning.
+
+        Sets up the response listener before clicking to avoid a race condition
+        where wait_for_load_state("networkidle") could resolve before the
+        search request is even initiated.
+
+        Args:
+            name (str): The device name string to filter by.
+        """
+        self.logger.info(f"Searching devices with filter: '{name}'")
+        self.get_devices_search_text().fill(name)
+        with self.page.expect_response(
+            lambda r: "/Device/search" in r.url and r.status == 200
+        ):
+            self.get_devices_search_button().click()
+        # Wait for React to process the search results and re-render the table.
+        # expect_response exits as soon as the HTTP response is received, but
+        # the DOM update is async — without this wait the row count is stale.
+        self.page.wait_for_timeout(500)
+
     def verify_all_devices_action_elements_present(self) -> Tuple[bool, List[str]]:
         """
         Verify that all expected device action elements are present.
