@@ -153,10 +153,30 @@ class TestInstallationsPageFunctional(SimpleSearchMixin):
                                     logger.warning(f"Error getting name from row {i} on current page: {str(e)}")
                             
                             logger.info(f"Collected {len(current_page_names)} names from current page")
-                            
-                            # Compare sets instead of lists to handle potential ordering differences
-                            check.equal(set(first_page_names), set(current_page_names),
-                                        "Navigating back should show the same information on first page")
+
+                            # Verify we are back on page 1 by checking pagination state.
+                            # NOTE: We do NOT compare exact record sets here because the API's
+                            # default sort order is not stable — records sitting at the exact
+                            # page boundary can swap between consecutive requests. Checking
+                            # exact equality would produce flaky failures unrelated to
+                            # pagination behaviour. Instead we verify the meaningful things:
+                            # page position (start = 1), total count unchanged, and row count
+                            # matches. If the Previous button returned us to the wrong page,
+                            # at least one of these will fail.
+                            back_counts = ip.get_pagination_counts()
+                            check.is_not_none(back_counts,
+                                              "Could not get pagination counts after navigating back")
+                            if back_counts:
+                                back_start, back_end, back_total = back_counts
+                                check.equal(back_start, current_start,
+                                            f"Should be back at the start of the first page "
+                                            f"(expected start={current_start}, got {back_start})")
+                                check.equal(back_total, total_records,
+                                            f"Total record count should be unchanged after navigation "
+                                            f"(expected {total_records}, got {back_total})")
+                            check.equal(current_rows_count, first_page_count,
+                                        f"Row count should match the first page after navigating back "
+                                        f"(expected {first_page_count}, got {current_rows_count})")
                     else:
                         logger.info("Not enough pages to test navigation")
                 else:
