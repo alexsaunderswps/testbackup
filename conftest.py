@@ -70,7 +70,49 @@ def pytest_addoption(parser):
         default=SYS_ADMIN_PASS,
         help="Password for login. Default is the ADMIN_PASS value from .env file."
     )
-    
+
+
+def pytest_configure_node(node):
+    """
+    pytest-xdist hook: fires in the controller process once per worker node
+    before the worker starts.
+
+    get_auth_token() uses the controller's own TokenCache singleton, so the
+    authentication network call happens exactly once regardless of how many
+    workers are being configured. The same token string is injected into each
+    worker's workerinput dictionary and later read by _seed_token_cache.
+
+    In a serial run (no xdist) this hook never fires — no impact.
+    """
+    from utilities.auth import get_auth_token
+    node.workerinput["shared_sysadmin_token"] = get_auth_token()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _seed_token_cache(request):
+    """
+    Pre-seed the worker's TokenCache from the token injected by pytest_configure_node.
+
+    Runs once per worker session (scope="session", autouse=True) before any
+    test in that worker executes. When each APIBase() is instantiated and calls
+    get_auth_token(), the TokenCache already holds the token — no network call
+    is made.
+
+    In a serial run (no xdist): request.config has no workerinput attribute so
+    this fixture exits immediately. TokenCache fetches the token normally on
+    first use — behaviour is unchanged.
+
+    In a parallel run (-n N): each worker pre-seeds its TokenCache here.
+    Combined with pytest_configure_node, the net result is exactly 1
+    authentication network call for the entire test run regardless of -n count.
+    """
+    if hasattr(request.config, "workerinput"):
+        token = request.config.workerinput.get("shared_sysadmin_token")
+        if token:
+            from utilities.auth import TokenCache
+            TokenCache()._token = token
+
+
 @pytest.fixture(scope="session")
 def playwright():
     """
