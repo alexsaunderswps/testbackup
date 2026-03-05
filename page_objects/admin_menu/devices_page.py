@@ -56,11 +56,150 @@ class DevicesPage(BasePage):
         return self.page.get_by_role("button", name="Apply")
     
     def get_wildxr_number_close_button(self):
-        """Get the WildXR number close button element."""
-        return self.page.get_by_role("button", name="x")
+        """Get the WildXR number close button element (renders × character)."""
+        return self.page.locator("button", has_text="\u00d7")
     
-    # This needs to be built out as possible for assigning devices organizations, installations, etc.
-    
+    # -----------------------------------------------------------------------
+    # AddEditDevice form elements (shown after Device Lookup → Apply,
+    # or when navigating to /device/{id}/edit)
+    # -----------------------------------------------------------------------
+
+    def get_add_edit_device_heading(self):
+        """Get the h1 heading on the AddEditDevice form.
+
+        Returns "Add Device" for new devices or "Device Details" for existing.
+        """
+        return self.page.locator("h1")
+
+    def get_device_name_label(self):
+        """Get the 'Name' label on the AddEditDevice form."""
+        return self.page.get_by_text("Name", exact=True)
+
+    def get_device_name_input(self):
+        """Get the Name text input on the AddEditDevice form."""
+        return self.page.locator("input[name='name']")
+
+    def get_device_wildxr_number_label(self):
+        """Get the 'WildXR Number' label on the AddEditDevice form."""
+        return self.page.get_by_text("WildXR Number", exact=True)
+
+    def get_device_wildxr_number_display(self):
+        """Get the WildXR Number text input (disabled/read-only) on the form."""
+        return self.page.locator("input").filter(has_text="").nth(1)
+
+    def get_device_select_installation_label(self):
+        """Get the 'Select Installation' label on the AddEditDevice form."""
+        return self.page.get_by_text("Select Installation")
+
+    def get_device_select_installation_dropdown(self):
+        """Get the Select Installation React-Select input container.
+
+        Uses the same .css-19bb58m class as other React-Select dropdowns.
+        This is the first React-Select on the form.
+        """
+        return self.page.locator(".css-19bb58m").first
+
+    def get_device_select_organization_label(self):
+        """Get the 'Select Organization' label on the AddEditDevice form."""
+        return self.page.get_by_text("Select Organization")
+
+    def get_device_select_organization_dropdown(self):
+        """Get the Select Organization React-Select input container.
+
+        This is the second React-Select on the form (only visible for
+        system admins or users in multiple organizations).
+        """
+        return self.page.locator(".css-19bb58m").nth(1)
+
+    def get_device_save_button(self):
+        """Get the Save button on the AddEditDevice form."""
+        return self.page.get_by_role("button", name="Save")
+
+    def get_device_cancel_button(self):
+        """Get the Cancel button on the AddEditDevice form."""
+        return self.page.get_by_role("button", name="Cancel")
+
+    def get_device_error_alert(self):
+        """Get the error alert div on the AddEditDevice form (role='alert')."""
+        return self.page.get_by_role("alert")
+
+    def get_device_lookup_error_alert(self):
+        """Get the error alert div inside the DeviceLookupModal (role='alert')."""
+        return self.page.get_by_role("alert")
+
+    # -----------------------------------------------------------------------
+    # Composite actions
+    # -----------------------------------------------------------------------
+
+    def perform_device_lookup(self, wildxr_number: str) -> None:
+        """Open the Device Lookup modal, enter a wildXRNumber, and click Apply.
+
+        After Apply the UI navigates to /device/{id}/edit if a match is found,
+        or shows an error alert inside the modal if not.
+
+        Args:
+            wildxr_number: The WildXR number string to look up.
+        """
+        self.logger.info(f"Performing device lookup for wildXRNumber: {wildxr_number}")
+
+        # Open the modal
+        self.get_devices_lookup_button().click()
+
+        # Wait for the modal input to appear
+        self.page.wait_for_selector("input[name='wildXRNumber']", state="visible")
+
+        # Enter the wildXRNumber and click Apply.
+        # Use clear() + type() instead of fill() because the React TextInput
+        # component uses a controlled input — fill() can update the DOM value
+        # without triggering React's onChange handler, leaving state empty.
+        wildxr_input = self.get_search_wildxr_number_text()
+        wildxr_input.clear()
+        wildxr_input.press_sequentially(wildxr_number, delay=50)
+
+        # Click Apply and wait for either navigation (success) or error (failure).
+        # We use expect_response to wait for the device-lookup API call to complete,
+        # then give the UI time to process the result (navigate or show error).
+        with self.page.expect_response(
+            lambda r: "device-lookup" in r.url.lower(),
+            timeout=15000,
+        ):
+            self.get_wildxr_number_apply_button().click()
+
+        # Give React time to process the response and trigger navigation
+        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_timeout(1000)
+
+    def fill_and_save_device_form(self, name: str, organization_name: str = None) -> None:
+        """Fill in the AddEditDevice form fields and click Save.
+
+        Assumes we are already on the /device/{id}/edit page (after lookup).
+
+        Args:
+            name: The device name to enter. Use AUTOTEST_ prefix.
+            organization_name: The organization to select (exact text match).
+                              If None, the default org assignment is used.
+        """
+        self.logger.info(f"Filling device form: name='{name}'")
+
+        # Wait for the form to load (h1 heading appears)
+        self.page.wait_for_selector("h1", state="visible")
+        self.page.wait_for_load_state("networkidle")
+
+        # Fill in the device name
+        self.get_device_name_input().fill(name)
+
+        # Select organization if provided (sysadmin only — dropdown may not exist for org admins).
+        # React-Select dropdowns require clicking the container first, then
+        # selecting an option from the rendered dropdown menu.
+        if organization_name:
+            org_dropdown = self.get_device_select_organization_dropdown()
+            org_dropdown.click()
+            self.page.get_by_text(organization_name, exact=True).click()
+
+        # Click Save and wait for navigation back to the devices list
+        self.get_device_save_button().click()
+        self.page.wait_for_load_state("networkidle")
+
     # Device Table Elements
     def get_devices_table_body(self):
         """Get the devices table body element."""

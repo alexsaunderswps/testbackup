@@ -103,15 +103,23 @@ The biggest gap: only Videos has meaningful API tests. Every resource below need
 
 ### 4c. Devices API (`/api/Device`)
 
-- [ ] **`test_api_devices.py`** — GET list: status 200, response structure
-- [ ] **GET search / lookup** — DeviceController has a lookup action; test it
-- [ ] **GET details by ID** — verify `DeviceDto` fields: `DeviceId`, `Name`, `WildXRNumber`, `InstallationId`, `OrganizationId`
-- [ ] **POST create** — valid payload; `AUTOTEST_` prefix
-- [ ] **POST create — missing required fields** — `Name` omitted; expect 400
-- [ ] **GET associated installation** — DeviceController has a route to get the device's installation; verify it works
-- [ ] **PUT update** — change device name; verify
-- [ ] **DELETE** — cleanup
-- [ ] **RowVersion concurrency** — DeviceDto has `RowVersion`; test that stale update returns 409
+> **Key API facts (discovered 2026-03-05):**
+> - Device creation is a TWO-STEP workflow: `POST /Device/InitializeNew` (bare device with auto-generated deviceId + wildXRNumber) → `POST /Device/Update` (register with name, org, installation)
+> - `GET /api/Device` returns a plain JSON array, NOT a `ResponseDto` wrapper (same quirk as Organizations, Installations)
+> - `GET /api/Device/device-lookup` only finds unregistered devices (no OrganizationId); registered devices return 404
+> - Details and Update return **404** (not 400) for not-found — differs from most other controllers
+> - Update is a partial field-level update (not full replace like Installations)
+> - RowVersion field exists in DTO but concurrency is NOT enforced by the controller
+
+- [x] ~~**`test_api_devices.py`** — GET list: status 200, response structure~~ ✅ Completed 2026-03-05: `test_get_list_returns_200`, `test_get_list_returns_array`, `test_get_list_items_have_required_fields`
+- [x] ~~**GET search / lookup** — DeviceController has a lookup action; test it~~ ✅ Completed 2026-03-05: 4 search tests (pagination envelope, fields, name filter, no-match) + 3 lookup tests (find unregistered, 404 nonexistent, 400 missing param)
+- [x] ~~**GET details by ID** — verify `DeviceDto` fields~~ ✅ Completed 2026-03-05: `test_get_detail_returns_200_for_valid_id`, `test_get_detail_has_required_fields`, `test_get_detail_returns_404_for_nonexistent_id`
+- [x] ~~**POST create** — valid payload; `AUTOTEST_` prefix~~ ✅ Completed 2026-03-05: Uses InitializeNew → Update workflow; `test_initialize_new_returns_200_with_device_data`, `test_initialized_device_has_no_org_or_name`, `test_register_device_returns_200`, `test_registered_device_appears_in_search`, `test_registered_device_detail_matches_payload`
+- [x] ~~**POST create — missing required fields**~~ ✅ Documented as API design gap (PUT /Device/Create accepts empty payloads, InitializeNew has no field validation); no test per "Document Gaps" principle
+- [x] ~~**GET associated installation** — DeviceController has a route to get the device's installation; verify it works~~ ✅ Completed 2026-03-05: `test_get_associated_installation_for_device_without_installation`
+- [x] ~~**PUT update** — change device name; verify~~ ✅ Completed 2026-03-05: `test_update_device_name_returns_200`, `test_update_device_missing_id_returns_400`, `test_update_nonexistent_device_returns_404`
+- [x] ~~**DELETE** — cleanup~~ ✅ Completed 2026-03-05: `test_delete_device_returns_200`, `test_delete_nonexistent_device_returns_400`
+- [ ] **RowVersion concurrency** — DeviceDto has `RowVersion`; controller does NOT enforce concurrency checks — documented as design gap; test deferred until controller is updated
 
 ### 4d. Users API (`/api/Users`)
 
@@ -263,7 +271,7 @@ Only Installations (add) and Organizations (add) have functional tests. Everythi
 
 ### 8c. Devices
 
-- [ ] **Add device** — fill form with `AUTOTEST_` prefix, assign to installation, verify in table
+- [ ] **Device Lookup → Register workflow** — API: InitializeNew to get wildXRNumber → UI: Device Lookup modal → enter wildXRNumber → Apply → fill AddEditDevice form (name, org, installation) → Save → verify device appears in table → API cleanup
 - [ ] **Edit device** — change name; verify
 - [ ] **Device-installation relationship** — assign device to installation, navigate to installation, verify device appears
 
@@ -378,7 +386,8 @@ Currently only the login page has these tests. Consider expanding:
 - [x] ~~**Reduce xdist auth calls from N to 1** — with `-n auto`, each worker made its own `/Users/Authenticate` call; wasted tokens and added startup latency~~ ✅ Completed 2026-02-24 (Session C): Added `pytest_configure_node` hook + `_seed_token_cache` autouse fixture to `conftest.py`; controller fetches token once via singleton, injects into all workers via `workerinput`; serial runs unaffected
 - [ ] **Parallel test isolation** — verify that `pytest-xdist` workers don't conflict on shared test data (e.g., two workers both creating `AUTOTEST_` records with the same name)
 - [x] ~~**Fix pytest-xdist collection divergence** — `test_login_functionality.py` used unseeded `Faker` at module level for `@pytest.mark.parametrize`, causing different test IDs across workers and a "Different tests were collected" crash~~ ✅ Completed 2026-02-24: Added `Faker.seed(0)` immediately after `fake = Faker()`
-- [ ] **Add `AUTOTEST_` cleanup to more entities** — currently conftest only cleans up installations, video catalogues, and organizations; extend cleanup to devices, users, map markers, species, tags, panels, panel collections
+- [x] ~~**Add `AUTOTEST_` cleanup for devices** — conftest `TEST_ENTITY_CONFIGURATIONS` now includes `"devices"` entry~~ ✅ Completed 2026-03-05
+- [ ] **Add `AUTOTEST_` cleanup to more entities** — currently conftest cleans up installations, video catalogues, organizations, and devices; extend to users, map markers, species, tags, panels, panel collections
 - [ ] **CI marker filter** — audit which tests are tagged `@pytest.mark.github` for CI and ensure all stable, non-slow tests are included
 - [ ] **Flaky test detection** — add `pytest-rerunfailures` for known-flaky UI tests (e.g., pagination tests that depend on QA data state)
 - [ ] **Response time baselines** — `APIBase` measures response times; add assertions for acceptable thresholds (e.g., list endpoints < 3s)
