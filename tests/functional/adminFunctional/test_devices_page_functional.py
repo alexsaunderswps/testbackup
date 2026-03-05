@@ -181,11 +181,23 @@ class TestDevicesPageFunctional:
                 )
 
                 # Step 4 — UI: Fill in the form and save
-                logger.info(f"Filling device form with name='{device_name}'")
-                dp.fill_and_save_device_form(
-                    name=device_name,
-                    organization_name=TEST_ORG_NAME,
-                )
+                # Wait for the AddEditDevice form to fully load
+                dp.page.wait_for_selector("h1", state="visible")
+                dp.page.wait_for_load_state("networkidle")
+
+                # Fill device name
+                logger.info(f"Filling device name: '{device_name}'")
+                dp.get_device_name_input().fill(device_name)
+
+                # Select organization (React-Select: click container, then option)
+                logger.info(f"Selecting organization: '{TEST_ORG_NAME}'")
+                dp.get_device_select_organization_dropdown().click()
+                dp.page.get_by_text(TEST_ORG_NAME, exact=True).click()
+
+                # Click Save
+                logger.info("Clicking Save")
+                dp.get_device_save_button().click()
+                dp.page.wait_for_load_state("networkidle")
 
                 # Step 5 — Verify we're back on the devices list
                 dp.page.wait_for_selector("h1", state="visible")
@@ -264,7 +276,7 @@ class TestDevicesPageFunctional:
             )
 
             # Verify an error message appeared in the modal
-            error_alert = dp.get_device_lookup_error_alert()
+            error_alert = dp.get_error_alert()
             if error_alert.count() > 0:
                 error_text = error_alert.first.inner_text(timeout=3000)
                 logger.info(f"Lookup error message: {error_text}")

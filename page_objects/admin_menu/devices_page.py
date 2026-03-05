@@ -84,8 +84,12 @@ class DevicesPage(BasePage):
         return self.page.get_by_text("WildXR Number", exact=True)
 
     def get_device_wildxr_number_display(self):
-        """Get the WildXR Number text input (disabled/read-only) on the form."""
-        return self.page.locator("input").filter(has_text="").nth(1)
+        """Get the WildXR Number text input (disabled/read-only) on the form.
+
+        The React component renders this as a disabled TextInput with no name
+        attribute, so we locate it by its sibling label text.
+        """
+        return self.page.get_by_label("WildXR Number")
 
     def get_device_select_installation_label(self):
         """Get the 'Select Installation' label on the AddEditDevice form."""
@@ -119,16 +123,17 @@ class DevicesPage(BasePage):
         """Get the Cancel button on the AddEditDevice form."""
         return self.page.get_by_role("button", name="Cancel")
 
-    def get_device_error_alert(self):
-        """Get the error alert div on the AddEditDevice form (role='alert')."""
-        return self.page.get_by_role("alert")
+    def get_error_alert(self):
+        """Get the error alert element (role='alert').
 
-    def get_device_lookup_error_alert(self):
-        """Get the error alert div inside the DeviceLookupModal (role='alert')."""
+        Both the DeviceLookupModal and the AddEditDevice form use the same
+        role='alert' pattern for error messages. This single method works
+        for both contexts — the page can only show one at a time.
+        """
         return self.page.get_by_role("alert")
 
     # -----------------------------------------------------------------------
-    # Composite actions
+    # Action methods (single-concern UI interactions)
     # -----------------------------------------------------------------------
 
     def perform_device_lookup(self, wildxr_number: str) -> None:
@@ -148,57 +153,23 @@ class DevicesPage(BasePage):
         # Wait for the modal input to appear
         self.page.wait_for_selector("input[name='wildXRNumber']", state="visible")
 
-        # Enter the wildXRNumber and click Apply.
-        # Use clear() + type() instead of fill() because the React TextInput
-        # component uses a controlled input — fill() can update the DOM value
+        # Use clear() + press_sequentially() instead of fill() because the React
+        # TextInput uses a controlled input — fill() can update the DOM value
         # without triggering React's onChange handler, leaving state empty.
         wildxr_input = self.get_search_wildxr_number_text()
         wildxr_input.clear()
         wildxr_input.press_sequentially(wildxr_number, delay=50)
 
-        # Click Apply and wait for either navigation (success) or error (failure).
-        # We use expect_response to wait for the device-lookup API call to complete,
-        # then give the UI time to process the result (navigate or show error).
+        # Wait for the device-lookup API call to complete, then give React
+        # time to process the result (navigate on success, show error on failure).
         with self.page.expect_response(
             lambda r: "device-lookup" in r.url.lower(),
             timeout=15000,
         ):
             self.get_wildxr_number_apply_button().click()
 
-        # Give React time to process the response and trigger navigation
         self.page.wait_for_load_state("networkidle")
         self.page.wait_for_timeout(1000)
-
-    def fill_and_save_device_form(self, name: str, organization_name: str = None) -> None:
-        """Fill in the AddEditDevice form fields and click Save.
-
-        Assumes we are already on the /device/{id}/edit page (after lookup).
-
-        Args:
-            name: The device name to enter. Use AUTOTEST_ prefix.
-            organization_name: The organization to select (exact text match).
-                              If None, the default org assignment is used.
-        """
-        self.logger.info(f"Filling device form: name='{name}'")
-
-        # Wait for the form to load (h1 heading appears)
-        self.page.wait_for_selector("h1", state="visible")
-        self.page.wait_for_load_state("networkidle")
-
-        # Fill in the device name
-        self.get_device_name_input().fill(name)
-
-        # Select organization if provided (sysadmin only — dropdown may not exist for org admins).
-        # React-Select dropdowns require clicking the container first, then
-        # selecting an option from the rendered dropdown menu.
-        if organization_name:
-            org_dropdown = self.get_device_select_organization_dropdown()
-            org_dropdown.click()
-            self.page.get_by_text(organization_name, exact=True).click()
-
-        # Click Save and wait for navigation back to the devices list
-        self.get_device_save_button().click()
-        self.page.wait_for_load_state("networkidle")
 
     # Device Table Elements
     def get_devices_table_body(self):
