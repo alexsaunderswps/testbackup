@@ -374,6 +374,7 @@ The workflow runs on `ubuntu-latest` and:
 
 ## Important Warnings
 
+- **Never develop directly on `main`** — always create a feature branch before starting work. Use descriptive branch names like `feature/api-devices-tests`, `fix/search-race-condition`, or `ui/panels-page-object`. Commit to the feature branch and merge via pull request.
 - **Never commit `.env` files** — they contain credentials
 - **Never introduce Selenium** — the codebase has been fully migrated to Playwright
 - **Always review the full current codebase** before suggesting changes — avoid recreating existing functions or breaking other code

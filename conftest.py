@@ -542,7 +542,21 @@ TEST_ENTITY_CONFIGURATIONS = {
             "name": "",  # Will be filled
             "organizationId": "",  # Will be filled
         }
-    }
+    },
+    "devices": {
+        "create_endpoint": f"{api_url}/Device/Create",
+        "delete_endpoint_template": f"{api_url}/Device/delete?id={{id}}",
+        "list_endpoint": f"{api_url}/Device",
+        "entity_name": "device",
+        "id_field": "deviceId",
+        "name_field": "name",
+        "payload_template": {
+            "deviceId": "",  # Will be filled
+            "name": "",  # Will be filled
+            "wildXRNumber": "",  # Will be filled
+            "organizationId": organization_id,
+        }
+    },
     # Add more entity types as needed
 }
 
