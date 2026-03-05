@@ -243,6 +243,123 @@ When a gap is fixed, the comment is what guides you to write the real test. Unti
 
 Write code that is **clear and readable**, not concise but obfuscated. If a one-liner requires mental gymnastics to parse, expand it. The codebase owner is learning — code should teach, not obscure.
 
+### Rules (Must Follow)
+
+These are non-negotiable. Fix violations before committing.
+
+#### Single Responsibility
+
+Every function, method, and class does exactly one thing. If you need the word "and" to describe what it does, split it.
+
+**In page objects this means:**
+- **Locator methods** (`get_*()`) return a Playwright locator. That's it.
+- **Action methods** (`search_*()`, `navigate_to_*()`, `click_*()`) perform a single UI interaction — fill a field, click a button, wait for a response. One verb per method.
+- **Verification methods** (`verify_*()`) check element presence and return `(bool, list)`.
+- **Multi-step workflows belong in the test**, not the page object. The test orchestrates; the page object provides the building blocks.
+
+**Example — wrong:**
+```python
+# Page object method that does two things: fills a form AND saves it
+def fill_and_save_device_form(self, name, org):
+    self.get_name_input().fill(name)
+    self.get_org_dropdown().click()
+    self.page.get_by_text(org).click()
+    self.get_save_button().click()
+```
+
+**Example — right:**
+```python
+# Page object: individual building blocks
+def get_device_name_input(self):
+    return self.page.locator("input[name='name']")
+
+def get_device_save_button(self):
+    return self.page.get_by_role("button", name="Save")
+
+# Test: orchestrates the workflow
+dp.get_device_name_input().fill(device_name)
+dp.get_device_select_organization_dropdown().click()
+dp.page.get_by_text(TEST_ORG_NAME, exact=True).click()
+dp.get_device_save_button().click()
+```
+
+#### No Duplicate Code
+
+If the same logic appears twice, extract it. Shared patterns across pages go in `BasePage` or a fixture. Page-specific patterns stay in the page object. Don't duplicate locators — if an element appears on every page, define it once in `BasePage`.
+
+#### No Magic Strings or Numbers
+
+Every hardcoded value that has a meaning should be a named constant. Test organization IDs, API URLs, known device names, timeout values — all constants.
+
+```python
+# Wrong
+response = self.api.get("/Device", params={"pageNumber": 1, "pageSize": 10})
+assert "4ffbb8fe-d8b4-49d9-982d-5617856c9cce" in data["organizationId"]
+
+# Right
+TEST_ORG_ID = os.environ.get("TEST_ORGANIZATION_ID", "4ffbb8fe-d8b4-49d9-982d-5617856c9cce")
+response = self.api.get("/Device", params={"pageNumber": 1, "pageSize": DEFAULT_PAGE_SIZE})
+assert TEST_ORG_ID in data["organizationId"]
+```
+
+### Guidelines (Evaluate and Flag)
+
+These are code quality signals. Flag them in reviews but don't block work over them.
+
+#### Function Length
+
+If a function exceeds ~25 lines, evaluate whether it violates Single Responsibility and should be split. Not every long function is wrong — but most long functions are doing more than one thing.
+
+#### No Deeply Nested Code
+
+Maximum 2 levels of nesting in any function. Use early returns and guard clauses to flatten logic.
+
+```python
+# Wrong — deeply nested
+def process_results(data):
+    if data:
+        if isinstance(data, list):
+            if len(data) > 0:
+                return data[0]
+
+# Right — guard clauses
+def process_results(data):
+    if not data:
+        return None
+    if not isinstance(data, list) or len(data) == 0:
+        return None
+    return data[0]
+```
+
+#### Naming Clarity
+
+Avoid vague names: `data`, `result`, `response`, `info`, `item`, `temp`, `val`. Names should describe *what the value is* or *what the function does*, not just that it exists.
+
+```python
+# Vague
+data = response.json()
+result = data.get("results", [])
+
+# Clear
+search_response_body = response.json()
+device_search_results = search_response_body.get("results", [])
+```
+
+#### Comments Explain *Why*, Not *What*
+
+The code explains what. Comments should explain why — business context, non-obvious decisions, workarounds for known issues.
+
+```python
+# Wrong — restates the code
+# Get the first device from the list
+first_device = devices[0]
+
+# Right — explains why
+# Use the first device from search results as a known-good ID for detail tests.
+# The search endpoint only returns registered devices (have an OrganizationId).
+known_device_id = devices[0].get("deviceId")
+```
+
 ### Naming
 
 - **Test files:** `test_{page_name}_{test_type}.py` (e.g., `test_organizations_page.py`, `test_api_videos.py`)
@@ -297,12 +414,9 @@ Tests are organized with markers. Register new markers in `pytest.ini`. Common m
 - `@pytest.mark.connection` — API connectivity tests
 - `@pytest.mark.slow` — long-running tests
 
-### DRY Principles
+### Parametrize Repeated Test Patterns
 
-- If a verification pattern is used across multiple pages, it belongs in `BasePage` or a shared fixture
-- If it's page-specific (like table columns), it stays in the page object
-- Don't duplicate locators — if an element appears on every page, define it once in `BasePage`
-- Use `@pytest.mark.parametrize` for testing multiple similar cases (e.g., endpoint connectivity)
+Use `@pytest.mark.parametrize` for testing multiple similar cases (e.g., endpoint connectivity, multiple field validations) rather than writing separate test methods for each case.
 
 ## Environment Configuration
 
@@ -374,6 +488,7 @@ The workflow runs on `ubuntu-latest` and:
 
 ## Important Warnings
 
+- **Never develop directly on `main`** — always create a feature branch before starting work. Use descriptive branch names like `feature/api-devices-tests`, `fix/search-race-condition`, or `ui/panels-page-object`. Commit to the feature branch and merge via pull request.
 - **Never commit `.env` files** — they contain credentials
 - **Never introduce Selenium** — the codebase has been fully migrated to Playwright
 - **Always review the full current codebase** before suggesting changes — avoid recreating existing functions or breaking other code
